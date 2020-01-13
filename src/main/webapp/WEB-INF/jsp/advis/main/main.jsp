@@ -75,7 +75,7 @@
 </head>
 <body>
 	<p id="skipnav">
-		<a href="#container">본문 내용 바로가기 </a> <a href="#gnb">대메뉴 바로가기</a>
+		<a href="#container">본문 내용 바로가기 </a> <a href="#gnb">대메뉴 바로가기 </a>
 	</p>
 	<div class="wrap">
 		<header class="clearfix">
