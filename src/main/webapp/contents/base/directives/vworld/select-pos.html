@@ -1,0 +1,39 @@
+<div> 
+<div>
+<div id="vMap" style="width:520px;height:450px;"></div>
+</div>
+
+<div   style="width:430px;height:60px;padding-top:10px;padding-left:10px;">
+<input type="text" ng-model="searchKeyWord" />
+<button type="button" class="btn btn-primary btn-sm " style="margin-left:5px;" ng-click="fnOnClickSearchArea()">장소 검색</button>  
+
+<button type="button" class="btn btn-primary btn-sm " style="margin-left:5px;" ng-click="fnOnClickChoice()">선택완료</button>
+<button type="button" class="btn btn-primary btn-sm " ng-click="fnOnClickInit()">초기화</button>  
+
+</div>
+<div>
+<table class="table table-striped jambo_table bulk_action">
+	<colgroup>
+		<col width="262"/>
+		<col width="121"/>
+	</colgroup>
+	<thead class="headings">
+		<tr>
+			<th scope="col" class="column-title">지역</th>
+			<th scope="col" class="column-title">이동하기</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="item in listPoi">
+			<td>{{item.juso}}</td>
+			<td>
+				<button type="button" ng-click="fnOnClickMovePoi(item)" class="btn btn-primary btn-xs">이동하기</button>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+<div>
+<pager binding="pager" callback-click="fnOnPagingClick"></pager>
+</div>
+</div>

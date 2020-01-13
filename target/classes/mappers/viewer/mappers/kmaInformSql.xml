@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kmaInform">
+	<select id="current" parameterType="hashMap" resultType="kmaInformDto" >
+		SELECT cd_stn, dt_tm_fc, no_tm_seq, nm_man_fc, cd_war_fc, etc_ttl, sect_area_txt, 
+       	dt_tm_ef_txt, stat_ctnt, dt_war_tm, stat_tm_ef, stat_pw_vl, etc_ref, 
+       	dt_regt
+  		FROM tob_kma_inform
+  		where 1=1
+  		<if test="dummy_date != null">
+  		and dt_tm_fc = #{dummy_date}
+  		 </if>
+  		<if test="report_date != null">
+  		and dt_tm_fc >= #{report_date}
+  		 </if>
+  		 <if test="report_txt != null">
+  		and stat_tm_ef like concat('%',#{report_txt},'%') 
+  		</if>
+  		 <if test="stDate != null">
+  		and dt_tm_fc between #{stDate} and #{endDate} 
+  		</if>
+  		and cd_stn='108'
+  		order by no_tm_seq desc
+  		limit 1
+	</select>
+	<select id="list" parameterType="hashMap" resultType="kmaInformDto" >
+		SELECT cd_stn, dt_tm_fc, no_tm_seq, nm_man_fc, cd_war_fc, etc_ttl, sect_area_txt, 
+       	dt_tm_ef_txt, stat_ctnt, dt_war_tm, stat_tm_ef, stat_pw_vl, etc_ref, 
+       	dt_regt
+  		FROM tob_kma_inform
+  		where stat_tm_ef like concat('%',#{report_txt},'%')  
+  		and dt_tm_fc between #{stDate} and #{endDate} 
+  		and cd_stn='108'
+  		order by dt_tm_fc desc
+  	</select>
+  	
+  	<update id="updateKmaRainType"  parameterType="hashMap" >
+  		update tb_kma_rain_status
+  		set loc_type=#{loc_type}
+  		where loc_code in
+  		<foreach collection="loc_codes" item="item" open="("
+				close=")" separator=",">
+				#{item}
+		</foreach>
+  	</update>
+  	<update id="updateKmaRainTypeInit"  parameterType="hashMap">
+  		update tb_kma_rain_status
+  		set loc_type=0
+  	</update>
+  	
+  	<update id="updateKmaTyphoonType"  parameterType="hashMap" >
+  		update tb_kma_typhoon_status
+  		set loc_type=#{loc_type}
+  		where loc_code in
+  		<foreach collection="loc_codes" item="item" open="("
+				close=")" separator=",">
+				#{item}
+		</foreach>
+  	</update>
+  	<update id="updateKmaTyphoonTypeInit"  parameterType="hashMap">
+  		update tb_kma_typhoon_status
+  		set loc_type=0
+  	</update>
+  	
+  	
+  	<select id="listKmaLocCode" parameterType="hashMap" resultType="kmaLocDto">
+  		select t1.loc_code,t1.loc_name,t1.adm_code,t1.loc_type,t2.short_name from tc_kma_loc t1
+  		left join tb_year_area_code t2 on t1.adm_code=t2.code and  t2.code_level='1'
+  	</select>
+  	
+  	
+</mapper>

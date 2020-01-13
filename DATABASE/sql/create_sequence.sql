@@ -1,0 +1,106 @@
+
+-- DROP SEQUENCE public.tb_attach_file_seq;
+
+CREATE SEQUENCE public.tb_attach_file_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 51
+-- DROP SEQUENCE public.tb_bbs_content_bbs_seq;
+
+CREATE SEQUENCE public.tb_bbs_content_bbs_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+-- DROP SEQUENCE public.tb_damage_typhoon_seq_seq;
+
+CREATE SEQUENCE public.tb_damage_typhoon_seq_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+-- DROP SEQUENCE public.tb_dis_event_file_seq;
+
+CREATE SEQUENCE public.tb_dis_event_file_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 139
+-- DROP SEQUENCE public.tb_dis_event_img_seq;
+
+CREATE SEQUENCE public.tb_dis_event_img_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 13
+-- DROP SEQUENCE public.tb_dis_event_item_seq;
+
+CREATE SEQUENCE public.tb_dis_event_item_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 26444
+-- DROP SEQUENCE public.tb_dis_event_ocr_seq;
+
+CREATE SEQUENCE public.tb_dis_event_ocr_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+-- DROP SEQUENCE public.tb_dis_manual_seq;
+
+CREATE SEQUENCE public.tb_dis_manual_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 160
+-- DROP SEQUENCE public.tb_year_dme_seq;
+
+CREATE SEQUENCE public.tb_year_dme_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 71561
+-- DROP SEQUENCE public.tb_year_dme_summary_seq;
+
+CREATE SEQUENCE public.tb_year_dme_summary_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 28086
+-- DROP SEQUENCE public.tb_year_dme_typhoon_seq;
+
+CREATE SEQUENCE public.tb_year_dme_typhoon_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 56
+-- DROP SEQUENCE public.th_bbs_log_bbs_seq;
+
+CREATE SEQUENCE public.th_bbs_log_bbs_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+-- DROP SEQUENCE public.ts_gungu_gid_seq;
+
+CREATE SEQUENCE public.ts_gungu_gid_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 250
+-- DROP SEQUENCE public.ts_kma_gungu_gid_seq;
+
+CREATE SEQUENCE public.ts_kma_gungu_gid_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+-- DROP SEQUENCE public.ts_kma_loc_gid_seq;
+
+CREATE SEQUENCE public.ts_kma_loc_gid_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 374

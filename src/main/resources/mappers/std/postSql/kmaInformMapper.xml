@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kmaInform">
+	<select id="listInform" parameterType="kmaInform" resultType="kmaInform">
+		select dt_tm_fc, nm_man_fc, etc_ttl, sect_area_txt, dt_tm_ef_txt, stat_ctnt,
+				stat_tm_ef, stat_pw_vl, etc_ref, dt_regt
+		from tob_kma_inform
+		order by dt_tm_fc desc
+		limit #{pageSize}::numeric offset #{pageSize}::numeric*#{pageNo}::numeric
+	</select>
+	
+	<select id="countInform" parameterType="kmaInform" resultType="int">
+		select count(*)
+		from tob_kma_inform
+		<if test="dt_tm_fc != null and cd_stn != null">
+			where dt_tm_fc = #{dt_tm_fc} and cd_stn = #{cd_stn}::numeric
+		</if>
+	</select>
+	
+	<update id="insertInform" parameterType="kmaInform">
+		insert into tob_kma_inform(
+			cd_stn, dt_tm_fc, nm_man_fc, etc_ttl, sect_area_txt, dt_tm_ef_txt, dt_regt
+		) values (
+			#{cd_stn}::numeric,
+			#{dt_tm_fc},
+			#{nm_man_fc},
+			#{etc_ttl},
+			#{etc_ttl},
+			#{sect_area_txt},
+			to_char(now(),'YYYYMMDDHH24MISS')
+		)
+	</update>
+	
+	<update id="deleteInform" parameterType="kmaInform">
+		delete
+		from tob_kma_inform
+		where dt_regt = #{dt_regt}
+	</update>
+</mapper>

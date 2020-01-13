@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bbsContent">
+	<update id="create" parameterType="bbsContentDTO" useGeneratedKeys="true" keyColumn="bbs_seq" keyProperty="bbs_seq" >
+		
+		insert into tb_bbs_content
+		(
+		 bbs_seq,
+		 bbs_id,
+		 bbs_cont,
+		 bbs_group,
+		 bbs_sort,
+		 bbs_parent,
+		 bbs_level,
+		 bbs_read,
+		 <if test="file_grp_id!=null">
+		 file_grp_id,
+		 </if>
+		 category_seq,
+		 bbs_cont_title,
+		 use_yn,
+		 create_date,
+		 create_user_id,
+		 update_date,
+		 update_user_id,
+		 create_ip,
+		 fixed_yn
+	    )
+	    values
+	    (
+	     tb_bbs_content_bbs_seq.nextval,
+		 #{bbs_id},
+		 #{bbs_cont},
+		 #{bbs_group},
+		 #{bbs_sort},
+		 #{bbs_parent},
+		 #{bbs_level},
+		 0,
+		 <if test="file_grp_id!=null">
+		 #{file_grp_id},
+		 </if>
+		 #{category_seq},
+		 #{bbs_cont_title},
+		 #{use_yn},
+		 sysdate,
+		 #{create_user_id},
+		 sysdate,
+		 #{update_user_id},
+		 #{create_ip},
+		 #{fixed_yn}		 
+	    )
+	  
+	</update>
+	
+	
+	
+	
+	<select id="detail" parameterType="hashMap" resultType="bbsContentDTO">
+			<![CDATA[
+		select 
+			 t1.bbs_seq,
+			 t1.bbs_id,
+			 t1.bbs_cont_title,
+			 t1.bbs_cont,
+			 t1.bbs_group,
+			 t1.bbs_sort,
+			 t1.bbs_parent,
+			 t1.bbs_level,
+			 t1.bbs_read,
+			 t1.file_grp_id,
+			 t1.use_yn,
+			 t1.create_date,
+			 t1.create_user_id,
+			 t1.update_date,
+			 t1.update_user_id,
+			 t2.bbs_title,
+			 t1.category_seq,
+			 t3.user_name create_user_name,
+			  t4.category_title
+		 from 
+		  tb_bbs_content t1 
+		  inner join tm_bbs t2 on t1.bbs_id=t2.bbs_id
+		  left join tb_user t3 on t1.create_user_id=t3.user_id
+		  left join tb_bbs_category t4 on t1.category_seq=t4.category_seq
+		 where
+		 bbs_seq=#{bbs_seq}
+		 ]]>
+	</select>
+	<select id="listRecent" parameterType="hashMap" resultType="bbsContentDTO">
+		<![CDATA[
+		select * from  (select rownum rn,
+			 t1.bbs_seq,
+			 t1.bbs_id,
+			 t1.bbs_cont_title,
+			 t1.bbs_cont,
+			 t1.bbs_group,
+			 t1.bbs_sort,
+			 t1.bbs_parent,
+			 t1.bbs_level,
+			 t1.bbs_read,
+			 t1.file_grp_id,
+			 t1.use_yn,
+			 t1.create_date,
+			 t1.create_user_id,
+			 t1.update_date,
+			 t1.update_user_id,
+			 t1.category_seq,
+			 t3.user_name create_user_name,
+			 t4.category_title,
+			 t2.bbs_title
+		 from 
+		  tb_bbs_content t1 
+		  inner join tm_bbs t2 on t1.bbs_id=t2.bbs_id
+		  left join tb_user t3 on t1.create_user_id=t3.user_id
+		  left join tb_bbs_category t4 on t1.category_seq=t4.category_seq
+		 where
+		 t1.use_yn='Y'
+	
+		
+		 order by t1.bbs_sort desc,t1.bbs_level
+		 ) tbbbs
+      where  rn between #{FirstIndex}+1 and #{LastIndex}+1
+      	 ]]>
+	</select>
+	<select id="list" parameterType="hashMap" resultType="bbsContentDTO">
+		<![CDATA[
+		select * from (
+		select 
+		rownum rn,
+	   	bbs_seq,
+	   	bbs_id,
+	    bbs_cont_title,
+	    bbs_cont,
+	    bbs_group,
+	    bbs_sort,
+	    bbs_parent,
+	    bbs_level,
+	    bbs_read,
+	    file_grp_id,
+	    use_yn,
+	    create_date,
+	    create_user_id,
+	    update_date,
+	    update_user_id,
+	    category_seq,
+	    create_user_name,
+	    category_title
+		 from  (select 
+			 t1.bbs_seq,
+			 t1.bbs_id,
+			 t1.bbs_cont_title,
+			 t1.bbs_cont,
+			 t1.bbs_group,
+			 t1.bbs_sort,
+			 t1.bbs_parent,
+			 t1.bbs_level,
+			 t1.bbs_read,
+			 t1.file_grp_id,
+			 t1.use_yn,
+			 t1.create_date,
+			 t1.create_user_id,
+			 t1.update_date,
+			 t1.update_user_id,
+			 t1.category_seq,
+			 t3.user_name create_user_name,
+			 t4.category_title
+		 from 
+		  tb_bbs_content t1 
+		  inner join tm_bbs t2 on t1.bbs_id=t2.bbs_id
+		  left join tb_user t3 on t1.create_user_id=t3.user_id
+		  left join tb_bbs_category t4 on t1.category_seq=t4.category_seq
+		 where
+		 t1.bbs_id=#{bbs_id}
+		 and
+		 t1.use_yn='Y'
+		 ]]>
+		 <if test="bbs_cont_title!=null">
+			 and bbs_cont_title like concat(#{bbs_cont_title},'%')
+		 </if>
+		 <if test="bbs_cont!=null">
+			 and bbs_cont like concat(#{bbs_cont},'%')
+		 </if>
+		  <if test="user_name!=null">
+			 and t3.user_name like concat(#{user_name},'%')
+		 </if>
+		  <if test="st_date!=null">
+			 and to_char(t1.create_date,'yyyymmdd') between #{st_date} and #{en_date}
+		 </if>
+		 <if test="category_seq!=-1">
+		 	and t1.category_seq=#{category_seq}
+		 </if>
+		 <if test="spell_kor!=null"> and 
+		( 
+		<![CDATA[
+		 case when t1.bbs_cont_title < 'ㄱ' then SUBSTRING(t1.bbs_cont_title, 1, 1) 
+            when ascii('ㄱ') <= ascii(t1.bbs_cont_title) and 
+                 ascii(t1.bbs_cont_title)<= ascii('ㅎ') then t1.bbs_cont_title 
+            when t1.bbs_cont_title < '나' then 'ㄱ'
+            when t1.bbs_cont_title < '다' then 'ㄴ'
+            when t1.bbs_cont_title < '라' then 'ㄷ'
+            when t1.bbs_cont_title < '마' then 'ㄹ'
+            when t1.bbs_cont_title < '바' then 'ㅁ'
+            when t1.bbs_cont_title < '사' then 'ㅂ'
+            when t1.bbs_cont_title < '아' then 'ㅅ'
+            when t1.bbs_cont_title < '자' then 'ㅇ'
+            when t1.bbs_cont_title < '차' then 'ㅈ'
+            when t1.bbs_cont_title < '카' then 'ㅊ'
+            when t1.bbs_cont_title < '타' then 'ㅋ'
+            when t1.bbs_cont_title < '파' then 'ㅌ'
+            when t1.bbs_cont_title < '하' then 'ㅍ'
+            else 'ㅎ'
+       		end=#{spell_kor}
+       		]]>
+		 )
+		 </if>
+		 <if test="spell_en!=null"> and t1.bbs_cont_title like concat(#{spell_en},'%')</if>
+		 order by t1.bbs_sort desc,t1.bbs_level
+		 ) tbbbs
+		 )
+      where  rn between #{FirstIndex}+1 and #{LastIndex}+1
+	</select>
+	
+	<select id="totalCount" parameterType="hashMap" resultType="int" >
+	<![CDATA[
+		select 
+			count(*)
+		 from 
+		  tb_bbs_content t1
+		 ,tm_bbs t2
+		 where
+		 t1.bbs_id=t2.bbs_id
+		 and 
+		 t1.bbs_id=#{bbs_id}
+		 and
+		 t1.use_yn='Y'
+		 ]]>
+		 <if test="bbs_cont_title">
+			 and bbs_cont_title like concat(#{bbs_cont_title},'%')
+		 </if>
+		 <if test="bbs_cont!=null">
+			 and bbs_cont like concat(#{bbs_cont},'%')
+		 </if>
+		  <if test="create_user_id!=null">
+			 and create_user_id like concat(#{create_user_id},'%')
+		 </if>
+		  <if test="spell_kor!=null"> and 
+		( 
+		<![CDATA[
+		 case when t1.bbs_cont_title < 'ㄱ' then SUBSTRING(t1.bbs_cont_title, 1, 1) 
+            when ascii('ㄱ') <= ascii(t1.bbs_cont_title) and 
+                 ascii(t1.bbs_cont_title)<= ascii('ㅎ') then t1.bbs_cont_title 
+            when t1.bbs_cont_title < '나' then 'ㄱ'
+            when t1.bbs_cont_title < '다' then 'ㄴ'
+            when t1.bbs_cont_title < '라' then 'ㄷ'
+            when t1.bbs_cont_title < '마' then 'ㄹ'
+            when t1.bbs_cont_title < '바' then 'ㅁ'
+            when t1.bbs_cont_title < '사' then 'ㅂ'
+            when t1.bbs_cont_title < '아' then 'ㅅ'
+            when t1.bbs_cont_title < '자' then 'ㅇ'
+            when t1.bbs_cont_title < '차' then 'ㅈ'
+            when t1.bbs_cont_title < '카' then 'ㅊ'
+            when t1.bbs_cont_title < '타' then 'ㅋ'
+            when t1.bbs_cont_title < '파' then 'ㅌ'
+            when t1.bbs_cont_title < '하' then 'ㅍ'
+            else 'ㅎ'
+       		end=#{spell_kor}
+       		]]>
+		 )
+		 </if>
+		  <if test="spell_en!=null"> and t1.bbs_cont_title like concat(#{spell_en},'%')</if>
+	</select>
+	<update id="updateSort" parameterType="hashMap">
+		<![CDATA[
+		update tb_bbs_content
+		set bbs_sort=bbs_sort-1
+		where
+		bbs_id=#{bbs_id}
+		and
+		bbs_sort between #{endNo} and #{startNo}
+		 ]]>
+	</update>
+	<update id="update" parameterType="bbsContentDTO">
+		update tb_bbs_content
+		set
+		 bbs_cont=#{bbs_cont},
+		 bbs_cont_title=#{bbs_cont_title},
+		 bbs_read=#{bbs_read},
+		 <if test="file_grp_id!=null">
+		 file_grp_id=#{file_grp_id},
+		 </if>
+		 category_seq=#{category_seq},
+		 update_date=sysdate,
+		 update_user_id=#{update_user_id,jdbcType=VARCHAR}
+		 where
+		 bbs_id=#{bbs_id}
+		 and
+		 create_user_id=#{create_user_id,jdbcType=VARCHAR}
+		 and
+		 bbs_seq=#{bbs_seq}
+	</update>
+	<update id="updateFile" parameterType="hashMap">
+		update tb_bbs_content
+		set file_grp_id = ''
+		<where>
+			<if test="bbs_id != null"> and bbs_id = #{bbs_id}</if>
+			<if test="bbs_seq != null"> and bbs_seq = #{bbs_seq}</if>
+		</where>
+	</update>
+	<update id="delete" parameterType="hashMap">
+		<![CDATA[
+		update tb_bbs_content
+		set use_yn='N'
+		,update_date=sysdate
+		,update_user_id=#{update_user_id,jdbcType=VARCHAR}
+		where
+		bbs_id=#{bbs_id}
+		and
+		create_user_id=#{create_user_id,jdbcType=VARCHAR}
+		and
+		bbs_seq=#{bbs_seq}
+		]]>
+	</update>
+
+	<select id="maxSort" parameterType="hashMap" resultType="int">
+	 <![CDATA[
+		select coalesce(max(bbs_sort),0) from tb_bbs_content
+		where bbs_id=#{bbs_id} and bbs_level=0 
+	]]>
+	</select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="meta">
+	<select id="list" parameterType="hashMap" resultType="metaDTO">
+		select table_name meta_table
+		from all_tables
+		where table_name in 
+		<foreach collection="metaTableSpaces" index="index" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		and owner=#{owner}
+	</select>	
+</mapper>

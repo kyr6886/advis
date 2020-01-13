@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- <settings cacheModelsEnabled="true" enhancementEnabled="true" lazyLoadingEnabled="true" 
+		errorTracingEnabled="false" maxRequests="512" maxSessions="128" maxTransactions="32" 
+		useStatementNamespaces="true" /> -->
+	<settings>
+		<setting name="cacheEnabled" value="false" />
+		<setting name="useGeneratedKeys" value="true" />
+		<setting name="defaultExecutorType" value="BATCH" />
+	</settings>
+	<typeAliases>
+		<!-- 공통 시작 -->
+		<typeAlias alias="fileDTO" type="com.noaa.base.file.dao.AttachFileDTO" />
+		<typeAlias alias="codeSysDTO" type="com.noaa.base.code.dao.CodeSysDTO" />
+		<typeAlias alias="codeGrpDTO" type="com.noaa.base.code.dao.CodeGrpDTO" />
+		<typeAlias alias="metaDTO" type="com.noaa.base.meta.dao.MetaDTO" />
+		<typeAlias alias="metaAdmDTO" type="com.noaa.base.meta.dao.MetaAdmDTO" />
+		<typeAlias alias="metaLawDTO" type="com.noaa.base.meta.dao.MetaLawDTO" />
+		<typeAlias alias="menuDTO" type="com.noaa.base.menu.dao.MenuDTO" />
+		<typeAlias alias="menuLogDTO" type="com.noaa.base.menu.dao.MenuLogDTO" />
+		<typeAlias alias="menuRoleDTO" type="com.noaa.base.menu.dao.MenuRoleDTO" />
+		<typeAlias alias="roleDTO" type="com.noaa.base.account.dao.RoleDTO" />
+		<typeAlias alias="userDTO" type="com.noaa.base.account.dao.UserDTO" />
+		<typeAlias alias="userMsgDTO" type="com.noaa.base.account.dao.UserMsgDTO" />
+		<typeAlias alias="userRoleDTO" type="com.noaa.base.account.dao.UserRoleDTO" />
+		<typeAlias alias="bbsCategoryDTO" type="com.noaa.base.bbs.dao.BBSCategoryDTO" />
+		<typeAlias alias="bbsContentDTO" type="com.noaa.base.bbs.dao.BBSContentDTO" />
+		<typeAlias alias="bbsMasterDTO" type="com.noaa.base.bbs.dao.BBSMasterDTO" />
+		<typeAlias alias="bbsRoleDTO" type="com.noaa.base.bbs.dao.BBSRoleDTO" />
+		<typeAlias alias="bbsUserRoleDTO" type="com.noaa.base.bbs.dao.BBSUserRoleDTO" />
+		<typeAlias alias="bbsLogDTO" type="com.noaa.base.bbs.dao.BBSLogDTO" />
+		<typeAlias alias="bbsUserDTO" type="com.noaa.base.bbs.dao.BBSUserDTO" />
+		<typeAlias alias="loginLogDTO" type="com.noaa.base.account.dao.LoginLogDTO" />
+		<typeAlias alias="partnerSiteDto" type="com.noaa.base.site.dao.PartnerSiteDto" />
+		<typeAlias alias="dbInfoDTO" type="com.noaa.base.file.dao.DBInfoDTO" />
+		<!-- 공통 end-->
+		
+	</typeAliases>
+	<mappers>
+			<!-- 공통 -->
+		<mapper resource="mappers/base/oracle/attachFileMapper.xml" />
+		<mapper resource="mappers/base/oracle/codeSysMapper.xml" />
+		<mapper resource="mappers/base/oracle/menuMapper.xml" />
+		<mapper resource="mappers/base/oracle/menuRoleMapper.xml" />
+		<mapper resource="mappers/base/oracle/roleMapper.xml" />
+		<mapper resource="mappers/base/oracle/userMapper.xml" />
+		<mapper resource="mappers/base/oracle/userMsgMapper.xml" />
+		<mapper resource="mappers/base/oracle/userRoleMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsCategoryMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsContentMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsMasterMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsRoleMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsUserRoleMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsLogMapper.xml" />
+		<mapper resource="mappers/base/oracle/bbsUserMapper.xml" />
+		<mapper resource="mappers/base/oracle/roleMapper.xml" />
+		<mapper resource="mappers/base/oracle/metaAdmMapper.xml" />
+		<mapper resource="mappers/base/oracle/metaMapper.xml" />
+		<mapper resource="mappers/base/oracle/loginLogMapper.xml" />
+		<mapper resource="mappers/base/oracle/partnerSiteMapper.xml" />
+		<mapper resource="mappers/base/oracle/systemMapper.xml" />   
+		<!-- 공통 end-->
+	</mappers>
+</configuration>

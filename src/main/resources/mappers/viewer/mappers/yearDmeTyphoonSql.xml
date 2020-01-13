@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmeTyphoon">
+
+<update id="create" parameterType="yearDmeTyphoonDto">
+		
+	with main as(
+	select beg_date,end_date,typ_name from tb_year_dme_typhoon
+	order by end_date desc
+	limit 1
+	)
+	insert into tb_year_dme_typhoon
+	select nextval('tb_year_dme_typhoon_seq') seq, substring(min(tm_fc),1,8) beg_date, substring(max(tm_fc),1,8) end_date,typ_name from tob_kma_typhoon_5ds 
+	where substring(tm_fc,1,8)>=(select beg_date from main) and typ_name !=(select typ_name from main)
+	group by typ_name,substring(tm_fc,1,4)
+</update>
+<update id="updateEndDate" parameterType="hashMap">
+	
+	with main as(
+	select substring(tm_fc,1,8) end_date,typ_name from tob_kma_typhoon_5ds
+	order by end_date desc
+	limit 1
+	)
+	update tb_year_dme_typhoon
+	set end_date=
+	(select end_date from main)
+	where
+	substring(end_date,1,4)>=(select substring(end_date,1,4) from main) and typ_name =(select typ_name from main)
+	
+</update> 
+
+<select id="findName" parameterType="hashMap" resultType="yearDmeTyphoonDto">
+	SELECT seq, beg_date, end_date, typ_name, impact_yn
+  	FROM tb_year_dme_typhoon
+  	where type_name like concat('%',#{typ_name},'%')
+</select>
+<select id="listAll" parameterType="hashMap" resultType="yearDmeTyphoonDto">
+with main as(
+	select 
+	min(beg_date) beg_date, max(end_date) end_date,typ_name
+	from tb_year_dme_typhoon
+	group by seq,typ_name
+)
+	select 
+beg_date,
+end_date,
+typ_name,
+com_dme,
+total_damage
+from (
+select 
+beg_date,
+end_date ,
+typ_name,
+(
+	select 
+	(sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+	from tb_year_dme
+	where 
+	damage_code in ('HZD002','HZD007') and
+	concat(beg_year,beg_month,beg_day)<![CDATA[>=]]>main.beg_date and  concat(beg_year,beg_month,beg_day)<![CDATA[<=]]>main.end_date
+
+) com_dme,
+(
+	select (pub_total+pri_total) total_damage
+	from (
+	select
+	( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+	) pri_total
+	from tb_year_dme
+	where 
+	damage_code in ('HZD002','HZD007') and
+	concat(beg_year,beg_month,beg_day)<![CDATA[>=]]>main.beg_date and  concat(beg_year,beg_month,beg_day)<![CDATA[<=]]>main.end_date
+	) t1
+) total_damage
+from 
+ main
+) t2
+where
+
+total_damage>0
+order by total_damage desc
+
+	
+	</select>
+</mapper>

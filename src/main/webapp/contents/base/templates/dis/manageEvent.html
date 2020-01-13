@@ -1,0 +1,109 @@
+<div class="page-title">
+	<div class="title_left">
+		<h3>재해 등록</h3>
+	</div>
+	<div class="title_right"></div>
+</div>
+<div class="clearfix"></div>
+<div calss="row">
+	<div class="col-md-12 col-sm-12 col-xs-12" >
+		<div class="x_panel">
+			<div class="x_title row">
+				<div class=" col-md-6 col-sm-6">
+					<h2>
+						재해 등록 <small> 재해 기본정보를 등록 합니다.</small>
+					</h2>
+
+				</div>
+				<div class="col-md-6 col-sm-6 text-right">
+					<button type="button" class="btn btn-sm  btn-info" ng-click="fnOnClickCreate()">저장</button>
+				
+				</div>
+			</div>
+			<div class="x_content">
+
+
+				<form method="post" enctype="multipart/form-data" action=""
+					name="site" class="form-horizontal form-label-left input_mask">
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">재해
+							유형 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<select class="form-control input-sm" 	id="disType" ng-model="disaster.type" ng-change="fnChangeDisasterType()">
+								<option value="NAB">조류대발생</option>
+								<option value="NDR">가뭄</option>
+								<option value="NFL">홍수</option>
+								<option value="NSD">우주재난</option>
+								<option value="NSU">해일</option>
+								<option value="NTB">낙뢰</option>
+								<option value="NTI">조수</option>
+								<option value="NTY">태풍</option>
+								<option value="NVO">화산활동</option>
+								<option value="NYS">황사</option>
+								<option value="NHR">호우</option>
+								<option value="NEQ">지진</option>
+								<option value="NSN">대설</option>
+								<option value="SCB">화생방사고</option>
+								<option value="SCO">붕괴</option>
+								<option value="SEP">환경오염사고</option>
+								<option value="SET">폭발</option>
+								<option value="STA">교통사고</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">
+							재해명 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input ng-model="disaster.title" type="text" class="form-control has-feedback-left" placeholder="재해명 입력(ex: 18호 태풍 탈림)">
+								 <span
+								style="color: #f08080"
+								class="fa fa-credit-card form-control-feedback left"
+								aria-hidden="true"> </span>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">
+							발생 일시 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input ng-model="disaster.date" type="text" class="form-control has-feedback-left"
+								placeholder="발생일시 입력(ex:201801012300)" maxlength="12"> 
+								<span
+								style="color: #f08080"
+								class="fa fa-credit-card form-control-feedback left"
+								aria-hidden="true"> </span>
+						</div>
+					</div>
+
+				</form>
+			</div>
+
+
+		</div>
+		<div class="x_panel">
+
+			<table class="table table-striped ">
+				<thead>
+					<tr class="headings bg-primary">
+						<th class="column-title">재해 아이디</th>
+						<th class="column-title">재해명</th>
+						<th class="column-title">발생일</th>
+						
+						<th class="column-title"> 삭제</th>
+					</tr>
+				</thead>
+				<tbody>
+				<tr ng-repeat="item in listDisaster">
+					
+					<td>{{item.evt_group}}</td>
+					<td>{{item.title}}</td>
+					<td>{{item.evt_date}}</td>
+					
+					<td><button  type="button" class="btn btn-sm btn-danger" ng-click="fnOnClickDelete(item)">삭제</button></td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

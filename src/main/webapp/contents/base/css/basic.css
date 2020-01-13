@@ -1,0 +1,102 @@
+.markerPopup {
+	clear: both;
+	overflow: hidden;
+	border-bottom: 1px solid #424242;
+	position: relative;
+	margin-top: 6px;
+	margin-left: 3px;
+	margin-right: -3px;
+}
+.markerPopup table {
+	width: 100%;
+    border-top: 2px solid #424242;
+    box-sizing: border-box;
+}
+.markerPopup table thead th {
+	padding: 12px 0 11px 0;
+	border-right: 1px solid #e0e0e0;
+	border-bottom: 1px solid #424242;
+	background: #f4f4f4;
+	text-align: center;
+}
+.markerPopup table td {
+	padding: 9px 12px 8px;
+	border-top: 1px solid #e0e0e0;
+	border-right: 1px solid #e0e0e0;
+	text-align: center;
+	text-overflow: ellipsis;
+	background: #fff;
+	white-space: initial;
+}
+.markerPopup table th:last-child, .markerPopup table td:last-child{
+	border-right: none;
+}
+
+.code-body{
+	height:270px;
+	overflow-y:auto;
+}
+.pr-0{
+	padding-right:0px !important;
+}
+
+.pl-0{
+	padding-left:0px !important;
+}
+.ml-30{
+	margin-left:30px;
+}
+
+.panel-heading{
+	min-height:40px;
+}
+
+
+.panel-footer.form{
+	min-height:50px;
+}
+
+.form-inline.search-box-inline{
+	margin-bottom:12px !important;
+}
+.dis-form-table td{
+	padding:0px !important;
+
+}
+.dis-form-table .dis-form-title{
+	display:block;
+	padding-left:15px;
+	
+	border-bottom:1px solid #ededed;
+	font-weight:1000;
+}
+
+.dis-form-table .dis-form-sub-title{
+	display:inline-block;
+	width:99%;
+	padding-left:10px;
+	font-weight:700;
+}
+
+.dis-form-table ul{
+	display:block;
+	border-top:1px solid #ededed;
+	padding-top:10px;
+	padding-left:0px;
+}
+
+.dis-form-table li{
+	display:block;
+	
+	padding-top:10px;
+}
+.dis-form-table textarea{
+	margin-left:10px;
+	width:95%;
+	
+}
+.dis-form-fulltext{
+	margin-top:10px;
+	width:95%;
+	min-height:200px;
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="damageTyphoon">	
+	<select id="detail" parameterType="hashMap" resultType="damageTyphoonDto">
+		SELECT seq,
+		 beg_date, 
+		 end_date, 
+		 typ_name, 
+		 impact_yn, 
+		 typ_eng_name, 
+		 typ_seq, 
+		 rn_day, 
+		 rn_day_area, 
+		 com_dme, 
+		 com_dme_sep, 
+		 property_dme, 
+		 typ_ps, 
+		 typ_ws, 
+		 typ_15, 
+		 com_area, 
+		 typ_feature
+		FROM tb_damage_typhoon
+		where substring(beg_date,1,4)=#{beg_year}
+		and typ_name=#{typ_name} 
+	</select>
+	<select id="list" parameterType="hashMap" resultType="damageTyphoonDto">
+	SELECT seq,
+		 beg_date, 
+		 end_date, 
+		 typ_name, 
+		 impact_yn, 
+		 typ_eng_name, 
+		 typ_seq, 
+		 rn_day, 
+		 rn_day_area, 
+		 COALESCE(com_dme,0) com_dme, 
+		 com_dme_sep, 
+		 COALESCE(property_dme,0) property_dme, 
+		 typ_ps, 
+		 typ_ws, 
+		 typ_15, 
+		 com_area, 
+		 typ_feature
+		FROM tb_damage_typhoon
+		where typ_name is not null
+	 <if test="end_total_damage != null">
+			and property_dme::numeric  <![CDATA[>=]]>#{st_total_damage} and property_dme::numeric <![CDATA[<=]]> #{end_total_damage}
+		</if>
+		<if test="end_com_dme != null">
+			and com_dme::numeric  <![CDATA[ >=]]>#{st_com_dme} and com_dme::numeric  <![CDATA[ <= ]]>#{end_com_dme}
+		</if>
+		order by beg_date
+	</select>
+	
+</mapper>

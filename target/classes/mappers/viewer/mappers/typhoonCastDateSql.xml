@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="typCastDate">
+
+	<select id="listCastTyphoonYear" parameterType="hashMap" resultType="typhoonCastDateDto">
+		select substring(tm_fc,1,4) beg_year
+		from tob_kma_typhoon_5ds
+			<![CDATA[
+		where typ_lon >=120 and typ_lon <=140  and typ_lat >=16 and typ_lat <=60
+		]]> 
+		group by beg_year
+		union 
+		select substring(dt_tm_fc,1,4) beg_year
+		from tob_kma_typhoon
+		where substring(dt_tm_fc,1,4) >= '2001'
+		<![CDATA[
+		and loc_lngi::numeric >=120 and loc_lngi::numeric <=140  and loc_lati::numeric >=16 and loc_lati::numeric <=60
+		]]> 
+		group by beg_year
+		order by beg_year desc
+	</select>
+	
+	<select id="listCastTyphoonMonth"  parameterType="hashMap" resultType="typhoonCastDateDto">
+	select beg_year
+		, beg_month
+	from(
+	
+	    select min(beg_year) beg_year
+	       , min(beg_month) beg_month
+	       , typ_name
+	      from (
+
+		select substring(tm_fc,1,4) beg_year
+			, substring(tm_fc,5,2) beg_month
+			, typ_name 
+		from tob_kma_typhoon_5ds
+		where substring(tm_fc,1,4) =  #{beg_year}
+		<![CDATA[
+		and typ_lon >=120 and typ_lon <=140  and typ_lat >=16 and typ_lat <=60
+		]]>	
+		) rs
+		group by typ_name
+	) ra 
+	group by beg_year, beg_month
+	union
+	select beg_year
+		, beg_month
+	from(
+	
+	   select min(beg_year) beg_year
+			, min(beg_month) beg_month
+			, typ_name
+		from 
+		(
+		select  substring(dt_tm_fc,1,4) beg_year, substring(dt_tm_fc,5,2) beg_month, nm_kor typ_name
+		from tob_kma_typhoon
+		where substring(dt_tm_fc,1,4) =  #{beg_year}
+		
+		<![CDATA[
+		and loc_lngi::numeric >=120 and loc_lngi::numeric <=140  and loc_lati::numeric >=16 and loc_lati::numeric <=60
+		]]> 
+		) rs
+		group by typ_name
+	) ra 
+	group by beg_year, beg_month
+	order by beg_month 
+	</select>
+	
+	<select id="listCastTyphoonName"  parameterType="hashMap" resultType="typhoonCastDateDto">
+	select
+		seq
+		, beg_year
+		, beg_month
+		, typ_name
+		, typ_en
+	from(
+		select
+			typ_seq::integer seq
+			, min(substring(tm_fc,1,4)) beg_year
+			, min(substring(tm_fc,5,2)) beg_month
+			, typ_name
+			, typ_en
+		from tob_kma_typhoon_5ds
+		where typ_seq is not null
+		<if test="beg_year != null">
+		  and substring(tm_fc,1,4) = #{beg_year}
+		</if>
+		<if test="beg_month != null">
+		and substring(tm_fc,5,2)= #{beg_month}
+		</if>
+		group by seq, typ_name, typ_en
+
+		union 
+		select 
+			no_seq::integer seq
+			, min(substring(dt_tm_fc,1,4)) beg_year
+			, min(substring(dt_tm_fc,5,2)) beg_month
+			, nm_kor typ_name
+			, nm_eng typ_en
+		from tob_kma_typhoon
+		where no_seq is not null
+	
+		<if test="beg_year != null">
+		  and substring(dt_tm_fc,1,4) = #{beg_year}
+		</if>
+		<if test="beg_month != null">
+		and substring(dt_tm_fc,5,2)= #{beg_month}
+		</if>
+		group by seq, nm_kor, nm_eng
+	) rs
+	where seq is not null
+	order by seq asc	
+	</select>
+</mapper>

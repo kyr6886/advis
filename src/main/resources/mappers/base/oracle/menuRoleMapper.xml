@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="menuRole">
+	<select id="list" parameterType="hashMap" resultType="menuRoleDTO">
+		
+		select  
+		 menu_id 
+		,role_id
+		,write_yn
+		from 
+		tb_menu_role
+		<where> 
+		<if test="menu_id!=null">
+		menu_id=#{menu_id}
+		</if>
+		</where>
+	</select>
+	<update id="create" parameterType="hashMap">
+		<![CDATA[
+		insert into tb_menu_role
+		(
+		 menu_id 
+		,role_id 
+		,write_yn
+		)
+		values
+		(
+		 #{menu_id} 
+		,#{role_id} 
+		,#{write_yn}
+		)
+		]]>
+	</update>
+	<delete id="drop" parameterType="hashMap">
+		<![CDATA[
+		delete from tb_menu_role
+		where menu_id=#{menu_id}
+		]]>
+	</delete>
+</mapper>

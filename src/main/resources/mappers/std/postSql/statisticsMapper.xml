@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="statisticsMapper">
+
+	<select id="listAccidentSocGroup" parameterType="accidentSoc" resultType="accidentSoc">
+		select 
+			 a.di_inf_id
+			,a.ctg_id
+			,b.title
+			,a.di_name
+			,trim(a.obz_dt) as obz_dt
+			,a.addr_code
+			,c.sido
+			,c.sigungu
+			,a.hm_dmg_killed
+			,a.hm_dmg_injser
+			,a.action_content
+			,a.di_ty_id
+			,a.di_dtl_id
+			,a.di_dtl_name
+			,a.item_ty
+			,a.di_inf_name
+			,a.dis_content
+			,a.occr_st_date
+			,a.occr_ed_date
+			,a.occr_place
+			,a.cause_etc
+			,a.instt_collect
+			,a.cord_lat
+			,a.cord_lon
+		from tb_accident_soc a, tc_dis_category b, tb_year_area_code c
+		where a.ctg_id = b.ctg_id
+		and substring(a.addr_code,1,5) = c.code
+		and a.obz_dt is not null
+		<if test="ctg_id!=null">
+			and a.ctg_id = #{ctg_id}
+		</if>
+		<if test="law_sido!=null">
+			and substring(a.addr_code,1,2) = #{law_sido}
+		</if>
+		<if test="law_sigungu!=null">
+			and substring(a.addr_code,1,5) = #{law_sigungu}
+		</if>
+		<if test="obz_dt!=null">
+			and substring(trim(a.obz_dt),5,2) = #{obz_dt}
+		</if>
+		order by a.obz_dt
+				
+	</select>
+	
+	
+	<select id="listAccidentSocAll" parameterType="accidentSoc" resultType="accidentSoc">
+		select 
+			di_inf_id
+			,ctg_id
+			,di_name
+			,trim(obz_dt) as obz_dt
+			,addr_code
+			,hm_dmg_killed
+			,hm_dmg_injser
+			,action_content
+			,di_ty_id
+			,di_dtl_id
+			,di_dtl_name
+			,item_ty
+			,di_inf_name
+			,dis_content
+			,occr_st_date
+			,occr_ed_date
+			,occr_place
+			,cause_etc
+			,instt_collect
+			,cord_lat
+			,cord_lon
+		from tb_accident_soc
+		where ctg_id is not null
+		and cord_lat is not null
+		and cord_lon is not null
+		and obz_dt is not null
+		<if test="ctg_id!=null">
+			and ctg_id = #{ctg_id}
+		</if>
+		<if test="law_sido!=null">
+			and substring(addr_code,1,2) = #{law_sido}
+		</if>
+		<if test="law_sigungu!=null">
+			and substring(addr_code,1,5) = #{law_sigungu}
+		</if>
+		<if test="obz_dt!=null">
+			and substring(trim(obz_dt),5,2) = #{obz_dt}
+		</if>
+		order by obz_dt
+	</select>
+	
+	
+	<select id="searchListAccidentSocGroup" parameterType="accidentSoc" resultType="accidentSoc">
+		select 
+			a.di_inf_id
+			, a.di_ty_id
+			, a.di_name
+			, a.di_dtl_id
+			, a.di_dtl_name
+			, a.item_ty
+			, a.di_dtl_etc
+			, a.di_dtl_clt
+			, a.di_inf_id_clt
+			, a.di_inf_name
+			, a.dis_content
+			, trim(a.obz_dt) as obz_dt
+			, a.occr_st_date
+			, a.occr_ed_date
+			, a.occr_place
+			, a.addr_code
+			, c.sido
+			, c.sigungu
+			, a.hm_dmg_killed
+			, a.hm_dmg_missing
+			, a.hm_dmg_injser
+			, a.hm_dmg_injslt
+			, a.hm_dmg_etc
+			, a.mt_dmg_fac
+			, a.mt_dmg_bud
+			, a.mt_dmg_anm
+			, a.mt_dmg_plt
+			, a.mt_dmg_etc
+			, a.dmg_total
+			, a.dmg_amnt
+			, a.dmg_amnt_movasset
+			, a.dmg_amnt_rlest
+			, a.cause_first
+			, a.cause_second
+			, a.cause_third
+			, a.cause_etc
+			, a.action_prob
+			, a.action_imprv
+			, a.action_exec
+			, a.action_content
+			, a.instt_super
+			, a.instt_resp
+			, a.instt_cause_inv
+			, a.instt_collect
+			, a.rel_legislation
+			, a.rel_cause_inv_data
+			, a.rel_action_exec
+			, a.weather
+			, a.temperature
+			, a.humidity
+			, a.cause_self_first
+			, a.cause_self_second
+			, a.cause_self_third
+			, a.cause_self_etc
+			, a.cord_lat
+			, a.cord_lon
+			, a.cord_ht
+			, a.ctg_id
+		from tb_accident_soc_group a, tb_year_area_code c
+		where a.obz_dt is not null
+		and a.dmg_amnt is not null
+		and substring(a.addr_code,1,5) = c.code
+		<if test="addr_code!=null">
+			and substring(a.addr_code,1,2) = #{addr_code}
+		</if>
+		<if test="obz_dt!=null">
+			and substring(trim(a.obz_dt),5,2) = #{obz_dt}
+		</if>
+		<if test="di_inf_name!=null">
+			and a.di_inf_name like '%' || #{di_inf_name} || '%' 
+		</if>
+		order by a.dmg_amnt desc
+				
+	</select>
+	
+	<select id="listAccidentSocCountByMonthly" resultType="accidentSoc">
+		select 
+			ctg_id,
+			substring(trim(obz_dt),5,2) as obz_dt,
+			count(ctg_id) as cnt
+		from tb_accident_soc
+		where ctg_id is not null
+		and obz_dt is not null
+		<if test="addr_code!=null">
+			and substring(addr_code,1,2) = #{addr_code}
+		</if>
+		group by ctg_id, substring(trim(obz_dt),5,2)
+		order by obz_dt
+	</select>
+	
+	<select id="searchListAccidentSocCountByMonthly" parameterType="accidentSoc" resultType="accidentSoc">
+		select 
+			ctg_id,
+			substring(trim(obz_dt),5,2) as obz_dt,
+			count(ctg_id) as cnt
+		from tb_accident_soc
+		where ctg_id is not null
+		and obz_dt is not null
+		<if test="di_inf_name!=null">
+			and di_inf_name like '%' || #{di_inf_name} || '%' 
+		</if>
+		<if test="addr_code!=null">
+			and substring(addr_code,1,2) = #{addr_code}
+		</if>
+		group by ctg_id, substring(trim(obz_dt),5,2)
+		order by obz_dt
+	</select>
+	
+	
+	
+	
+</mapper>

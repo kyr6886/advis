@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmeCondition">
+	<select id="detail"  parameterType="hashMap" resultType="yearDmeConditionDto">
+	select 
+	seq,beg_year,beg_month,beg_day,end_year,end_month,end_day,damage_type,description, damages, causes 
+	from tb_year_dme_condition
+	where
+	concat(beg_year,beg_month,beg_day)<![CDATA[>=]]>#{beg_date} and concat(beg_year,beg_month,beg_day)<![CDATA[<=]]>#{end_date} 
+	and
+	damage_type=#{damage_type}
+	order by concat(end_year,end_month,end_day) desc
+	limit 1
+	</select>
+	
+	<insert id="registCondition" parameterType="yearDmeConditionDto">
+		insert into tb_year_dme_condition(
+            seq
+            , beg_year
+            , beg_month
+            , beg_day
+            , end_year
+            , end_month
+            , end_day
+            , damage_type
+            , description
+            , causes
+ 
+           ) values (
+           	 nextval('tb_year_dme_condition_seq')
+           , #{beg_year}
+           , #{beg_month}
+           , #{beg_day}
+           , #{end_year}
+           , #{end_month}
+           , #{end_day}
+           , #{damage_type}
+           , #{description}
+           , #{causes}
+           )
+	</insert>
+	
+	<update id="updateCondition" parameterType="yearDmeConditionDto">
+		update tb_year_dme_condition
+		set 
+			description = #{description}
+		,   causes = #{causes}
+		where seq = #{seq}
+	</update>
+	
+	<update id="deleteCondition" parameterType="yearDmeConditionDto">
+		delete from tb_year_dme_condition
+		where seq = #{seq}
+	</update>
+	
+</mapper>

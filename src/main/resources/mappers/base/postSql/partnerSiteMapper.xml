@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="partnerSite">
+	<select id="list" parameterType="hashMap" resultType="partnerSiteDto">
+		select 
+		site_url 
+		,site_title
+		,file_grp_id
+		,use_yn 
+		from tb_partner_site 
+		
+	</select>
+	
+	<update id="create" parameterType="partnerSiteDto">
+		insert into tb_partner_site
+		(
+		 site_url
+		,site_title
+		<if test="file_grp_id!=null">
+		,file_grp_id
+		</if>
+		,use_yn
+		)
+		values
+		(
+		 #{site_url}
+		,#{site_title}
+		<if test="file_grp_id!=null">
+		,#{file_grp_id}
+		</if>
+		,#{use_yn}
+		)
+	</update>
+
+	<update id="update" parameterType="partnerSiteDto">
+		update  tb_partner_site
+		      set site_title=#{site_title}
+		      ,site_url = #{site_url}
+		     <if test="file_grp_id!=null">
+		     ,file_grp_id=#{file_grp_id}
+		     </if>
+		     where site_url=#{siteUrlBefore}
+	</update>
+	<update id="updateUseYN" parameterType="partnerSiteDto">
+		update tb_partner_site
+			   set use_yn = #{use_yn}
+			   where site_url=#{site_url}
+	</update>
+	<delete id="drop" parameterType="hashMap">
+		<![CDATA[
+		delete from tb_partner_site
+		where site_url=#{site_url}
+		]]>
+	</delete>
+	<update id="deleteSiteImage" parameterType="PartnerSiteDto">
+		update  tb_partner_site
+		     set file_grp_id=null
+		     where site_url=#{site_url}
+		     and file_grp_id=#{file_grp_id}
+	</update>
+</mapper>

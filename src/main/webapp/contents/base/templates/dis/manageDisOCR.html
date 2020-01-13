@@ -1,0 +1,123 @@
+<div class="page-title">
+	<div class="title_left" ng-init="fnInit()">
+		<h3>OCR 관리</h3>
+	</div>
+	<div class="title_right"></div>
+</div>
+<div class="clearfix"></div>
+<div class="row" ng-show="isCreateViewOn">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>OCR <small> 등록</small></h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<form class="form-horizontal form-label-left input_mask" name="submitFile" method="POST" enctype="multipart/form-data" action="/api/std/ocr/file/create">
+						<div class="text-right">
+							<button type="button" class="fa fa-save btn btn-sm btn-primary" ng-click="fnClickSave()"> 저장</button>
+							<button type="button" class="fa fa-times-circle btn btn-sm btn-success" ng-click="fnClickCloseCreateView()"> 닫기</button>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-1 col-sm-1 col-xs-12" >재난구분 : </label>
+							<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+								<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+								<select class="form-control has-feedback-left" name="paramCtgId" ng-model="ctg_id">
+									<option value="">선택</option>
+									<option ng-repeat="item in listlargeCode" value="{{item.ctg_id}}">{{item.title}}</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-1 col-sm-1 col-xs-12" >발생일 : </label>
+							<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+								<input type="text" class="form-control has-feedback-left" ng-model="evt_id" name='paramEvtId' placeholder="YYYYMMDDHH(연월일시)">
+								<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-1 col-sm-1 col-xs-12" >제목 : </label>
+							<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+								<input type="text" class="form-control has-feedback-left" ng-model="title" name='paramTitle' placeholder="제목">
+								<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-1 col-sm-1 col-xs-12" >이미지 : </label>
+							<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+								<input type="file" class="form-control has-feedback-left" id='selFile' name="uploadFiles" accept='.png,.jpeg,.jpg,.gif,.bmp'>
+								<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>OCR <small> 목록</small></h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<div class="text-right">
+						<button type="button" class="fa fa-plus-circle btn btn-sm btn-success" ng-click="fnClickOpenCreateView()"> 생성</button>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped">
+							<thead>
+								<tr class="headings bg-primary">
+									<th class="column-title">재난유형</th>
+									<th class="column-title">카테고리</th>
+									<th class="column-title">코드</th>
+									<th class="column-title">제목</th>
+									<th class="column-title">삭제</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="item in mainDataList" ng-click="fnOnClickOcr(item)">
+									<td>{{item.ctg_id}}</td>
+									<td>{{item.ctg_title}}</td>
+									<td><a href="" ng-click="fnOnClickDetail(item)">{{item.evt_id}}</a></td>
+									<td>{{item.title}}</td>
+									<td>
+										<button type="button" class="fa fa-trash btn btn-sm btn-danger" ng-click="fnClickDelete(item.ctg_id, item.evt_id)"> 삭제</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div align="center">
+							<pager binding="pager" callback-click='fnOnPagingClick'></pager>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- /.modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ocrInfo.title}}</h4>
+      </div>
+      <div class="modal-body">
+        <div ng-repeat="item in ocrInfo.list">
+        	<p>{{item.sbj_nm}}</p>
+        	<p>{{item.sbj_cont}}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kmaAws">
+	<select id="awsMaxYmdh" parameterType="hashMap" resultType="String">
+		select max(dt_obz)
+		from tob_kma_aws
+	</select>
+	<select id="awsList" parameterType="hashMap" resultType="kmaAwsDto">
+		select
+		aws_1hr.cd_stn cd_stn
+		, dt_obz
+		, cd_area
+		, nm_stn
+		, cord_lat
+		, cord_lon
+		, wthr_1hr
+		, map.sido sido
+		, map.sigungu sigungu
+		, map.law_code law_code
+		from(
+		select
+		brnch.cd_stn cd_stn
+		, dt_obz dt_obz
+		, cd_area cd_area
+		, nm_stn nm_stn
+		, brnch.cord_lat cord_lat
+		, brnch.cord_lon cord_lon
+		, case when aws.wthr_1hr <![CDATA[<]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_1hr
+		from
+		tob_kma_aws_brnch brnch
+		inner join tob_kma_aws aws on
+		brnch.cd_stn = aws.cd_stn and aws.dt_obz = #{end_date}
+		) aws_1hr
+		inner
+		join tb_kma_obs_mapping map on aws_1hr.cd_stn = map.cd_stn
+		<if test="law_code != null">
+			where map.law_code = #{law_code}
+		</if>
+		order by wthr_1hr
+	</select>
+
+	<select id="awsGunguHourAndDay" parameterType="hashMap" resultType="kmaAwsDto">
+		with current_rain as (
+		select
+		rs.sido,
+		rs.sigungu,
+		rs.law_code,
+		max(rs.wthr_1hr) wthr_1hr,
+		max(ohr.wthr_1hr) pre_wthr_1hr
+		from(
+		select
+		map.cd_stn cd_stn,
+		map.sido sido,
+		map.sigungu sigungu,
+		map.law_code law_code,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_1hr
+		from tb_kma_obs_mapping map
+		left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+		where law_code not like '49%'
+		and aws.dt_obz = #{end_date}
+		) rs
+		left join (
+		select
+		sido,
+		sigungu,
+		law_code,
+		max(wthr_1hr) wthr_1hr
+		from(
+		select
+		map.cd_stn cd_stn,
+		map.sido sido,
+		map.sigungu sigungu,
+		map.law_code law_code,
+		case when aws.wthr_1hr <![CDATA[<]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_1hr
+		from tb_kma_obs_mapping map
+		left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+		where law_code not like '49%'
+		and aws.dt_obz = #{beg_date}
+		) rs
+		group by sido,sigungu,law_code
+
+		) ohr on ohr.law_code = rs.law_code
+		where rs.wthr_1hr <![CDATA[>=]]> '25'
+		group by rs.sido, rs.sigungu, rs.law_code
+		)
+
+		select current_rain.sido sido
+		, current_rain.sigungu sigungu
+		, current_rain.law_code law_code
+		, current_rain.wthr_1hr wthr_1hr
+		, current_rain.pre_wthr_1hr pre_wthr_1hr
+		, thr_rain.wthr_3hr wthr_3hr
+		, thr_rain.wthr_6hr wthr_6hr
+		, day_rain.wthr_day wthr_day
+		, day_rain.wthr_6day wthr_6day
+		from current_rain
+		left join (
+		select
+		rs.sido,
+		rs.sigungu,
+		rs.law_code,
+		max(rs.wthr_3hr) wthr_3hr,
+		max(ohr.wthr_6hr) wthr_6hr
+		from (
+
+		select
+		cd_stn,
+		sido,
+		sigungu,
+		law_code,
+		sum(wthr_3hr) wthr_3hr
+		from(
+
+		select
+		map.cd_stn cd_stn,
+		map.sido sido,
+		map.sigungu sigungu,
+		map.law_code law_code,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_3hr
+		from tb_kma_obs_mapping map
+		left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+		where law_code not like '49%'
+		and aws.dt_obz <![CDATA[>=]]> #{beg_date_3hr}
+		and aws.dt_obz <![CDATA[<=]]> #{end_date}
+		) ra
+
+		group by cd_stn, sido, sigungu, law_code
+
+		) rs
+		left join (
+
+		select
+		sido,
+		sigungu,
+		law_code,
+		max(wthr_3hr) wthr_6hr
+		from (
+
+		select
+		cd_stn,
+		sido,
+		sigungu,
+		law_code,
+		sum(wthr_3hr) wthr_3hr
+		from(
+
+		select
+		map.cd_stn cd_stn,
+		map.sido sido,
+		map.sigungu sigungu,
+		map.law_code law_code,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_3hr
+		from tb_kma_obs_mapping map
+		left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+		where law_code not like '49%'
+		and aws.dt_obz <![CDATA[>=]]> #{beg_date_6hr}
+		and aws.dt_obz <![CDATA[<=]]> #{end_date}
+		) rs
+		group by cd_stn, sido, sigungu, law_code
+		) ra
+		group by sido, sigungu, law_code
+		) ohr on ohr.law_code = rs.law_code
+		group by rs.sido, rs.sigungu, rs.law_code
+		) thr_rain on current_rain.law_code = thr_rain.law_code and
+		current_rain.sido = thr_rain.sido and current_rain.sigungu = thr_rain.sigungu
+		left join (
+		select 
+		rs.sido,
+		rs.sigungu,
+		rs.law_code,
+		max(rs.wthr_day) wthr_day,
+		max(wthr_6day) wthr_6day
+	from (
+	select
+		cd_stn,
+		sido,
+		sigungu,
+		law_code,
+		sum(wthr_day) wthr_day
+	from(
+		select
+		map.cd_stn cd_stn,
+		map.sido sido,
+		map.sigungu sigungu,
+		map.law_code law_code,
+		aws.dt_obz dt_obz,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_day
+		from tb_kma_obs_mapping map
+		left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+		where law_code not like '49%'
+		and aws.dt_obz <![CDATA[>=]]> #{beg_date_day}
+		and aws.dt_obz <![CDATA[<=]]> #{end_date_day}
+	) ra
+       group by cd_stn,sido,sigungu,law_code
+	) rs 
+      left outer join 
+(
+select
+		cd_stn,
+		sido,
+		sigungu,
+		law_code,
+		sum(wthr_day) wthr_6day
+	from(
+		select
+		map.cd_stn cd_stn,
+		map.sido sido,
+		map.sigungu sigungu,
+		map.law_code law_code,
+		aws.dt_obz dt_obz,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_day
+		from tb_kma_obs_mapping map
+		left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+		where law_code not like '49%'
+		and aws.dt_obz <![CDATA[>=]]> #{beg_date_6day}
+		and aws.dt_obz <![CDATA[<=]]> #{end_date_day}
+	) ra
+       group by cd_stn,sido,sigungu,law_code
+
+) ohd on ohd.law_code = rs.law_code
+      group by rs.sido, rs.sigungu, rs.law_code
+		) day_rain on current_rain.law_code = day_rain.law_code and current_rain.sido = day_rain.sido and current_rain.sigungu = day_rain.sigungu
+	
+	<if test="law_code != null">
+	where current_rain.law_code like concat(#{law_code}, '%')
+	</if>
+	order by current_rain.wthr_1hr desc
+	
+	</select>
+
+	<select id="obsWaterAwsDataList" parameterType="hashMap" resultType="kmaAwsDto">
+	select 
+		current.sido sido,
+		current.sigungu sigungu,
+		current.law_code law_code,
+		max(current.wthr_3hr) wthr,
+		max(prev.wthr_3hr) pre_wthr
+	from( 
+	select 
+		cd_stn,
+		sido,
+		sigungu,
+		law_code,
+		sum(wthr_3hr) wthr_3hr
+        from(
+	select
+		map.cd_stn cd_stn,
+		code.sido sido,
+		code.sigungu sigungu,
+		code.code law_code,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_3hr
+	from tb_kma_obs_mapping map
+	left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+	left outer join tb_year_area_code code on map.law_mapping_code = code.code and code.code_level = '2'
+	where law_code not like '49%'
+	and aws.dt_obz <![CDATA[>=]]> #{beg_date}
+	and aws.dt_obz <![CDATA[<=]]> #{end_date}
+	) rs
+	group by cd_stn, sido, sigungu, law_code 
+  ) current
+  left join (
+	select 
+		cd_stn,
+		law_code,
+		sum(wthr_3hr) wthr_3hr
+        from(
+	select
+		map.cd_stn cd_stn,
+		code.code law_code,
+		case when aws.wthr_1hr <![CDATA[<=]]> 0 then 0 else round(aws.wthr_1hr / 10,0) end wthr_3hr
+	from tb_kma_obs_mapping map
+	left outer join tob_kma_aws aws on map.cd_stn = aws.cd_stn
+	left outer join tb_year_area_code code on map.law_mapping_code = code.code and code.code_level = '2'
+	where law_code not like '49%'
+	and aws.dt_obz <![CDATA[>=]]> #{pre_beg_date}
+	and aws.dt_obz <![CDATA[<=]]> #{pre_end_date}
+	) rs
+	group by cd_stn, law_code 
+  ) prev on prev.cd_stn = current.cd_stn 
+where current.sido is not null
+and current.law_code like concat(#{law_code}, '%')
+group by  
+		current.sido,
+		current.sigungu,
+		current.law_code
+	</select>
+</mapper>

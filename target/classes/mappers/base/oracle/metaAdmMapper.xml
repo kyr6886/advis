@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="metaAdm">
+
+	<update id="createTable" parameterType="hashMap">
+		<![CDATA[
+			create table tc_adm
+			  (
+			    adm_code        varchar2(10 byte),
+			    adm_sido        varchar2(50 byte),
+			    adm_sigungu     varchar2(50 byte),
+			    adm_dong        varchar2(50 byte),
+			    code_create_day varchar2(10 byte),
+			    code_delete_day varchar2(10 byte),
+			    constraint tc_adm_pk primary key (adm_code)
+			  )
+		]]>
+	</update>
+
+	<update id="createIndex" parameterType="hashMap">
+		<![CDATA[
+			create index tc_adm_idx_salary on tc_adm
+			  (adm_code,adm_sido
+			  )
+		]]>
+	</update>
+	
+ 	<select id="detail" parameterType="hashMap"  resultType="metaAdmDTO">
+ 		<![CDATA[
+			select adm_code ,
+			  adm_sido ,
+			  adm_sigungu ,
+			  adm_dong ,
+			  code_create_day ,
+			  code_delete_day
+			from tc_adm
+			where adm_code=#{adm_code}
+			order by code_delete_day desc
+		]]>
+	</select>
+	
+	<select id="listBySido"  resultType="metaAdmDTO">
+		<![CDATA[
+				select substr(adm_code,1,2) adm_code,
+				  adm_sido,
+				  adm_sigungu,
+				  adm_dong,
+				  code_create_day,
+				  code_delete_day
+				from tc_adm
+				where code_delete_day   is null
+				and adm_sido            is not null
+				and adm_sigungu is null
+				and adm_dong is null        		
+				order by adm_code
+		]]>
+	</select>
+	<select id="listByGungu" parameterType="hashMap"  resultType="metaAdmDTO">
+		<![CDATA[
+			select substr(adm_code,1,5) adm_code,
+			  adm_sido,
+			  adm_sigungu,
+			  adm_dong,
+			  code_create_day,
+			  code_delete_day
+			from tc_adm
+			where code_delete_day   is null
+			and adm_sigungu         is not null
+			and adm_dong is null
+			and substr(adm_code,1,2) =#{adm_code}
+			order by adm_code
+		]]>
+	 </select>
+	 <select id="listByDong" parameterType="hashMap"  resultType="metaAdmDTO">
+	 	<![CDATA[
+			select adm_code,
+			  adm_sido,
+			  adm_sigungu,
+			  adm_dong,
+			  code_create_day,
+			  code_delete_day
+			from tc_adm
+			where code_delete_day   is null
+			and adm_dong            is not null
+			and substr(adm_code,9,10)='00'
+			and substr(adm_code,1,5) =#{adm_code}
+			order by adm_code
+		]]>
+	 </select>
+</mapper>

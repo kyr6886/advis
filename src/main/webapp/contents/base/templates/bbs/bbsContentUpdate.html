@@ -1,0 +1,78 @@
+
+<div class="page-title" ng-init="fnGetList()">
+	<div class="title_left">
+		<h3>게시물 작성</h3>
+	</div>
+	<div class="title_right">
+		<!-- <div
+			class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Search for...">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button">Go!</button>
+				</span>
+			</div>
+		</div> -->
+	</div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row"   ng-init="fnContentDetailInit()">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h2>
+					게시판물 작성 <small> 내용을 수정 합니다.</small>
+				</h2>
+				<div class="clearfix"></div>
+			</div>
+			<div class="x_content">
+		
+				<form name="mainForm" method="post" enctype="multipart/form-data" action="/admim/board/content/create" class="form-horizontal form-label-left">
+					<div class="form-group" >
+						<label><input type="checkbox" name="detailContent.fixed_yn" value="Y" name="detailContent.fixed_yn"/> 상단고정글</label>
+						
+						
+						
+						<hr class="ng-hide" ng-show="listCategories.length>0">
+						<label  class="ng-hide" ng-show="listCategories.length>0">카테고리 :</label> 
+						<select  ng-show="listCategories.length>0" readonly="readonly"  id="heard" class="form-control ng-hide" style="width: 97%;" name="detailContent.category_seq" >
+							<option ng-repeat="item in listCategories" value="{{item.category_seq}}">{{item.category_title}}</option>
+						</select>
+						
+						<hr>
+						<label>제목 :</label> <input type="text" class="form-control" name="detailContent.bbs_cont_title" ng-model="detailContent.bbs_cont_title"
+							placeholder="제목 입력" style="width: 97%;" required="required" />
+						<hr>
+						<div>
+						<label>파일첨부 :</label> <input type="file" placeholder="파일선택" name="uploadFiles" style="width: 97%;" />
+						</div>
+							<input type="hidden" name="detailContent.file_grp_id" value="{{detailContent.file_grp_id}}"/>
+							<div ng-repeat="item in detailContent.listFiles">
+							<a href="" ng-click="fnOnFileDownload(item.file_seq)">{{item.file_org_name}}</a>
+							<a href="" ng-click="fnOnFileDelete(item.file_seq)">삭제</a>
+								
+							</div>
+						<hr>
+
+						<label>내용 :</label>
+						<div class="col-md-12 col-sm-12 col-xs-12 form-group has-feedback">
+							<editor-form class="ng-cloak"></editor-form>
+						</div>  
+
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<a href="#/bbsContentList/{{bbsID}}" class="btn btn-primary pull-right" >취소</a>
+							
+							<button type="button" class="btn btn-success pull-right"  ng-click="fnOnUpdateSubmit()">저장</button>
+						</div>
+					</div>
+					<input type="hidden" name="paramSeq" value="{{detailContent.bbs_seq}}"/>
+					<input type="hidden" name="id" value="{{bbsID}}"/>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

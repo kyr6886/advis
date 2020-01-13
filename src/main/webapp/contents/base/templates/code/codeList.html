@@ -1,0 +1,101 @@
+
+<div class="page-title" ng-init="fnGetListGrpCode()">
+	<div class="title_left">
+		<h3>코드관리</h3>
+	</div>
+	<div class="title_right">
+		<div
+			class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+			<!-- <div class="input-group">
+				<input type="text" class="form-control" placeholder="Search for...">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button">Go!</button>
+				</span>
+			</div> -->
+		</div>
+	</div>
+</div>
+
+
+<div class="clearfix"></div>
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+
+
+		<div class="x_panel">
+			<div class="x_title">
+				<h2>코드 목록</h2>
+
+			</div>
+
+			<div class="x_content">
+				
+				<div class="table-responsive col-md-6">
+					<table class="table table-striped jambo_table bulk_action">
+						<thead>
+							<tr class="headings">
+								
+								<th class="column-title">코드그룹</th>
+								<th class="column-title">코드 그룹명</th>
+								<th class="column-title">삭제</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="item in listGrps">
+								<td>
+								<a href="" ng-click="fnSelectedGrp(item)" ><i ng-class="{'fa fa-hand-o-right':item.selected}"></i> {{item.grp_code}}</a>
+								</td>
+								<td>{{item.grp_title}}</td>
+								<td>
+									<button type="button" ng-click="fnDelteGrpCode(item)" class="btn  btn-xs btn-danger">
+										<i class="fa fa-trash-o"></i> 삭제
+									</button>
+								</td>
+							</tr>
+							<tr>
+							<td><input type="text" ng-model="inputGrpCode" maxlength="8" /></td>
+							<td><input type="text" ng-model="inputGrpCodeTxt" /></td>
+							<td><button type="button" ng-click="fnClickAddGrpCode()" class="btn  btn-xs btn-info">
+										<i class="fa fa-plus-circle"></i> 추가
+									</button></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="table-responsive col-md-6">
+					<table class="table table-striped jambo_table bulk_action">
+						<thead>
+							<tr class="headings">
+								
+								<th class="column-title">코드</th>
+								<th class="column-title">코드명</th>
+								
+								<th class="column-title">삭제</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="item in listSysCodes">
+								<td><a href="">{{item.sys_code}}</a></td>
+								<td>{{item.sys_title}}</td>
+								<td>
+									<button type="button" ng-click="fnDeleteSysCode(item)" class="btn  btn-xs btn-danger">
+										<i class="fa fa-trash-o"></i> 삭제
+									</button>
+								</td>
+							</tr>
+							<tr>
+							<td><input type="text" ng-model="inputSysCode" maxlength="8"/></td>
+							<td><input type="text" ng-model="inputSysCodeTxt" /></td>
+							<td><button type="button" ng-click="fnClickAddSysCode()" class="btn  btn-xs btn-info">
+										<i class="fa fa-plus-circle"></i> 추가
+									</button></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<div class="clearfix"></div>

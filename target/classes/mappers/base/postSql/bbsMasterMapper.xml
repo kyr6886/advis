@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bbsMaster">
+	<select id="list" parameterType="hashMap" resultType="bbsMasterDTO">
+	with cateogy as (
+	select 
+	bbs_id,
+	string_agg(to_char(category_seq,'FM99999'),',') category_seqs,
+	string_agg(category_title,',') category_titles
+	from tb_bbs_category 
+	group by bbs_id
+	)
+		select 
+		tm_bbs.bbs_id,
+		tm_bbs.bbs_title,
+		tm_bbs.bbs_pub_yn,
+		tm_bbs.read_role_id,
+		tm_bbs.write_role_id,
+		tm_bbs.use_yn,
+		tm_bbs.create_date,
+		tm_bbs.create_user_id,
+		tm_bbs.bbs_list_view,
+		tm_bbs.bbs_write_view,
+		tm_bbs.bbs_update_view,
+		tm_bbs.bbs_read_view,
+		tm_bbs.bbs_img_path,
+		tm_bbs.bbs_info_html,
+		cateogy.category_seqs,
+		cateogy.category_titles	
+	from tm_bbs  left join cateogy on tm_bbs.bbs_id=cateogy.bbs_id
+	
+	
+	</select>
+	<select id="detail" parameterType="hashMap" resultType="bbsMasterDTO">
+	
+
+	select 
+		bbs_id,
+		bbs_title,
+		bbs_pub_yn,
+		read_role_id,
+		write_role_id,
+		use_yn,
+		create_date,
+		create_user_id,
+		bbs_list_view,
+		bbs_write_view,
+		bbs_update_view,
+		bbs_read_view,
+		bbs_img_path,
+		bbs_info_html
+	from tm_bbs
+	where 
+	bbs_id=#{bbs_id}
+	</select>
+	
+	<update id="create" parameterType="bbsMasterDTO">
+	insert into tm_bbs(
+            bbs_id, bbs_title, use_yn, create_date, create_user_id, bbs_list_view, 
+            bbs_write_view, bbs_update_view, bbs_pub_yn, bbs_read_view, read_role_id, 
+            write_role_id, bbs_img_path, bbs_info_html)
+    values (
+    		#{bbs_id}, #{bbs_title}, #{use_yn}, now(), #{create_user_id}, #{bbs_list_view}, 
+            #{bbs_write_view}, #{bbs_update_view}, #{bbs_pub_yn}, #{bbs_read_view}, #{read_role_id}, 
+            #{write_role_id}, #{bbs_img_path}, #{bbs_info_html});
+	</update>
+	
+	<update id="update" parameterType="bbsMasterDTO">
+	update tm_bbs 
+	set 
+		bbs_title=#{bbs_title}, 
+		use_yn=#{use_yn}, 
+		update_date=now(), 
+		update_user_id=#{update_user_id}, 
+		bbs_list_view=#{bbs_list_view}, 
+	    bbs_write_view=#{bbs_write_view}, 
+	    bbs_update_view=#{bbs_update_view}, 
+	    bbs_pub_yn=#{bbs_pub_yn}, 
+	    bbs_read_view=#{bbs_read_view}, 
+	    read_role_id=#{read_role_id}, 
+	    write_role_id=#{write_role_id}, 
+	    bbs_img_path=#{bbs_img_path}, 
+	    bbs_info_html=#{bbs_info_html}
+    where
+    bbs_id=#{bbs_id}
+	</update>
+	
+</mapper>

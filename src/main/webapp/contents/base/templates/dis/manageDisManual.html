@@ -1,0 +1,98 @@
+<div class="clearfix"></div>
+<div class="row" ng-init="fnInit()">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>
+					메뉴얼 관리 <small> 재해 메뉴얼 관리 합니다.</small>
+				</h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+				
+					<div class="col-xs-12 col-md-4">
+						<div class="panel panel-default">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">재해코드 </div>
+								<div class="col-sm-6  pl-0 pr-0 "></div>
+							</div>
+							<div class="panel-body manual-body">
+								<table class="table table-hover">
+									<tbody>
+										<tr ng-repeat="item in listlargeCode">
+										<td><input type="radio" name="item.print_id" value="item.print_id" ng-model="selectedCtgId" ng-click="fnChangeCtgId(item)"></td>
+											<td><a class="click-item" ><i ng-class="{'fa fa-hand-o-right':item.selected}"></i>{{item.print_id}}</a></td>
+											<td><a class="click-item" >{{item.title}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-xs-12 col-md-8">
+						<div class="table-responsive manual-table">
+							<table class="table table-striped ">
+								<thead>
+									<tr class="headings bg-primary">
+										<th class="column-title">재해명</th>
+										<th class="column-title">메뉴얼 코드명</th>
+										<th class="column-title">메뉴얼 구분</th>
+										<th class="column-title">메뉴얼 내용</th>
+										<th class="column-title"></th>
+									</tr>
+								</thead>
+								<tbody ng-show="listManual.length>0">
+									<tr ng-repeat="item in listManual">
+										<td>{{item.ctg_title}}</td>
+										<td>{{item.sys_title}}</td>
+										<td>{{item.manual_title}}</td>
+										<td>{{item.manual_contents}}</td>
+										<td><button type="button" class="fa fa-save btn btn-sm btn-danger" ng-click="fnClickManualDelete(item)">삭제</button></td>
+									</tr>
+								</tbody>
+								<tbody ng-show="listManual.length==0">
+									<tr>
+										<td colspan="5"> 해당 내용이 없습니다. </td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+					<div class="col-xs-12 col-md-8">
+						<div class="panel panel-default">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">메뉴얼 등록</div>
+								<div class="col-sm-6  pl-0 pr-0 "></div>
+							</div>
+							<div class="panel-body manual-body">
+							<div class="col-xs-12 col-md-12">
+									<label class="control-label" >* 메뉴얼 코드명  : </label>
+									<select class="form-control input-sm" ng-model="manualCode">
+										<option ng-repeat="item in listSysCodes" value="{{item.sys_code}}">{{item.sys_title}}</option>
+									</select>
+								</div>
+								<div class="col-xs-12 col-md-12">
+									<label class="control-label" >* 메뉴얼 구분 : </label>
+									<input type="text" class="form-control" ng-model="manualTitle" placeholder="제목을 입력하세요.">
+								</div>
+								<div class="col-xs-12 col-md-12">
+									<label class="control-label" >* 메뉴얼 내용 : </label>
+									<input type="text" class="form-control" ng-model="manualContents" placeholder="내용을 입력하세요.">
+								</div>
+							</div>
+							<div class="panel-footer form">
+								<div class="col-xs-12 text-right pr-0">
+									<button type="button" class="btn btn-sm btn-primary" ng-click="fnClickSave()"> 저장</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>

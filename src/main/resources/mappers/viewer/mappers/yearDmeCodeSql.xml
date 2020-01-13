@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmeCode">
+<select id="list" parameterType="hashMap" resultType="int">
+		select count(*) from tb_year_dme_code
+	</select>
+		
+	
+<select id="listCode"  parameterType="hashMap" resultType="yearDmeCodeDto">
+select 
+     dme.code code
+   , dme.code_name code_name_dme
+   , grp.group_code group_code
+   , grp.code_name code_name_grp
+from tb_year_dme_code dme
+inner join tb_year_dme_code_grp grp on dme.group_code = grp.group_code
+where dme.code != 'HZD000'
+order by code asc
+</select>
+
+<select id="selectDmeCodeList" parameterType="hashMap" resultType="yearDmeCodeDto">
+	select 
+		damage_code
+		, beg_year
+		, beg_month
+		, beg_day
+		, concat(beg_month, beg_day) beg_date
+		, concat(end_month, end_day) end_date
+	from(
+		select damage_code
+				, beg_year
+				, beg_month
+				, beg_day
+				, end_year
+				, end_month
+				, end_day
+ 		from tb_year_dme
+ 		where end_year is not null 
+ 		<if test="damage_code != null">
+ 		and damage_code = #{damage_code}
+ 		</if>
+ 		<if test="beg_year != null">
+ 		and beg_year = #{beg_year}
+ 		</if>
+ 	) rs
+ 	group by damage_code, beg_year, beg_month, beg_day, concat(beg_month, beg_day)	, concat(end_month, end_day) 
+ 	order by concat(beg_month, beg_day) asc
+</select>
+
+
+<select id="selectDmeSidoCodeList" parameterType="hashMap" resultType="yearDmeCodeDto">
+	select 
+		damage_code
+			, sido
+			, sido_code
+	from(
+		select damage_code
+				, code.sido sido
+				, dme.sido_code sido_code
+ 		from tb_year_dme dme
+ 		left outer join tb_year_area_code code on dme.sigungu_code = code.code and code.code_level ='2' 
+ 		where end_year is not null 
+ 		<if test="damage_code != null">
+ 		and damage_code = #{damage_code}
+ 		</if>
+ 		<if test="beg_year != null">
+ 		and beg_year = #{beg_year}
+ 		</if>
+ 		<if test="beg_date != null">
+ 		and concat(beg_month, beg_day) = #{beg_date}
+ 		</if>
+ 	) rs
+ 	group by  damage_code
+			, sido
+			, sido_code
+		order by sido_code asc
+</select>
+
+<select id="selectDmeGunguCodeList" parameterType="hashMap" resultType="yearDmeCodeDto">
+	select 
+			damage_code
+			, sido
+			, sigungu
+			, sido_code
+			, sigungu_code
+	from(
+		select damage_code
+				, code.sido sido
+				, code.sigungu sigungu
+				, dme.sido_code sido_code
+				, code.code sigungu_code
+ 		from tb_year_dme dme
+ 		left outer join tb_year_area_code code on dme.sigungu_code = code.code and code.code_level ='2' 
+ 		where end_year is not null 
+ 		<if test="damage_code != null">
+ 		and damage_code = #{damage_code}
+ 		</if>
+ 		<if test="beg_year != null">
+ 		and beg_year = #{beg_year}
+ 		</if>
+ 		<if test="beg_date != null">
+ 		and concat(beg_month, beg_day) = #{beg_date}
+ 		</if>
+ 		<if test="law_code != null">
+ 		and sido_code like concat(#{law_code}, '%')
+ 		</if>
+ 	) rs
+ 	group by damage_code
+			, sido
+			, sigungu
+			, sido_code
+			, sigungu_code
+	order by sido_code asc
+</select>
+
+<select id="selectTypoonDmeSidoCodeList" parameterType="hashMap" resultType="yearDmeCodeDto">
+
+select
+	damage_code code
+	, typ_seq
+	, typ_name
+	, beg_date
+	, end_date
+	<if test="typ_seq != null">
+	, sido
+	, sido_code
+	</if>
+from( 
+		select 
+			damage_code 
+			, no_seq::integer typ_seq
+			, concat(beg_year,beg_month,beg_day) beg_date
+			, concat(end_year,end_month,end_day) end_date
+			, nm_kor typ_name
+			, sido
+			, sido_code
+		from tb_year_dme dme
+		left outer join tob_kma_typhoon typ on concat(dme.beg_year, dme.beg_month, dme.beg_day) = substring(typ.dt_tm_fc,1,8)
+		where end_year is not null
+		<if test="beg_year != null">
+		and beg_year = #{beg_year}
+		</if>
+		<if test="dme_code != null">
+		and damage_code = #{dme_code}
+		</if>
+		<if test="typ_seq != null">
+		and no_seq::integer = #{typ_seq}
+		</if>
+	union 
+		select 
+			damage_code 
+			,  typ_seq::integer 
+			, concat(beg_year,beg_month,beg_day) beg_date
+			, concat(end_year,end_month,end_day) end_date
+			, typ_name
+			, sido
+			, sido_code
+		from tb_year_dme dme
+		left outer join tob_kma_typhoon_5ds typ on concat(dme.beg_year, dme.beg_month, dme.beg_day) = substring(typ.tm_fc,1,8)
+		where  end_year is not null 
+		<if test="beg_year != null">
+		and beg_year = #{beg_year}
+		</if>
+		<if test="dme_code != null">
+		and damage_code =  #{dme_code}
+		</if>
+		<if test="typ_seq != null">
+		and typ_seq::integer = #{typ_seq}
+		</if>
+) rs	
+where typ_seq is not null
+<if test="typ_seq != null">
+group by damage_code, typ_seq, typ_name ,beg_date, end_date	,sido, sido_code
+order by sido_code asc 
+</if>
+<if test="typ_seq == null">
+group by damage_code, typ_seq, typ_name ,beg_date, end_date
+order by typ_seq asc
+</if>
+</select>
+
+</mapper>

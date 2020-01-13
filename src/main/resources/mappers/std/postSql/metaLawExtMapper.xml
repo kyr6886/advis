@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="metaLawExtMapper">	
+	<select id="listAllSidoCodes" resultType="metaLawDTO">
+		select distinct substr(law_code, 1, 2) law_code, law_sido
+		from tc_law
+		where length(law_sigungu) = 0
+		and law_sido not like '%출장%'
+		and law_sido not like '%직할%'
+		and substr(law_code, 1, 2) != '49'
+		order by law_code
+	</select>
+</mapper>

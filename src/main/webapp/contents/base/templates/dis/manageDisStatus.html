@@ -1,0 +1,259 @@
+<div class="page-title">
+	<div class="title_left"  ng-init="fnInit()">
+		<h3>재해현황 관리</h3>
+	</div>
+	<div class="title_right"></div>
+</div>
+<div class="clearfix"></div>
+<div calss="row" >
+	<div class="col-md-12 col-sm-12 col-xs-12" ng-show='isCreate'>
+		<div class="x_panel">
+			<div class="x_title">
+				<div class="row">
+					<div class="col-md-6">
+						<h5>재해 리포트 등록</h5>
+					</div>
+					<div class="col-md-6 text-right">
+						<button type="button" class="btn btn-sm  btn-info" ng-click="fnClickUpdateSave()">저장</button>
+						<button type="button" class="btn btn-sm  btn-danger" ng-click="fnClickCloseCreate()">닫기</button>
+					</div>
+				</div>
+			</div>
+			<div class="x_content">
+				<div class="row">
+				<div class="col-md-12">
+					<table class="table table-bordered">
+						<tr><th>재해명</th><th>제목</th><th>발생일시</th></tr>
+						<tr><td><select class="form-control input-sm " ng-model="selectedEventGroup">
+							 	<option ng-repeat="item in listEventGroup" value="{{item.evt_id}}">{{item.title}}</option>
+							 </select></td>
+							 <td><input type="text" ng-model="disTitle" class="form-control input-sm  " /></td>
+							 <td><input type="text" ng-model="disDate" class="form-control input-sm "/></td></tr>
+						<tr><th>사망(*숫자만 입력)</td><th>실종(*숫자만 입력)</td><th>부상(*숫자만 입력)</td></tr>
+						<tr><td><input type="text" ng-model="disTitle" class="form-control input-sm  " /></td>
+						<td><input type="text" ng-model="disTitle" class="form-control input-sm  " /></td>
+						<td><input type="text" ng-model="disTitle" class="form-control input-sm  " /></td></tr>
+						<tr><th>위도(대표 위도 입력)</td><th>경도(대표 경도 입력)</td><th>&nbsp;</th></tr>
+						<tr><td><input type="text" ng-model="disTitle" class="form-control input-sm  " /></td>
+						<td><input type="text" ng-model="disTitle" class="form-control input-sm  " /></td><td>&nbsp;</td></tr>
+						
+					</table>
+					</div>
+					</div>
+					</div>
+					</div>
+					
+					<div class="clearfix"></div>
+						<div class="x_panel">
+						<div class="x_content">
+					<div class="table-responsive">
+						<table class="table table-bordered dis-form-table">
+							<tr>
+								<td ng-repeat="level1 in listLevel1"><span
+									class='dis-form-title'>{{level1.title}}</span>
+									<ul ng-if="fnHasCount(level1.code)>0">
+										<li ng-repeat="level2 in listLevel2"
+											ng-if="level2.parent==level1.code"><span
+											class='dis-form-sub-title'> {{level2.title}} <span
+												style="float: right">
+													<button type="button" class="btn btn-xs btn-info"
+														ng-click="fnClickAddItems(level2.code,3)">추가</button>
+											</span>
+										</span>
+
+											<ul ng-if="fnHasCount(level2.code)>0">
+												<li ng-repeat="level3 in listLevel3"
+													ng-if="level3.parent==level2.code"><span
+													class='dis-form-sub-title'>{{level3.title}}</span>
+													<ul ng-if="fnHasCount(level3.code)>0">
+														<li ng-repeat="level4 in listLevel4"><span
+															class='dis-form-sub-title'>{{level4.title}}</span>
+															<ul ng-if="fnHasCount(level4.code)>0">
+															</ul> <input type="text" ng-model="level4.value"
+															ng-if="fnHasCount(level4.code)==0"></li>
+													</ul> <textarea type="text" ng-model="level3.value"
+														ng-if="fnHasCount(level3.code)==0"></textarea></li>
+											</ul> <textarea type="text" ng-model="level2.value"
+												ng-if="fnHasCount(level2.code)==0"></textarea></li>
+									</ul>
+									<ul ng-if="fnHasCount(level1.code)==0">
+										<li><span class='dis-form-sub-title'>내용 입력</span></li>
+										<li><textarea type="text" ng-model="grp.value"
+												class="dis-form-fulltext"></textarea></li>
+									</ul></td>
+							</tr>
+						</table>
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+		
+		<!-- END CREATE -->
+		
+		<div class="col-md-12 col-sm-12 col-xs-12" ng-show='isUpdate'>
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>재해 리포트 수정</h5>
+
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<div class="text-right">
+						<button type="button" class="btn btn-sm  btn-info" ng-click="fnClickUpdateSave()">저장</button>
+						<button type="button" class="btn btn-sm  btn-danger" ng-click="fnClickCloseCreate()">닫기</button>
+					</div>
+					
+						<div class="form-group">
+							<label>재해명 </label> 
+							
+							 <input type="text" ng-model="disTitle" class="form-control input-sm  size-sm" />
+							
+						</div>
+						<div class="form-group">
+							<label >발생일 </label> 
+							<input type="text" ng-model="disDate"	class="form-control input-sm size-sm" />
+						</div>
+<!-- 						<div class="form-group"> -->
+<!-- 							<button ng-model="file" name="file" ngf-select="fnOnFileSelect($files)">파일첨부</button> -->
+<!-- 							<div ng-repeat="item in fileList">	 -->
+<!-- 								<span style="padding-left: 10px;"><strong>{{item.fileInfo.name}}</strong></span> -->
+<!-- 								<span style="padding-left: 10px;"><a href="" ng-click="fnOnClickDeleteFile(item)">삭제</a></span> -->
+<!-- 							</div> -->
+<!-- 						</div> -->
+					
+					</div>
+					<div class="clearfix"></div>
+					<div class="table-responsive">
+						<table class="table table-bordered dis-form-table">
+							<tr>
+								<td ng-repeat="level1 in listLevel1"><span
+									class='dis-form-title'>{{level1.title}}</span>
+									<ul ng-if="fnHasCount(level1.code)>0">
+										<li ng-repeat="level2 in listLevel2"
+											ng-if="level2.parent==level1.code"><span
+											class='dis-form-sub-title'> {{level2.title}} <span
+												style="float: right">
+													<button type="button" class="btn btn-xs btn-info"
+														ng-click="fnClickAddItems(level2.code,3)">추가</button>
+											</span>
+										</span>
+
+											<ul ng-if="fnHasCount(level2.code)>0">
+												<li ng-repeat="level3 in listLevel3"
+													ng-if="level3.parent==level2.code"><span
+													class='dis-form-sub-title'>{{level3.title}}</span>
+													
+													<ul ng-if="fnHasCount(level3.code)>0">
+														<li ng-repeat="level4 in listLevel4">
+															<span class='dis-form-sub-title'>{{level4.title}}</span>
+															<ul ng-if="fnHasCount(level4.code)>0"></ul> 
+															<input type="text" ng-model="level4.value"ng-if="fnHasCount(level4.code)==0">
+														</li>
+													</ul> 
+													<textarea type="text" ng-model="level3.value" ng-if="fnHasCount(level3.code)==0"></textarea>
+													
+												</li>
+											</ul> 
+											
+											<textarea type="text" ng-model="level2.value"ng-if="fnHasCount(level2.code)==0"></textarea>
+											
+										</li>
+									</ul>
+									<ul ng-if="fnHasCount(level1.code)==0">
+										<li><span class='dis-form-sub-title'>내용 입력</span></li>
+										<li><textarea type="text" ng-model="grp.value"
+												class="dis-form-fulltext"></textarea></li>
+									</ul></td>
+							</tr>
+						</table>
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+		
+		<!-- END UPDATE -->
+		
+	</div>
+
+</div>
+
+
+<div class="clearfix"></div>
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>
+					재해 목록 <small> 재해 리포트 검색</small>
+				</h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<div class="form-inline search-box-inline">
+						<div class="form-group ">
+							<label for="disType"> 재해유형 </label> 
+							<select	class="form-control input-sm" ng-model='selectedCategory' id="disType">
+								<option value="NAB">조류대발생</option>
+								<option value="NDR">가뭄</option>
+								<option value="NFL">홍수</option>
+								<option value="NSD">우주재난</option>
+								<option value="NSU">해일</option>
+								<option value="NTB">낙뢰</option>
+								<option value="NTI">조수</option>
+								<option value="NTY">태풍</option>
+								<option value="NVO">화산활동</option>
+								<option value="NYS">황사</option>
+								<option value="NHR">호우</option>
+								<option value="NEQ">지진</option>
+								<option value="NSN">대설</option>
+								<option value="SCB">화생방사고</option>
+								<option value="SCO">붕괴</option>
+								<option value="SEP">환경오염사고</option>
+								<option value="SET">폭발</option>
+								<option value="STA">교통사고</option>
+							</select>
+						</div>
+						<div class="form-group ">
+							<input type="text" class="form-control input-sm" />
+						</div>
+						<div class="btn-group ">
+							<button class="btn btn-sm btn-primary" ng-click="fnGetSearchList()">검색</button>
+						</div>
+						<div class="btn-group pull-right">
+							<button class="btn btn-sm btn-info" ng-click="fnClickBtnCreate()">생성</button>
+						</div>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped ">
+							<thead>
+								<tr class="headings bg-primary">
+									<th class="column-title">구분</th>
+									<th class="column-title">코드명</th>
+									<th class="column-title">재해명</th>
+									<th class="column-title">생성일</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="item in searchList">
+									<td>{{item.division}}</td>
+									<td><a ng-click="fnOnClickEvtDetail(item)" style="cursor: pointer;">{{item.print_id}}</a></td>
+									<td>{{item.title}}</td>
+									<td>{{item.evt_date_print}}</td>
+									<td><a class="btn btn-sm btn-danger" ng-click="fnClickDeleteSave(item.evt_id)">삭제</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

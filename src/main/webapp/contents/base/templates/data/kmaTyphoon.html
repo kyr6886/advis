@@ -1,0 +1,201 @@
+<div class="page-title">
+	<div class="title_left" ng-init="fnInit()">
+		<h3>태풍 데이터 관리</h3>
+	</div>
+	<div class="title_right"></div>
+</div>
+<div class="clearfix"></div>
+<div class="row" ng-show="isCreateViewOn">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>태풍 데이터 <small> 등록</small></h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<div class="text-right">
+						<button type="button" class="fa fa-save btn btn-sm btn-primary" ng-click="fnClickSave()"> 저장</button>
+						<button type="button" class="fa fa-times-circle btn btn-sm btn-success" ng-click="fnClickCloseCreateView()"> 닫기</button>
+					</div>
+					<div class="col-md-2">
+						<div class="panel panel-primary">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">기본정보 입력</div>
+							</div>
+							<div class="form-group">
+								<label>통신소 번호 </label> 
+								<input ng-model="stn_id" class="form-control" placeholder="임의 통신소 번호 : 999"/>
+							</div>
+							<div class="form-group">
+								<label>시간 </label> 
+								<input ng-model="tm_fc" class="form-control" placeholder="{{nowTime}}"/>
+							</div>
+							<div class="form-group">
+								<label>태풍번호 </label> 
+								<input ng-model="typ_seq" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>태풍명 </label> 
+								<input ng-model="typ_name" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>태풍영문명 </label> 
+								<input ng-model="typ_en" class="form-control"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="panel panel-primary">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">제원정보 입력</div>
+							</div>
+							<div class="form-group">
+								<label>위도 </label> 
+								<input ng-model="typ_lat" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>경도 </label> 
+								<input ng-model="typ_lon" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>풍속 </label> 
+								<input ng-model="typ_sp" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>중심기압 </label> 
+								<input ng-model="typ_ps" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>typ_15 </label> 
+								<input ng-model="typ_15" class="form-control"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="panel panel-primary">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">예측정보 <big>&#10102;</big></div>
+							</div>
+							<div class="form-group">
+								<label>위도 </label> 
+								<input ng-model="ft1_lat" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>경도 </label> 
+								<input ng-model="ft1_lon" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>풍속 </label> 
+								<input ng-model="ft1_sp" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>중심기압 </label> 
+								<input ng-model="ft1_ps" class="form-control"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="panel panel-primary">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">예측정보 <big>&#10103;</big></div>
+							</div>
+							<div class="form-group">
+								<label>위도 </label> 
+								<input ng-model="ft2_lat" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>경도 </label> 
+								<input ng-model="ft2_lon" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>풍속 </label> 
+								<input ng-model="ft2_sp" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>중심기압 </label> 
+								<input ng-model="ft2_ps" class="form-control"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="panel panel-primary">
+							<div class="panel-heading pl-0 pr-0 ">
+								<div class="col-sm-6">예측정보 <big>&#10104;</big></div>
+							</div>
+							<div class="form-group">
+								<label>위도 </label> 
+								<input ng-model="ft3_lat" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>경도 </label> 
+								<input ng-model="ft3_lon" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>풍속 </label> 
+								<input ng-model="ft3_sp" class="form-control"/>
+							</div>
+							<div class="form-group">
+								<label>중심기압 </label> 
+								<input ng-model="ft3_ps" class="form-control"/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>태풍 데이터 <small> 목록</small></h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<div class="text-right">
+						<button type="button" class="fa fa-plus-circle btn btn-sm btn-success" ng-click="fnClickOpenCreateView()"> 생성</button>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped" style="height:200px;overflow-y:auto;overflow-x:hidden">
+							<thead>
+								<tr class="headings bg-primary">
+									<th class="column-title">예보시간</th>
+									<th class="column-title">태풍명</th>
+									<th class="column-title">영문명</th>
+									<th class="column-title">태풍번호</th>
+									<th class="column-title">위도</th>
+									<th class="column-title">경도</th>
+									<th class="column-title">중심기압</th>
+									<th class="column-title">태풍속도</th>
+									<th class="column-title">삭제</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="item in mainDataList">
+									<td>{{item.tm_fc}}</td>
+									<td>{{item.typ_name}}</td>
+									<td>{{item.typ_en}}</td>
+									<td>{{item.typ_seq}}</td>
+									<td>{{item.typ_lat}}</td>
+									<td>{{item.typ_lon}}</td>
+									<td>{{item.typ_ps}}</td>
+									<td>{{item.typ_sp}}</td>
+									
+									<td>
+										<button type="button" class="fa fa-trash btn btn-sm btn-danger" ng-show="item.stn_id==999" ng-click="fnClickDelete(item.dt_regt)"> 삭제</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div align="center">
+							<pager binding="pager" callback-click='fnOnPagingClick'></pager>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

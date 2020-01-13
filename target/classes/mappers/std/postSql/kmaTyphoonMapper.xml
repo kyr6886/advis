@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kmaTyphoon">	
+	<select id="listTyphoon" parameterType="kmaTyphoon" resultType="kmaTyphoon">
+		select stn_id, tm_fc, typ_name, typ_en,
+				floor(tm_seq) tm_seq, floor(typ_seq) typ_seq,man_fc,
+				typ_tm, typ_lat, typ_lon, typ_loc, typ_dir, typ_sp,
+				typ_ps, typ_sp, typ_tp,				
+				to_char(dt_regt,'YYYY-MM-DD HH24:MI:SS') dt_regt
+		from tob_kma_typhoon_5ds		
+		order by dt_regt desc nulls last,
+				tm_fc desc, typ_seq desc, tm_seq desc
+		limit #{pageSize}::numeric offset #{pageSize}::numeric*#{pageNo}::numeric
+	</select>
+	
+	<select id="countTyphoon" parameterType="kmaTyphoon" resultType="int">
+		select count(*)
+		from tob_kma_typhoon_5ds
+		<if test="tm_fc != null and typ_seq != null">
+			where tm_fc = #{tm_fc} and typ_seq = #{typ_seq}::numeric
+		</if>
+	</select>
+	
+	<select id="countMaxTyphoonTmSeq" parameterType="kmaTyphoon" resultType="int">
+		select max(tm_seq) tm_seq
+		from tob_kma_typhoon_5ds
+		where stn_id = #{stn_id}::numeric and
+				substr(tm_fc,0,4) = substr(#{tm_fc},0,4) and
+				typ_seq = #{typ_seq}::numeric and
+				typ_name = #{typ_name} and
+				typ_en = #{typ_en}
+	</select>
+	
+	<update id="insertTyphoon" parameterType="kmaTyphoon">
+		insert into tob_kma_typhoon_5ds(
+			stn_id,
+			tm_fc,
+			typ_seq,
+			tm_seq,
+			typ_name,
+			typ_en,
+			typ_lat,
+			typ_lon,
+			typ_sp,
+			typ_ps,
+			typ_15,
+			ft1_lat,
+			ft1_lon,
+			ft1_sp,
+			ft1_ps,
+			ft2_lat,
+			ft2_lon,
+			ft2_sp,
+			ft2_ps,
+			ft3_lat,
+			ft3_lon,
+			ft3_sp,
+			ft3_ps,
+			dt_regt
+		) values (
+			#{stn_id}::numeric,
+			#{tm_fc},
+			#{typ_seq}::numeric,
+			#{tm_seq}::numeric,
+			#{typ_name},
+			#{typ_en},
+			#{typ_lat}::numeric,
+			#{typ_lon}::numeric,
+			#{typ_sp}::numeric,
+			#{typ_ps}::numeric,
+			#{typ_15}::numeric,
+			#{ft1_lat}::numeric,
+			#{ft1_lon}::numeric,
+			#{ft1_sp}::numeric,
+			#{ft1_ps}::numeric,
+			#{ft2_lat}::numeric,
+			#{ft2_lon}::numeric,
+			#{ft2_sp}::numeric,
+			#{ft2_ps}::numeric,
+			#{ft3_lat}::numeric,
+			#{ft3_lon}::numeric,
+			#{ft3_sp}::numeric,
+			#{ft3_ps}::numeric,
+			now()
+		)
+	</update>
+	
+	<update id="deleteTyphoon" parameterType="kmaTyphoon">
+		delete
+		from tob_kma_typhoon_5ds
+		where to_char(dt_regt,'YYYY-MM-DD HH24:MI:SS') = #{tm_fc}
+	</update>
+</mapper>

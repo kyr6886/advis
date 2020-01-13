@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="advisSearch">
+	
+	<select id="searchItem" parameterType="searchDto" resultType="searchDto">
+		SELECT ctg_id,
+		       evt_id,
+		       title,
+		       evt_date,
+		       evt_num
+		FROM tm_dis_event
+		WHERE 1=1 
+		<if test="title!=null">
+			 AND title like '%' || #{title} || '%' 
+		</if>
+		<if test="evt_date!=null">
+			 AND evt_date like '%' || #{evt_date} || '%' 
+		</if>
+	</select>
+
+	<select id="searchEvt_id" parameterType="String" resultType="searchDto">
+		SELECT distinct(substring(ctg_id, 0, 6)) as evt_id
+		FROM tb_dis_event_item
+		WHERE 1=1
+		<if test="evt_id!=null">
+			and evt_id = #{evt_id}
+		</if>
+
+	</select>
+	
+	<select id="resultCategory" parameterType="searchDto" resultType="searchDto">
+		SELECT ctg_id,title
+		FROM tc_dis_category
+ 		WHERE ctg_id IN
+	    <foreach item="item" index="index" collection="ctgArr" open="(" close=")" separator=",">
+	            #{item}
+	    </foreach>
+	</select>	
+
+</mapper>

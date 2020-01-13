@@ -1,0 +1,75 @@
+
+<div class="page-title" ng-init="fnGetList()">
+	<div class="title_left">
+		<h3>게시물 작성</h3>
+	</div>
+	<div class="title_right">
+		<!-- <div
+			class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Search for...">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button">Go!</button>
+				</span>
+			</div>
+		</div> -->
+	</div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h2>
+					게시판물 작성 <small> 내용을 추가 합니다.</small>
+				</h2>
+				<div class="clearfix"></div>
+			</div>
+			<div class="x_content">
+				<form name="mainForm" method="post" enctype="multipart/form-data" action="/admin/board/content/create" class="form-horizontal form-label-left">
+					<div class="form-group" ng-init="fnContentWriteInit()">
+						<label><input type="checkbox" name="detailContent.fixed_yn" value="Y" name="detailContent.fixed_yn"/> 공지사항</label>
+						<hr>
+						<label>게시판 :</label> 
+						<select id="heard" class="form-control" style="width: 97%;" name="detailContent.bbs_id" ng-model="bbsID" ng-change="fnOnSelectCategories()">
+							<option ng-repeat="item in listBBS" value="{{item.bbs_id}}">{{item.bbs_title}}</option>
+						</select>
+						
+						<hr class="ng-hide" ng-show="listCategories.length>0">
+						<label  class="ng-hide" ng-show="listCategories.length>0">카테고리 :</label> 
+						<select  ng-show="listCategories.length>0" id="heard" class="form-control ng-hide" style="width: 97%;" name="detailContent.category_seq" >
+							<option ng-repeat="item in listCategories" value="{{item.category_seq}}">{{item.category_title}}</option>
+						</select>
+						
+						<hr>
+						<label>제목 :</label> <input type="text" class="form-control" name="detailContent.bbs_cont_title" ng-model="detailContent.bbs_cont_title"
+							placeholder="제목 입력" style="width: 97%;" required="required" />
+						<hr>
+						
+						<label>파일첨부 :</label> <input type="file" placeholder="파일선택" name="uploadFiles"
+							style="width: 97%;" />
+						
+						
+						</div>
+						<hr>
+
+						<label>내용 :</label>
+						<div class="col-md-12 col-sm-12 col-xs-12 form-group has-feedback">
+							<editor-form></editor-form>
+						</div>  
+
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<a href="#/bbsContentList/{{bbsID}}" class="btn btn-primary pull-right" >취소</a>
+							<button type="submit" class="btn btn-success pull-right" ng-show="!isEnableUpdate" ng-click="fnOnSubmit()">저장</button>
+							<button type="submit" class="btn btn-success pull-right" ng-show="isEnableUpdate" ng-click="fnUpdateAction()">수정</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="eventItem">
+	<update id="create" parameterType="eventItemDto">
+		 INSERT INTO tb_dis_event_item(
+            seq, evt_id, ctg_id, evt_num, contents, create_date, update_date, 
+            create_user_id, update_user_id, use_yn,item_group)
+   		 VALUES (
+   		 nextval('tb_dis_event_item_seq')
+   		 , #{evt_id}
+   		 , #{ctg_id}
+   		 , #{evt_num}
+   		 , #{contents}
+   		 ,NOW()
+   		 ,NOW()
+   		 , #{create_user_id}
+   		 , #{update_user_id}
+   		 , #{use_yn}
+   		 ,#{item_group}
+   		 )
+	</update>
+	
+	<update id="createFile" parameterType="eventItemDto">
+		 INSERT INTO tb_dis_event_file(
+            seq, 
+            file_grp_id,
+            evt_id, 
+            ctg_id, 
+            create_date, 
+            update_date, 
+            create_user_id, 
+            update_user_id, 
+            use_yn
+         )
+   		 VALUES (
+   		 nextval('tb_dis_event_file_seq')
+   		 , #{file_grp_id}
+   		 , #{evt_id}
+   		 , #{ctg_id}
+   		 ,NOW()
+   		 ,NOW()
+   		 , #{create_user_id}
+   		 , #{update_user_id}
+   		 , #{use_yn}
+   		 )
+	</update>
+	
+	<select id="selectEventItemList" parameterType="eventItemDto" resultType="eventItemDto">
+		select a.seq, a.evt_id, a.ctg_id, a.evt_num, a.contents, a.item_group, b.title as contentsTitle
+		from (
+			select seq, evt_id, ctg_id, evt_num, contents, item_group
+			from tb_dis_event_item
+			where use_yn = 'Y'
+			<if test="evt_id!=null">
+				and evt_id = #{evt_id}
+			</if>
+		)a 
+		left join tc_dis_category b on a.ctg_id = b.ctg_id
+		order by a.seq
+	</select>
+	
+	<select id="selectDepthEventItemList" parameterType="eventItemDto" resultType="eventItemDto">
+		select a.seq, a.evt_id, a.ctg_id, a.evt_num, a.contents, a.item_group, b.title as contentsTitle
+		from (
+			select seq, evt_id, ctg_id, evt_num, contents, item_group
+			from tb_dis_event_item
+			where use_yn = 'Y'
+			<if test="evt_id!=null">
+				and evt_id = #{evt_id}
+			</if>
+		)a 
+		left join tc_dis_category b on a.ctg_id = b.ctg_id
+		order by a.seq
+	</select>
+	
+	<select id="selectCtgIdEventItemList" parameterType="eventItemDto" resultType="eventItemDto">
+		select a.seq, a.evt_id, a.ctg_id, a.evt_num, a.contents, a.item_group, b.title as contentsTitle
+		from (
+			select seq, evt_id, ctg_id, evt_num, contents, item_group
+			from tb_dis_event_item
+			where use_yn = 'Y'
+			<if test="evt_id!=null">
+				and evt_id = #{evt_id}
+			</if>
+			<if test="ctg_id!=null">
+				and ctg_id like '%' || #{ctg_id} || '%' 
+			</if>
+		)a 
+		left join tc_dis_category b on a.ctg_id = b.ctg_id
+		order by a.seq
+	</select>
+	
+</mapper>

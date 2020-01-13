@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="accidentSocMapper">
+	<select id="listAccidentSoc" parameterType="hashmap" resultType="accidentSoc">
+		select di_inf_id,
+			di_ty_id,
+			di_name,
+			di_dtl_id,
+			di_dtl_name,
+			item_ty,
+			di_dtl_etc,
+			di_dtl_clt,
+			di_inf_id_clt,
+			di_inf_name,
+			dis_content,
+			obz_dt,
+			occr_st_date,
+			occr_ed_date,
+			occr_place,
+			addr_code,
+			hm_dmg_killed,
+			hm_dmg_missing,
+			hm_dmg_injser,
+			hm_dmg_injslt,
+			hm_dmg_etc,
+			mt_dmg_fac,
+			mt_dmg_bud,
+			mt_dmg_anm,
+			mt_dmg_plt,
+			mt_dmg_etc,
+			dmg_total,
+			dmg_amnt,
+			dmg_amnt_movasset,
+			dmg_amnt_rlest,
+			cause_first,
+			cause_second,
+			cause_third,
+			cause_etc,
+			action_prob,
+			action_imprv,
+			action_exec,
+			action_content,
+			instt_super,
+			instt_resp,
+			instt_cause_inv,
+			instt_collect,
+			rel_legislation,
+			rel_cause_inv_data,
+			rel_action_exec,
+			weather,
+			temperature,
+			humidity,
+			cause_self_first,
+			cause_self_second,
+			cause_self_third,
+			cause_self_etc,
+			cord_lat,
+			cord_lon,
+			cord_ht
+		from tb_accident_soc
+		
+		<if test="paramMonth != null and paramList != null">
+			where substr(obz_dt, 5, 2) = #{paramMonth}
+			and addr_code in
+			
+			<foreach item="item" collection="paramList" open="(" close=")" separator=",">
+		    	#{item}
+		    </foreach>
+		</if>
+	</select>
+	
+	<select id="countAccidentSoc" parameterType="hashmap" resultType="int">
+		select count(*)
+		from tb_accident_soc
+		
+		<if test="paramMonth != null and paramList != null">
+			where substr(obz_dt, 5, 2) = #{paramMonth}
+			and addr_code in
+			
+			<foreach item="item" collection="paramList" open="(" close=")" separator=",">
+		    	#{item}
+		    </foreach>
+		</if>
+	</select>
+	
+	<select id="listAccidentGroupCount" parameterType="hashmap" resultType="accidentSoc">
+		SELECT law_code,
+		  law_sido,
+		  law_sigungu,
+		  di_dtl_name,
+		  COUNT(*) cnt
+		FROM tb_accident_soc tb1
+		JOIN
+		  (SELECT SUBSTR(law_code, 1, 5) law_code,
+		    law_sido,
+		    law_sigungu
+		  FROM tc_law
+		  WHERE code_delete_day  IS NULL
+		  AND LENGTH(law_sigungu) > 0
+		  ) tb2
+		ON SUBSTR(tb1.addr_code, 1, 5) = SUBSTR(tb2.law_code, 1, 5)
+		
+		<if test="paramMonth != null and paramList != null">
+			where substr(obz_dt, 5, 2) = #{paramMonth}
+			and substr(addr_code, 1, 5) in
+			
+			<foreach item="item" collection="paramList" open="(" close=")" separator=",">
+		    	#{item}
+		    </foreach>
+		</if>
+		
+		GROUP BY law_code,
+		  law_sido,
+		  law_sigungu,
+		  di_dtl_name
+		ORDER BY cnt DESC,
+		  di_dtl_name DESC
+	</select>
+	
+	<update id="createCheckedArea" parameterType="hashmap">
+		insert into tb_user_itrs(user_id, sido)
+		values(#{user_id}, #{paramSido})
+	</update>
+	
+	<update id="deleteCheckedArea" parameterType="hashmap">
+		delete from tb_user_itrs
+		where user_id = #{user_id}
+	</update>
+	
+	<select id="listCheckedArea" parameterType="hashmap" resultType="accidentSoc">
+		select sido law_code
+		from tb_user_itrs
+		where user_id = #{user_id}
+		order by sido
+	</select>
+</mapper>

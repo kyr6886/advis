@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bbsLog">
+	<select id="list" parameterType="hashMap" resultType="bbsLogDTO">
+		select 
+			bbs_seq,
+			log_target_code,
+			create_date,
+			create_user_id
+		from
+		th_bbs_log
+		where
+		create_user_id=#{create_user_id}
+		and
+		bbs_seq=#{bbs_seq}
+	</select>
+	<insert id="create" parameterType="bbsLogDTO">
+		insert into th_bbs_log
+		(
+		bbs_log_seq,
+		bbs_seq,
+		log_target_code,
+		create_date,
+		create_user_id
+		)values
+		(
+		nextval('th_bbs_log_bbs_seq'),
+		#{bbs_seq},
+		#{log_target_code},
+		now(),
+		#{create_user_id}
+		)
+	</insert>
+	<select id="detail" parameterType="hashMap" resultType="bbsLogDTO">
+		select 
+			bbs_seq,
+			log_target_code,
+			create_date,
+			create_user_id
+		from
+		th_bbs_log
+		where
+		create_user_id=#{create_user_id}
+		and
+		bbs_seq=#{bbs_seq}
+		and
+		log_target_code=#{log_target_code}
+	</select>
+</mapper>

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="eventsMaster">
+	<update id="create" parameterType="eventsDto">
+		insert into tm_dis_events(
+            ctg_id
+            , evt_id
+            , title
+            , evt_date
+            , evt_num
+            , use_yn
+            , sort
+            , create_date
+            , update_date
+            , create_user_id
+            , update_user_id
+            ,evt_group
+            )
+    		values 
+    		(
+    		#{ctg_id}
+    		,#{evt_id}
+    		,#{title}
+    		,#{evt_date}
+    		,#{evt_num}
+    		,#{use_yn}
+    		,#{sort}
+    		,NOW()
+			,NOW()
+			, #{create_user_id}
+            , #{update_user_id}
+            ,#{evt_group}
+    			)
+	</update>
+	<select id="list"  parameterType="eventsDto" resultType="eventsDto">
+		select 
+		  ctg_id
+            , evt_id
+            , title
+            , evt_date
+            , evt_num
+            , use_yn
+            , sort
+            , create_date
+            , update_date
+            , create_user_id
+            , update_user_id
+            ,evt_group
+           from tm_dis_events
+           where use_yn='Y'
+           <if  test="evt_num!=null">
+           	and evt_num=#{evt_num}
+           </if>
+           <if  test="sort!=null">
+           and sort=#{sort}
+           </if>
+           <if  test="ctg_id">
+           and ctg_id=#{ctg_id}
+           </if>
+           order by evt_date desc
+	</select>
+	
+	<select id="searchItemList" parameterType="eventsDto" resultType="eventsDto">
+		
+		SELECT a.ctg_id,
+		       a.evt_id,
+		       a.title,
+		       a.evt_date,
+		       b.title as division
+		FROM
+		  (SELECT ctg_id,
+			  evt_id,
+			  title,
+			  evt_date
+		   FROM tm_dis_events
+		   where use_yn = 'Y'
+		   <if test="ctg_id!=null">
+			and ctg_id = #{ctg_id}
+			</if>
+		 )a
+		LEFT OUTER JOIN tc_dis_category b ON a.ctg_id = b.ctg_id
+		ORDER BY a.evt_date desc
+	</select>
+	
+	<select id="searchCtgList" parameterType="eventsDto" resultType="eventsDto">
+	select a.evt_id, b.ctg_id, b.title
+	from
+	  (select 
+		evt_id 
+	  from tb_dis_event_item
+	  where use_yn = 'Y'
+	  <if test="contents!=null">
+	  and contents like '%' || #{contents} || '%' 
+	  </if>
+	  <if test="keyWordList.size>0">
+	  	or
+	  	<foreach collection="keyWordList" item="item" index="index" separator="or">
+	  		contents like '%' || #{item} || '%' 
+	  	</foreach>
+	  </if>
+	  group by evt_id
+	   )a
+	left outer join tm_dis_events b on a.evt_id = b.evt_id
+	group by a.evt_id, b.ctg_id, b.title
+	order by evt_id desc
+	</select>
+	
+	<select id="selectEventImgList" parameterType="eventImgDto" resultType="eventImgDto">
+		select 
+			a.file_grp_id, a.evt_id, a.ctg_id, a.title, b.file_seq, b.file_org_name, b.file_new_name, b.file_path, b.file_size
+		from tb_dis_event_img a
+		left join tb_attach_file b on a.file_grp_id = b.file_grp_id
+		where a.use_yn = 'Y'
+		<if test="title!=null">
+		 and a.title like '%' || #{title} || '%' 
+		</if>
+		<if test="keyWordList.size>0 and title!=null">
+		 	or
+			<foreach collection="keyWordList" item="item" index="index" separator="or">
+		  		a.title like '%' || #{item} || '%' 
+		  	</foreach>
+		</if>
+		<if test="keyWordList.size>0 and title==null">
+		 	and
+			<foreach collection="keyWordList" item="item" index="index" separator="or">
+		  		a.title like '%' || #{item} || '%' 
+		  	</foreach>
+		</if>
+	</select>
+	
+	<select id="selectDisEventItemList" parameterType="eventsDto" resultType="eventsDto">
+		select b.ctg_id, b.evt_id, b.title, substring(b.evt_date,1,8) as evt_date
+		from 
+		(
+		select dis_category
+		from tb_year_dme_code
+		where 1=1
+		<if test="damage_code!=null">
+			and code = #{damage_code}
+		</if>
+		)a left join tm_dis_events b on a.dis_category = b.ctg_id
+		where b.use_yn = 'Y'
+		<if test="beg_date!=null">
+			and substring(b.evt_date,1,8)<![CDATA[ >= ]]> #{beg_date}
+			and substring(b.evt_date,1,8)<![CDATA[ <= ]]> #{end_date}
+		</if>
+		order by b.evt_id
+	</select>
+	
+	<select id="selectDisEventByPeriodList" parameterType="eventsDto" resultType="eventsDto">
+		select  d.ctg_id, d.evt_id, d.title, d.evt_date
+		from(
+		select dis_category
+		from tb_year_dme_code
+		where 1=1
+		<if test="damage_code!=null">
+			and code = #{damage_code}
+		</if>
+		)c,
+		(select b.ctg_id, b.evt_id, b.title, b.evt_date
+		from(
+		select evt_id
+		from tb_dis_event_item
+		where use_yn = 'Y'
+		<if test="contents!=null">
+			and contents like '%' || #{contents} || '%' 
+		</if>
+		group by evt_id
+		)a left join tm_dis_events b on a.evt_id = b.evt_id
+		where b.use_yn = 'Y'
+		<if test="beg_date!=null and beg_date.length==6">
+			and substring(evt_date,1,6)<![CDATA[ >= ]]> #{beg_date}
+		</if>
+		<if test="end_date!=null and end_date.length==6">
+			and substring(evt_date,1,6)<![CDATA[ <= ]]> #{end_date}
+		</if>
+		) d 
+		where c.dis_category = d.ctg_id
+		order by d.evt_id
+	</select>
+	
+	<select id="selectCtgIdDisEventByPeriodList" parameterType="eventsDto" resultType="eventsDto">
+
+		select b.ctg_id, b.evt_id, b.title, b.evt_date
+		from(
+		select evt_id
+		from tb_dis_event_item
+		where use_yn = 'Y'
+		<if test="contents!=null">
+			and contents like '%' || #{contents} || '%' 
+		</if>
+		group by evt_id
+		)a left join tm_dis_events b on a.evt_id = b.evt_id
+		where b.use_yn = 'Y'
+		<if test="ctg_id!=null">
+			and b.ctg_id = #{ctg_id}
+		</if>
+		<if test="beg_date!=null and beg_date.length==6">
+			and substring(evt_date,1,6)<![CDATA[ >= ]]> #{beg_date}
+		</if>
+		<if test="end_date!=null and end_date.length==6">
+			and substring(evt_date,1,6)<![CDATA[ <= ]]> #{end_date}
+		</if>
+
+	</select>
+	
+	<select id="listEventFileListAction" parameterType="eventsDto" resultType="eventsDto">
+		select seq, file_grp_id, evt_id, ctg_id, use_yn 
+		from tb_dis_event_file
+		where use_yn = 'Y'
+		<if test="evt_id!=null">
+			and evt_id = #{evt_id}
+		</if>
+	</select>
+	
+	<update id="deleteDisEvent" parameterType="eventsDto">
+		update tm_dis_events
+		set use_yn = 'N'
+		where evt_id = #{evt_id}
+	</update>
+	
+	<update id="deleteDisEventItem" parameterType="eventsDto">
+		update tb_dis_event_item
+		set use_yn = 'N'
+		where evt_id = #{evt_id}
+	</update>
+	
+	<update id="deleteDisEventFile" parameterType="eventsDto">
+		update tb_dis_event_file
+		set use_yn = 'N'
+		where evt_id = #{evt_id}
+	</update>
+
+
+	<select id="selectListDisEventListByEvtYear" parameterType="eventsDto" resultType="eventsDto">
+		select  d.ctg_id, d.evt_id, d.title, d.evt_date
+		from(
+		select dis_category
+		from tb_year_dme_code
+		where 1=1
+		<if test="damage_code!=null">
+			and code = #{damage_code}
+		</if>
+		)c,
+		(select b.ctg_id, b.evt_id, b.title, b.evt_date
+		from(
+		select evt_id
+		from tb_dis_event_item
+		where use_yn = 'Y'
+		<if test="contents!=null">
+			and contents like '%' || #{contents} || '%' 
+		</if>
+		group by evt_id
+		)a left join tm_dis_events b on a.evt_id = b.evt_id
+		where b.use_yn = 'Y'
+		<if test="evt_year!=null">
+			and substring(evt_date,1,4)<![CDATA[ = ]]> #{evt_year}
+		</if>
+		) d 
+		where c.dis_category = d.ctg_id
+		order by d.evt_id
+	</select>
+	
+	<select id="selectListDisEventActionByDate" parameterType="eventsDto" resultType="eventsDto">
+		
+		select d.ctg_id, 
+		       d.evt_group,
+		       e.title,
+		       d.year, 
+		       d.month, 
+		       d.day, 
+		       d.hour, 
+		       d.sort, 
+		       d.dis_org, 
+		       d.dis_level_code, 
+		       d.sys_title,
+		       d.dis_act_lv1, 
+		       d.dis_act_lv2, 
+		       d.dis_act_lv3, 
+		       d.dis_act_lv4, 
+		       d.dis_act_lv5, 
+		       d.dis_act_lv6 
+		from(
+			SELECT a.ctg_id, 
+			       a.evt_group, 
+			       a.year, 
+			       a.month, 
+			       a.day, 
+			       a.hour, 
+			       a.sort, 
+			       a.dis_org, 
+			       a.dis_level_code, 
+			       b.sys_title,
+			       a.dis_act_lv1, 
+			       a.dis_act_lv2, 
+			       a.dis_act_lv3, 
+			       a.dis_act_lv4, 
+			       a.dis_act_lv5, 
+			       a.dis_act_lv6 
+			FROM   tb_dis_event_action a, tc_code_sys b
+			WHERE  a.dis_level_code = b.sys_code
+	       	<if test="ctg_id!=null">
+	        	and a.ctg_id = #{ctg_id}
+	       	</if>
+	       	<if test="year!=null">
+	        	and a.year = #{year}
+	       	</if>
+	       	<if test="month!=null">
+	       		and a.month = #{month}
+	       	</if>
+	       	<if test="day!=null">
+	       		and a.day = #{day}
+	       	</if>
+	       	<if test="hour!=null">
+	       		and a.hour = #{hour}
+	       	</if>
+	       	order by a.sort
+       	) d, 
+		(
+			select evt_group, title
+			from tm_dis_events
+			group by evt_group, title
+		) e
+		where d.evt_group = e.evt_group
+	</select>
+	
+	<select id="selectListDisEventActionByGroup" parameterType="eventsDto" resultType="eventsDto">
+		select d.ctg_id, 
+		       d.evt_group,
+		       e.title,
+		       d.year, 
+		       d.month, 
+		       d.day, 
+		       d.hour, 
+		       d.sort, 
+		       d.dis_org, 
+		       d.dis_level_code, 
+		       d.sys_title,
+		       d.dis_act_lv1, 
+		       d.dis_act_lv2, 
+		       d.dis_act_lv3, 
+		       d.dis_act_lv4, 
+		       d.dis_act_lv5, 
+		       d.dis_act_lv6 
+		from(
+			select a.ctg_id, 
+			       a.evt_group,
+			       a.year, 
+			       a.month, 
+			       a.day, 
+			       a.hour, 
+			       a.sort, 
+			       a.dis_org, 
+			       a.dis_level_code, 
+			       b.sys_title,
+			       a.dis_act_lv1, 
+			       a.dis_act_lv2, 
+			       a.dis_act_lv3, 
+			       a.dis_act_lv4, 
+			       a.dis_act_lv5, 
+			       a.dis_act_lv6 
+			FROM   tb_dis_event_action a 
+	       left join tc_code_sys b on a.dis_level_code = b.sys_code
+	       WHERE  1=1
+		       <if test="ctg_id!=null">
+	        		and ctg_id = #{ctg_id}
+		       	</if>
+		       	<if test="evt_group!=null">
+		        	and evt_group = #{evt_group}
+		       	</if>
+			ORDER  BY a.month,
+			          a.day, 
+			          a.hour, 
+			          a.sort
+		) d, 
+		(
+			select evt_group, title
+			from tm_dis_events
+			group by evt_group, title
+		) e
+		where d.evt_group = e.evt_group
+  	</select>
+  	
+	<select id="selectListDisEventByEvtGroup" parameterType="eventsDto" resultType="eventsDto">
+		select 
+			ctg_id, evt_id, title, evt_date, evt_num, sort, evt_group
+		from 
+			tm_dis_events
+		where use_yn = 'Y'
+		<if test="ctg_id!=null">
+        	and ctg_id = #{ctg_id}
+       	</if>
+       	<if test="evt_group!=null">
+        	and evt_group = #{evt_group}
+       	</if>
+		order by evt_date
+  	</select>
+  	
+  	<select id="selectDisEventGrpId" parameterType="eventsDto" resultType="eventsDto">
+ 		select ctg_id, evt_group
+		from tm_dis_events
+		where use_yn = 'Y'
+		<if test="ctg_id!=null">
+       		and ctg_id = #{ctg_id}
+       	</if>
+       	<if test="beg_date!=null">
+       		and evt_date between #{beg_date} and #{end_date}
+       	</if>
+		<if test="title!=null">
+       		and title like '%' || #{title} || '%' 
+       	</if>
+		group by ctg_id, evt_group
+  	</select>
+	
+</mapper>

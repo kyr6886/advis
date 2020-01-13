@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="obsAsosData">
+	<select id="listObs" parameterType="hashMap" resultType="ObsAsosDto">
+		select 
+			obs_id stn_id
+			, obs_name
+			, position_x 
+			, postion_y
+			, above_see_level
+			, obs_barometer
+			, obs_management
+			, obs_thermometer
+			, obs_windspeed
+			, obs_rainfallmeter
+			, start_date
+		from tb_obs_st
+		where delete_date is null
+	</select>
+	
+	
+	<select id="countGunguAsosOverLap" parameterType="hashMap" resultType="ObsAsosDto">
+		select 
+			substring(law_code, 1,5) law_code, count(tm) gungu_count
+		from 
+		(
+				select 
+					substring(law_code, 1,5) law_code
+					, tm
+					, sum(rn_day) rn_day
+				from(
+						select 
+							law_code
+							, stn_id
+							, tm
+							, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+						from tb_obs_tsen asos 
+						left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+						where law_area in ('N', 'A')
+						<if test="law_code != null">
+						and law_code like concat(#{law_code}, '%')
+						</if> 
+						and rn_day > 0
+					) rs
+					group by substring(law_code, 1,5), tm
+		) count
+		where  rn_day > #{rn_day}
+		group by substring(law_code, 1,5)
+	</select>
+	
+	<select id="countSidoAsosOverLap" parameterType="hashMap" resultType="ObsAsosDto">
+		select substring(law_code, 1,2) law_code, count(tm) sido_count
+		from(
+			select 
+				substring(law_code, 1,2) law_code, tm, round(avg(rn_day),1) rn_day
+			from (	
+				select substring(law_code, 1,5) law_code,  tm, sum(rn_day) rn_day
+				from (
+					select 
+						law_code, stn_id, tm, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+					from tb_obs_tsen asos 
+					left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+					where law_area in ('Y', 'A')
+					<if test="law_code != null">
+					and  law_code like concat(#{law_code}, '%')
+					</if>
+					and rn_day > 0 
+				) rs
+			group by substring(law_code, 1,5), tm
+			) rv 
+			group by substring(law_code, 1,2), tm
+		) count
+		where rn_day > #{rn_day}
+		group by substring(law_code, 1,2)
+	</select>
+	
+	
+	
+	<select id="listRainSido" parameterType="hashMap" resultType="ObsAsosDto">
+		select 
+			substring(law_code, 1,2) law_code
+			, tm
+			, round(avg(rn_day),1) rn_day
+			, round(avg(rn_10m_max),1) rn_10m_max
+			, round(avg(rn_60m_max),1) rn_60m_max
+		from (	
+			select 
+				substring(law_code, 1,5) law_code
+				,  tm
+				, sum(rn_day) rn_day
+				, sum(rn_10m_max) rn_10m_max
+				, sum(rn_60m_max) rn_60m_max
+			from (
+				select 
+					law_code
+					, stn_id
+					, tm
+					, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+					, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_10m_max / 10 end) rn_10m_max
+					, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in ('Y', 'A')
+				<if test="beg_date != null">
+				   and tm  <![CDATA[>=]]> #{beg_date}
+				 </if>
+				 <if test="end_date != null">
+				   and tm  <![CDATA[<=]]>   #{end_date} 
+				 </if> 
+				 <if test="law_code != null">
+				   and law_code like concat(#{law_code}, '%')
+				 </if>
+				  
+			) rs
+		group by substring(law_code, 1,5), tm
+		) rv 
+		where rv.tm is not null
+		<if test="pre_rn_day != null">
+		and rv.rn_day <![CDATA[>=]]> #{pre_rn_day}
+		</if>
+		<if test="end_rn_day != null">
+		and rv.rn_day <![CDATA[<=]]>  #{end_rn_day}
+		</if>
+		group by substring(law_code, 1,2), tm
+		order by tm asc
+	</select>
+	
+	<select id="listRainGungu" parameterType="hashMap" resultType="ObsAsosDto">
+		select 
+					substring(law_code, 1,5) law_code
+					, tm
+					, sum(rn_day) rn_day
+					, sum(rn_10m_max) rn_10m_max
+					, sum(rn_60m_max) rn_60m_max
+					
+		from(
+				select 
+					law_code
+					, stn_id
+					, tm
+					, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+					, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_10m_max / 10 end) rn_10m_max
+					, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in ('N', 'A')
+			     <if test="beg_date != null">
+				   and tm  <![CDATA[>=]]> #{beg_date}
+				 </if>
+				 <if test="end_date != null">
+				   and tm  <![CDATA[<=]]>   #{end_date} 
+				 </if> 
+				 <if test="law_code != null">
+				   and law_code like concat(#{law_code}, '%')
+				 </if>
+		) rs
+		where rs.tm is not null
+		<if test="pre_rn_day != null">
+		and rs.rn_day <![CDATA[>=]]> #{pre_rn_day}
+		</if>
+		<if test="end_rn_day != null">
+		and rs.rn_day <![CDATA[<=]]>  #{end_rn_day}
+		</if>
+		group by substring(law_code, 1,5), tm
+		order by tm asc
+	</select>
+	
+	
+	<select id="maxSidoAsos" parameterType="hashMap" resultType="ObsAsosDto">
+		select 
+			substring(law_code, 1,2) law_code
+			, max(rn_day) rn_day_max
+		from(
+			select 
+				substring(law_code, 1,2) law_code
+				, tm
+				, round(avg(rn_day),1) rn_day
+			from (	
+				select 
+					substring(law_code, 1,5) law_code,  tm, sum(rn_day) rn_day
+				from (
+					select 
+						law_code
+						, stn_id
+						, tm
+						, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+					from tb_obs_tsen asos 
+					left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+					where law_area in ('Y', 'A')
+				    <if test="beg_date != null">
+				    and tm  <![CDATA[>=]]> #{beg_date}
+				    </if>
+				    <if test="end_date != null">
+				    and tm  <![CDATA[<=]]>   #{end_date} 
+				    </if> 
+				    <if test="law_code != null">
+				    and law_code like concat(#{law_code}, '%')
+				    </if>
+					
+				) rs
+			group by substring(law_code, 1,5), tm
+			) rv 
+			group by substring(law_code, 1,2), tm
+		) max
+		group by substring(law_code, 1,2)
+	</select>
+	
+	<select id="maxGunguAsos" parameterType="hashMap" resultType="ObsAsosDto">
+		select 
+			substring(law_code, 1,5) law_code
+			, max(rn_day) rn_day_max
+		from( 
+		
+			select 
+					substring(law_code, 1,5) law_code
+					, tm
+					, sum(rn_day) rn_day
+					, sum(rn_60m_max) rn_60m_max
+			from(
+				select 
+					law_code
+					, stn_id
+					, tm
+					, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+					, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in ('N', 'A')
+				 <if test="beg_date != null">
+				   and tm  <![CDATA[>=]]> #{beg_date}
+				 </if>
+				 <if test="end_date != null">
+				   and tm  <![CDATA[<=]]>   #{end_date} 
+				 </if> 
+				 <if test="law_code != null">
+				   and law_code like concat(#{law_code}, '%')
+				 </if>
+			) rs
+			group by substring(law_code, 1,5), tm
+		) max
+		group by substring(law_code, 1,5)
+	</select>
+	<select id="maxObsRnDay" parameterType="hashMap" resultType="ObsAsosDto">
+	select 
+	 t1.stn_id
+	,t2.obs_name
+	,rn_day 
+	from tb_obs_asos t1,tb_obs_st t2
+	where 
+	t1.stn_id=t2.obs_id::numeric
+	and
+	tm <![CDATA[>=]]> #{beg_date} and tm <![CDATA[<=]]>  #{end_date} 
+	and rn_day>0
+	order by rn_day desc 
+	limit 1
+	</select>
+	
+	<select id="listObsRnDay" parameterType="hashMap" resultType="obsAsosDto">
+		select 
+			 t1.stn_id
+			,t2.obs_name
+			,rn_60m_max
+			,rn_day 
+		from 
+			tb_obs_asos t1,tb_obs_st t2
+		where 
+			t1.stn_id=t2.obs_id::numeric
+		and t2.delete_date = ''
+		and t1.tm = #{beg_date}
+		and t1.rn_day <![CDATA[>=]]> #{rn_day}::numeric
+		order by t1.rn_day desc 
+	</select>
+
+</mapper>

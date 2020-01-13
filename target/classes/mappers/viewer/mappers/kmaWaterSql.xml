@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kmaWater">
+<select id="maxWaterObsDate" parameterType="hashMap" resultType="String">
+select max(dt_obsdh) dt_obsdh
+from outlink.tob_kow_dubhrwlif
+</select>
+
+<select id="maxWaterDamDate" parameterType="hashMap" resultType="String">
+select max(ymdhm) dt_obsdh from outlink.tob_hrf_dmmst
+</select>
+
+
+<select id="kmaWaterObsList" parameterType="hashMap" resultType="kmaWaterDto">
+
+with main as(
+
+	
+	select t1.dt_obsdh,t1.cd_wlobs,t2.qty_hrwl from (
+		select 
+		  max(dt_obsdh) dt_obsdh
+		, cd_wlobs
+		from outlink.tob_kow_dubhrwlif t1
+		where dt_obsdh>=#{paramStDate}
+		group by cd_wlobs
+	) t1, outlink.tob_kow_dubhrwlif t2
+	where t1.dt_obsdh=t2.dt_obsdh and t1.cd_wlobs=t2.cd_wlobs
+	
+)
+
+select main.dt_obsdh,main.cd_wlobs,main.qty_hrwl,
+(select qty_hrwl from outlink.tob_kow_dubhrwlif t2 where t2.cd_wlobs=main.cd_wlobs and t2.dt_obsdh= to_char( to_timestamp(main.dt_obsdh,'YYYYMMDDHH24MI') + interval '-1' HOUR,'YYYYMMDDHH24MI')) pre_qty_hrwl
+ , nm_obs
+	, cd_dam
+	, cord_lon
+	, cord_lat
+	, etc_etcaddr
+	, law_code
+	, qty_mxdokcnt 
+
+from main
+left join (
+
+select 
+	 cd_wlobs
+	, nm_obs
+	, cd_dam
+	, cord_lon
+	, cord_lat
+	, etc_etcaddr
+	, area_code law_code
+	, qty_mxdokcnt 
+from 
+outlink.tcm_kow_dubwlobsif 
+
+) dub on dub.cd_wlobs = main.cd_wlobs
+where law_code is not null
+
+
+</select>
+
+<select id="kmaWaterDamList" parameterType="hashMap" resultType="kmaWaterDto">
+select 
+	 cd_wlobs
+	, nm_obs
+	, substring(dt_obsdh,1,10) dt_obsdh
+	, cord_lat cord_lat
+	, cord_lon cord_lon
+	, max(round(swl,2)) qty_hrwl
+	, max(lwl) qty_mxdokcnt
+	, max(tototf) tototf
+	, srcdis srcdis
+from (
+select 
+	dmobscd cd_wlobs
+	, damnm nm_obs
+	, ymdhm dt_obsdh
+	, swl   swl
+	, lat   cord_lat
+	, lon   cord_lon
+	, lwl   lwl
+	, srcdis
+	, tototf
+from outlink.tob_hrf_dmmst dmmst 
+left outer join outlink.tob_hrf_dubdamspc spc on dmmst.dmobscd = spc.damcd 
+where spc.damnm is not null
+and dmobscd = #{damcd}
+) rs
+where dt_obsdh = #{end_date}
+group by cd_wlobs, nm_obs, substring(dt_obsdh,1,10), cord_lat, cord_lon, srcdis
+</select>
+
+</mapper>

@@ -1,0 +1,7 @@
+<div class="pagination">
+    <ul>
+    	<li><a href=""  ng-click="fnClickPreBlock(pager.startBlockNum-10)" title="이전페이지로 가기" class="prev"><span>이전페이지로 가기</span></a></li>
+    	<li ng-repeat="item in pager.pagerNums" ><a href="" ng-click="fnOnClickPapger(item)" ng-class="{'active':item==pager.currentPage}">{{item}}</a></li>
+    	 <li><a href="#" title="다음페이지로 가기" class="next" ng-click="fnClickNextBlock(pager.nextBlockNum)"><span>다음페이지로 가기</span></a></li>
+    </ul>
+</div>

@@ -1,0 +1,21 @@
+<div class="{{layerClass}}">
+	<select name="paramSido" ng-model="selectedSido" ng-change="fnChangeSido()" title="시,도 선택" style="width: 128px;">
+		<option value=''>전체(시도)</option>
+		<option ng-repeat="item in listSido" value="{{item.law_code}}">{{item.law_sido}}</option>
+	</select>
+	<select  ng-show="binding.isUseGungu" name="paramGungu" ng-model="selectedGungu" ng-change="fnChangeGungu()" title="시/군/구 선택" style="width: 123px;">
+		<option value=''>전체(시/군/구)</option>
+		<option ng-repeat="item in listGungu" value="{{item.law_code}}">{{item.law_sigungu}}</option>
+	</select>
+	<select ng-show="binding.isUseDong" name="paramDong" title="시/군/구 선택" ng-change="fnChangeDong()" ng-model="selectedDong" style="width: 123px;">
+		<option value=''>전체(읍/면/동)</option>
+		<option ng-repeat="item in listDong" value="{{item.law_code}}">{{item.law_dong}}</option>
+	</select>
+	<select ng-show="binding.isUseRi" name="paramRi" title="읍/면/동 선택" ng-change="fnChangeRi()" ng-model="selectedRi" style="width: 123px;">
+		<option value=''>전체(리)</option>
+		<option ng-repeat="item in listRi" value="{{item.law_code}}">{{item.law_ri}}</option>
+	</select>
+	<span>{{fieldText}}</span>
+	<input style="width: 304px;" class="it ng-hide" name="paramText" type="text" ng-model="searchText" ng-show="fieldText!=null">
+	<a href="#" class="{{btnClass}} ng-hide" ng-show="callbackClick!=null" ng-click="fnOnClickSearch()"><span>검색</span></a>
+</div>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="loginLog">
+<select id="count" parameterType="hashMap" resultType="int">
+		
+		select count(*)
+		from th_login_log
+		where 
+		to_char(create_date,'YYYYMMDD')=to_char(sysdate,'YYYYMMDD')
+		<if test="user_id!=null">
+		and
+		user_id=#{user_id}
+		</if>
+		<if test="session_id!=null">
+		and
+		session_id=#{session_id}
+		</if>
+		
+		
+		
+</select>
+<update id="create" parameterType="loginLogDTO">
+		insert into th_login_log
+		(
+		user_id,
+		create_date,
+		session_id,
+		update_date,
+		hit_count
+		)
+		values
+		(
+		#{user_id},
+		sysdate,
+		#{session_id},
+		sysdate,
+		1
+		)
+</update>
+<update id="update" parameterType="hashMap" >
+		<![CDATA[
+		update th_login_log
+		set update_date=sysdate
+		,hit_count=hit_count+1
+		where
+		user_id=#{user_id}
+		and
+		session_id=#{session_id}
+		and
+		to_char(create_date,'YYYYMMDD')=to_char(sysdate,'YYYYMMDD')
+		
+		]]>
+</update>
+<select id="totalCount" parameterType="hashMap" resultType="int">
+		
+		with login_log as (
+			select a.user_id
+			       ,b.user_name as create_user_name
+			       ,max(a.update_date) as update_date
+			       ,count(*) as hit_count
+			from th_login_log a, tb_user b
+			where a.user_id = b.user_id
+			and a.update_date between to_date(#{startDate},'YYYYMMDD') and to_date(#{endDate},'YYYYMMDD')+1
+			<if test="userId!=null">
+			and a.user_id like concat(#{userId} ,'%')
+			</if>
+			<if test="userName!=null">
+			and b.user_name like  concat(#{userName} ,'%')
+			</if>
+			group by a.user_id,b.user_name
+			)
+			select count(*) from login_log
+		
+</select>
+<select id="curTime" parameterType="hashMap" resultType="loginLogDTO" >
+		select max(update_date) as update_date
+		from th_login_log
+</select>
+<select id="list" parameterType="hashMap" resultType="loginLogDTO" >
+		with login_log as (
+			select a.user_id
+			       ,b.user_name as create_user_name
+			       ,max(a.update_date) as update_date
+			       ,count(*) as hit_count
+			from th_login_log a, tb_user b
+			where a.user_id = b.user_id
+			and a.update_date between to_date(#{startDate},'YYYYMMDD') and to_date(#{endDate},'YYYYMMDD')+1
+			<if test="userId!=null">
+			and a.user_id like concat(#{userId} ,'%')
+			</if>
+			<if test="userName!=null">
+			and b.user_name like  concat(#{userName} ,'%')
+			</if>
+			group by a.user_id,b.user_name
+			)
+			select * from(
+			select 
+			rownum as rn
+			,user_id
+			,create_user_name
+			,update_date
+			,hit_count from login_log
+			) where rn between #{FirstIndex}+1 and #{LastIndex}+1
+</select>
+<select id="detailTotalCount" parameterType="hashMap" resultType="int">
+		with login_log
+			AS
+			  (SELECT 
+			    a.user_id,
+			    to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd') as update_date,
+			    COUNT(*) AS hit_count
+			  FROM th_login_log a,
+			       tb_user b
+			  WHERE a.user_id = b.user_id
+			  and a.update_date between to_date(#{startDate},'YYYYMMDD') and to_date(#{endDate},'YYYYMMDD')+1
+			  <if test="userId!=null">
+				and a.user_id = #{userId}
+			  </if>
+			  GROUP BY to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd'),a.user_id
+			  )
+				select 
+					count(*)
+				  FROM login_log
+		
+</select>
+<select id="detailConnTotalCount" parameterType="hashMap" resultType="int">
+		with login_log
+			AS
+			  (SELECT 
+			    a.user_id,
+			    to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd') as update_date,
+			    COUNT(*) AS hit_count
+			  FROM th_login_log a,
+			       tb_user b
+			  WHERE a.user_id = b.user_id
+			  and a.update_date between to_date(#{startDate},'YYYYMMDD') and to_date(#{endDate},'YYYYMMDD')+1
+			  <if test="userId!=null">
+				and a.user_id = #{userId}
+			  </if>
+			  GROUP BY to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd'),a.user_id
+			  )
+				select 
+					sum(hit_count) as conn_cnt_tot
+				  FROM login_log
+		
+</select>
+<select id="detail" parameterType="hashMap" resultType="loginLogDTO" >
+with login_log
+	AS
+	  (SELECT 
+	    a.user_id,
+	    to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd') as update_date,
+	    COUNT(*) AS hit_count
+	  FROM th_login_log a,
+	       tb_user b
+	  WHERE a.user_id = b.user_id
+	  and a.update_date between to_date(#{startDate},'YYYYMMDD') and to_date(#{endDate},'YYYYMMDD')+1
+	  <if test="userId!=null">
+		and a.user_id  = #{userId}
+	  </if>
+	  GROUP BY to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd'),a.user_id
+	  order by to_date(TO_CHAR(a.update_date,'yyyymmdd'),'yyyymmdd') desc
+	  )
+	  select * from(
+			select 
+				rownum as rn,
+			    user_id,
+			    update_date,
+			    hit_count
+			  FROM login_log
+			   order by update_date desc
+	   )
+	   <if test="FirstIndex != null">
+		   where rn between #{FirstIndex}+1 and #{LastIndex}+1
+	   </if> 
+	    
+</select>	
+</mapper>

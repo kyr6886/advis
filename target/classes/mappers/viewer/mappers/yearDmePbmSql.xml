@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmePbm">
+
+	<select id="listPbm" parameterType="hashMap" resultType="yearDmePbmDto">
+		select
+			damage_date_code,
+			sido_code,
+			sigungu_code,
+			sido,
+			sigungu,
+			beg_year,
+			beg_month ,
+			beg_day ,
+			end_year ,
+			end_month ,
+			end_day ,
+			vts_hue_b_typ_b ,
+			vts_hue_e_typ_b ,
+			vts_hue ,
+			vts_hue_b_typ_a ,
+			vts_hue_e_typ_a ,
+			vts_cnt ,
+			man_dah ,
+			man_dpr ,
+			man_ije ,
+			man_e_typ_c ,
+			man_dme ,
+			fld_fmd ,
+			fld_cty ,
+			fld_fmd_j_typ_a ,
+			fld_fmd_d_typ_a ,
+			fld_fmd_e_typ_a ,
+			fld_dme ,
+			bug_are_u_typ_a ,
+			bug_are_a_typ_a ,
+			bug_are ,
+			bug_hre ,
+			bug_are_typ_a ,
+			bug_fld ,
+			bug_are_sub_typ_a ,
+			bug_dme ,
+			shp_amn ,
+			shp_amt ,
+			shp_hmn ,
+			shp_hmt ,
+			shp_apn ,
+			shp_apt ,
+			shp_hpn ,
+			shp_hpt ,
+			shp_dme ,
+			fmd_fmd ,
+			fmd_fed ,
+			fmd_dme ,
+			hvt_fmd ,
+			hvt_fed ,
+			hvt_etc ,
+			hvt_dme ,
+			hvt_type_a_dme ,
+			pbm_wln ,
+			pbm_wln_dme ,
+			pbm_aln ,
+			pbm_aln_dme ,
+			pbm_adn ,
+			pbm_adn_dme ,
+			pbm_scn ,
+			pbm_scn_dme ,
+			pbm_fgn ,
+			pbm_fgn_dme ,
+			pbm_vhn ,
+			pbm_vhn_dme ,
+			pbm_etc ,
+			pbm_etc_dme ,
+		from tb_year_dme_pbm
+	</select>
+	<!-- 시군구 재해일 정보 -->
+	<select id="detailPbm" parameterType="hashMap" resultType="yearDmePbmDto">
+		select
+		damage_date_code,
+		sido_code,
+		sigungu_code,
+		sido,
+		sigungu,
+		beg_year,
+		beg_month ,
+		beg_day ,
+		end_year ,
+		end_month ,
+		end_day ,
+		vts_hue_b_typ_b ,
+		vts_hue_e_typ_b ,
+		vts_hue ,
+		vts_hue_b_typ_a ,
+		vts_hue_e_typ_a ,
+		vts_cnt ,
+		man_dah ,
+		man_dpr ,
+		man_ije ,
+		man_e_typ_c ,
+		man_dme ,
+		fld_fmd ,
+		fld_cty ,
+		fld_fmd_j_typ_a ,
+		fld_fmd_d_typ_a ,
+		fld_fmd_e_typ_a ,
+		fld_dme ,
+		bug_are_u_typ_a ,
+		bug_are_a_typ_a ,
+		bug_are ,
+		bug_hre ,
+		bug_are_typ_a ,
+		bug_fld ,
+		bug_are_sub_typ_a ,
+		bug_dme ,
+		shp_amn ,
+		shp_amt ,
+		shp_hmn ,
+		shp_hmt ,
+		shp_apn ,
+		shp_apt ,
+		shp_hpn ,
+		shp_hpt ,
+		shp_dme ,
+		fmd_fmd ,
+		fmd_fed ,
+		fmd_dme ,
+		hvt_fmd ,
+		hvt_fed ,
+		hvt_etc ,
+		hvt_dme ,
+		hvt_type_a_dme ,
+		pbm_wln ,
+		pbm_wln_dme ,
+		pbm_aln ,
+		pbm_aln_dme ,
+		pbm_adn ,
+		pbm_adn_dme ,
+		pbm_scn ,
+		pbm_scn_dme ,
+		pbm_fgn ,
+		pbm_fgn_dme ,
+		pbm_vhn ,
+		pbm_vhn_dme ,
+		pbm_etc ,
+		pbm_etc_dme ,
+		from tb_year_dme_pbm
+		where damage_date_code = #{damage_date_code}
+		and si_code = #{law_code}
+		and gungu_code = #{law_code}
+	</select>
+	<!-- 시도별 피해금액 총 피해금액 -->
+	<select id="listSidoPbmDme" parameterType="hashMap" resultType="yearDmePbmDto">
+		select
+		    rs.damage_date_code damage_date_code		
+		  , data.code disaster_code
+		  , sido_code
+		  , sido
+		  , rs.beg_date beg_date
+		  , rs.end_date end_date
+		, sum(
+		       man_dah
+			   + man_dpr
+			   + man_ije
+			   + man_e_typ_c) man_total_dme
+		, sum( fld_dme
+			   +bug_dme
+			   +shp_dme
+			   +fmd_dme
+			   +hvt_dme
+			   +hvt_type_a_dme
+			   +pbm_wln_dme
+			   +pbm_aln_dme
+			   +pbm_adn_dme
+			   +pbm_scn_dme
+			   +pbm_fgn_dme
+			   +pbm_vhn_dme
+			   +pbm_etc_dme ) pbm_total_dme
+
+		from (
+			select
+			damage_date_code,
+			sido_code,
+			sigungu_code,
+			sido,
+			sigungu,
+			concat(beg_year, beg_month, beg_day) beg_date,
+			concat(end_year, end_month, end_day) end_date,
+			man_dah::integer,
+			man_dpr::integer,
+			man_ije::integer,
+			man_e_typ_c::integer,
+			fld_dme::numeric,
+			bug_dme::numeric,
+			shp_dme::numeric,
+			fmd_dme::numeric,
+			hvt_dme::numeric,
+			hvt_type_a_dme::numeric,
+			pbm_wln_dme::numeric,
+			pbm_aln_dme::numeric,
+			pbm_adn_dme::numeric,
+			pbm_scn_dme::numeric,
+			pbm_fgn_dme::numeric,
+			pbm_vhn_dme::numeric,
+			pbm_etc_dme::numeric
+		from tb_year_dme_pbm
+	
+		) rs, tb_year_dme_date data
+		where rs.damage_date_code = data.damage_date_code
+		<if test="law_code != null">
+			and sido_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+			and rs.beg_date <![CDATA[>=]]> #{beg_date}
+		</if>
+		<if test="end_date != null">
+			and rs.end_date <![CDATA[<=]]> #{end_date}
+		</if>
+		group by rs.damage_date_code, sido_code, rs.beg_date, rs.end_date, sido, data.code
+		order by rs.damage_date_code, sido_code
+	</select>
+	<!-- 시군구별 사유실설 총 피해액 -->
+	<select id="listGunguPbmDme" parameterType="hashMap" resultType="yearDmePbmDto">
+		select
+		 rs.damage_date_code damage_date_code
+		, data.code disaster_code
+		, sigungu_code
+		, sigungu
+		, rs.beg_date
+		, rs.end_date
+		,
+		sum(
+		man_dah::integer
+		+ man_dpr::integer
+		+ man_ije::integer
+		+ man_e_typ_c::integer) man_total_dme
+		, sum( fld_dme
+		+bug_dme
+		+shp_dme
+		+fmd_dme
+		+hvt_dme
+		+hvt_type_a_dme
+		+pbm_wln_dme
+		+pbm_aln_dme
+		+pbm_adn_dme
+		+pbm_scn_dme
+		+pbm_fgn_dme
+		+pbm_vhn_dme
+		+pbm_etc_dme ) pbm_total_dme
+
+		from (
+		select
+		damage_date_code,
+		sido_code,
+		sigungu_code,
+		sido,
+		sigungu,
+		concat(beg_year, beg_month, beg_day) beg_date,
+		concat(end_year, end_month, end_day) end_date,
+		man_dah::integer,
+		man_dpr::integer,
+		man_ije::integer,
+		man_e_typ_c::integer,
+		fld_dme::numeric,
+		bug_dme::numeric,
+		shp_dme::numeric,
+		fmd_dme::numeric,
+		hvt_dme::numeric,
+		hvt_type_a_dme::numeric,
+		pbm_wln_dme::numeric,
+		pbm_aln_dme::numeric,
+		pbm_adn_dme::numeric,
+		pbm_scn_dme::numeric,
+		pbm_fgn_dme::numeric,
+		pbm_vhn_dme::numeric,
+		pbm_etc_dme::numeric
+		from tb_year_dme_pbm
+		) rs,  tb_year_dme_date data
+		where rs.damage_date_code = data.damage_date_code
+		<if test="law_code != null">
+			and rs.sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+			and rs.beg_date <![CDATA[>=]]>
+			#{beg_date}
+		</if>
+		<if test="end_date != null">
+			and rs.end_date <![CDATA[<=]]>
+			#{end_date}
+		</if>
+		group by rs.damage_date_code, sigungu_code, rs.beg_date, rs.end_date, sigungu, data.code
+		order by rs.damage_date_code, sigungu_code
+	</select>
+
+	<!-- 시도별 피해금액 총 피해금액 -->
+	<select id="listSidoPbmDmeSum" parameterType="hashMap"
+		resultType="yearDmePbmDto">
+		select
+		sido_code
+		, sido
+		, sum(
+		man_dah::integer
+		+ man_dpr::integer
+		+ man_ije::integer
+		+ man_e_typ_c::integer) man_total_dme
+		, sum( fld_dme
+		+bug_dme
+		+shp_dme
+		+fmd_dme
+		+hvt_type_a_dme
+		+pbm_wln_dme
+		+pbm_aln_dme
+		+pbm_adn_dme
+		+pbm_scn_dme
+		+pbm_fgn_dme
+		+pbm_vhn_dme
+		+pbm_etc_dme ) pbm_total_dme
+
+		from (
+		select
+		t1.damage_date_code,
+		t1.sido_code,
+		t1.sigungu_code,
+		t1.sido,
+		t1.sigungu,
+		t1.man_dah::integer,
+		t1.man_dpr::integer,
+		t1.man_ije::integer,
+		t1.man_e_typ_c::integer,
+		t1.fld_dme::numeric,
+		t1.bug_dme::numeric,
+		t1.shp_dme::numeric,
+		t1.fmd_dme::numeric,
+		t1.hvt_type_a_dme::numeric,
+		t1.pbm_wln_dme::numeric,
+		t1.pbm_aln_dme::numeric,
+		t1.pbm_adn_dme::numeric,
+		t1.pbm_scn_dme::numeric,
+		t1.pbm_fgn_dme::numeric,
+		t1.pbm_vhn_dme::numeric,
+		t1.pbm_etc_dme::numeric
+		from tb_year_dme_pbm t1,tb_year_dme_date t2
+		where t1.damage_date_code=t2.damage_date_code
+		<if test="code != null">
+			and t2.code=#{code}
+		</if>
+		<if test="law_code != null">
+			and t1.sido_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+			and t1.beg_year <![CDATA[>=]]>
+			#{beg_date}
+		</if>
+		<if test="end_date != null">
+			and t1.end_year <![CDATA[<=]]>
+			#{end_date}
+		</if>
+		) rs
+
+		group by sido_code, sido
+		order by sido_code
+	</select>
+	<!-- 시군구별 사유실설 총 피해액 -->
+	<select id="listGunguPbmDmeSum" parameterType="hashMap"
+		resultType="yearDmePbmDto">
+		
+		select
+		sigungu_code
+		, sigungu
+		, sum(
+		man_dah::integer
+		+ man_dpr::integer
+		+ man_ije::integer
+		+ man_e_typ_c::integer) man_total_dme
+		,sum(bug_dme) bug_dme
+		,sum(shp_dme) shp_dme
+		,sum(fmd_dme) fmd_dme
+		,sum(hvt_type_a_dme) hvt_type_a_dme
+		,sum(pbm_wln_dme) pbm_wln_dme
+		,sum(pbm_aln_dme) pbm_aln_dme
+		,sum(pbm_adn_dme) pbm_adn_dme
+		,sum(pbm_scn_dme) pbm_scn_dme
+		,sum(pbm_fgn_dme) pbm_fgn_dme
+		,sum(pbm_vhn_dme) pbm_vhn_dme
+		,sum(pbm_etc_dme) pbm_etc_dme
+		, sum( fld_dme
+		+bug_dme
+		+shp_dme
+		+fmd_dme
+		+hvt_type_a_dme
+		+pbm_wln_dme
+		+pbm_aln_dme
+		+pbm_adn_dme
+		+pbm_scn_dme
+		+pbm_fgn_dme
+		+pbm_vhn_dme
+		+pbm_etc_dme ) pbm_total_dme
+
+		from (
+		select
+		t1.damage_date_code,
+		sido_code,
+		sigungu_code,
+		sido,
+		sigungu,
+		man_dah::integer,
+		man_dpr::integer,
+		man_ije::integer,
+		man_e_typ_c::integer,
+		fld_dme::numeric,
+		bug_dme::numeric,
+		shp_dme::numeric,
+		fmd_dme::numeric,
+		hvt_type_a_dme::numeric,
+		pbm_wln_dme::numeric,
+		pbm_aln_dme::numeric,
+		pbm_adn_dme::numeric,
+		pbm_scn_dme::numeric,
+		pbm_fgn_dme::numeric,
+		pbm_vhn_dme::numeric,
+		pbm_etc_dme::numeric
+		from tb_year_dme_pbm t1,tb_year_dme_date t2
+		where t1.damage_date_code=t2.damage_date_code
+		<if test="code != null">
+			and t2.code=#{code}
+		</if>
+		<if test="law_code != null">
+			and sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+			and beg_year <![CDATA[>=]]>
+			#{beg_date}
+		</if>
+		<if test="end_date != null">
+			and end_year <![CDATA[<=]]>
+			#{end_date}
+		</if>
+		) rs
+		group by sigungu_code, sigungu
+		order by sigungu_code
+	</select>
+
+	<!--년도별 시군구별 사유실설 총 피해액 -->
+	<select id="listGunguPbmDmeSumByYear" parameterType="hashMap"
+		resultType="yearDmePbmDto">
+		select sigungu_code,beg_year,man_total_dme,pbm_total_dme
+		,bug_dme
+		,shp_dme
+		,fmd_dme
+		,hvt_type_a_dme
+		,pbm_wln_dme
+		,pbm_aln_dme
+		,pbm_adn_dme
+		,pbm_scn_dme
+		,pbm_fgn_dme
+		,pbm_vhn_dme
+		,pbm_etc_dme
+		 from (
+		select
+		sigungu_code
+		,beg_year
+		, sigungu
+		, sum(
+		man_dah::integer
+		+ man_dpr::integer
+		+ man_ije::integer
+		+ man_e_typ_c::integer) man_total_dme
+		,sum(bug_dme) bug_dme
+		,sum(shp_dme) shp_dme
+		,sum(fmd_dme) fmd_dme
+		,sum(hvt_type_a_dme) hvt_type_a_dme
+		,sum(pbm_wln_dme) pbm_wln_dme
+		,sum(pbm_aln_dme) pbm_aln_dme
+		,sum(pbm_adn_dme) pbm_adn_dme
+		,sum(pbm_scn_dme) pbm_scn_dme
+		,sum(pbm_fgn_dme) pbm_fgn_dme
+		,sum(pbm_vhn_dme) pbm_vhn_dme
+		,sum(pbm_etc_dme) pbm_etc_dme
+		, sum( fld_dme
+		+bug_dme
+		+shp_dme
+		+fmd_dme
+		+hvt_type_a_dme
+		+pbm_wln_dme
+		+pbm_aln_dme
+		+pbm_adn_dme
+		+pbm_scn_dme
+		+pbm_fgn_dme
+		+pbm_vhn_dme
+		+pbm_etc_dme ) pbm_total_dme
+
+		from (
+		select
+		t1.damage_date_code,
+		beg_year,
+		sido_code,
+		sigungu_code,
+		sido,
+		sigungu,
+		man_dah::integer,
+		man_dpr::integer,
+		man_ije::integer,
+		man_e_typ_c::integer,
+		fld_dme::numeric,
+		bug_dme::numeric,
+		shp_dme::numeric,
+		fmd_dme::numeric,
+		hvt_type_a_dme::numeric,
+		pbm_wln_dme::numeric,
+		pbm_aln_dme::numeric,
+		pbm_adn_dme::numeric,
+		pbm_scn_dme::numeric,
+		pbm_fgn_dme::numeric,
+		pbm_vhn_dme::numeric,
+		pbm_etc_dme::numeric
+		from tb_year_dme_pbm t1,tb_year_dme_date t2
+		where t1.damage_date_code=t2.damage_date_code
+		<if test="code != null">
+			and t2.code=#{code}
+		</if>
+		<if test="law_code != null">
+			and sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+			and beg_year <![CDATA[>=]]>
+			#{beg_date}
+		</if>
+		<if test="end_date != null">
+			and end_year <![CDATA[<=]]>
+			#{end_date}
+		</if>
+		) rs
+		group by beg_year,sigungu_code, sigungu
+		) main ,tb_year_area_code area 
+		where main.sigungu_code=area.code
+		and area.code_level='2'
+		order by beg_year
+	</select>
+	
+	
+	
+	<!-- 시군구별 사유실설 년도별 세부 피해액 -->
+	<select id="listSidoDetailPbmDmeSumByYear" parameterType="hashMap" resultType="yearDmePbmDto">
+		
+		select
+			sido_code,
+			sido,
+			beg_year beg_date,
+			sum(fld_dme::numeric) fld_dme,
+			sum(bug_dme::numeric) bug_dme,
+			sum(shp_dme::numeric) shp_dme,
+			sum(fmd_dme::numeric) fmd_dme,
+			sum(hvt_dme::numeric) hvt_dme,
+			sum(hvt_type_a_dme::numeric) hvt_type_a_dme,
+			sum(pbm_wln_dme::numeric) pbm_wln_dme,
+			sum(pbm_aln_dme::numeric) pbm_aln_dme,
+			sum(pbm_adn_dme::numeric) pbm_adn_dme,
+			sum(pbm_scn_dme::numeric) pbm_scn_dme,
+			sum(pbm_fgn_dme::numeric) pbm_fgn_dme,
+			sum(pbm_vhn_dme::numeric) pbm_vhn_dme,
+			sum(pbm_etc_dme::numeric) pbm_etc_dme
+		from tb_year_dme_pbm
+		where sido_code is not null 
+		<if test="law_code != null">
+		and sido_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+		and beg_year <![CDATA[>=]]> #{beg_date}
+		</if>
+		<if test="end_date != null">
+		and beg_year <![CDATA[<=]]> #{end_date}
+		</if>
+		group by sido_code, sido, beg_year
+		order by beg_year
+	</select>
+
+	<!-- 시군구별 사유실설 년도별 세부 피해액 -->
+	<select id="listGunguDetailPbmDmeSumByYear" parameterType="hashMap" resultType="yearDmePbmDto">
+		select
+			sigungu_code,
+			sigungu,
+			beg_year beg_date,
+			sum(fld_dme::numeric) fld_dme,
+			sum(bug_dme::numeric) bug_dme,
+			sum(shp_dme::numeric) shp_dme,
+			sum(fmd_dme::numeric) fmd_dme,
+			sum(hvt_dme::numeric) hvt_dme,
+			sum(hvt_type_a_dme::numeric) hvt_type_a_dme,
+			sum(pbm_wln_dme::numeric) pbm_wln_dme,
+			sum(pbm_aln_dme::numeric) pbm_aln_dme,
+			sum(pbm_adn_dme::numeric) pbm_adn_dme,
+			sum(pbm_scn_dme::numeric) pbm_scn_dme,
+			sum(pbm_fgn_dme::numeric) pbm_fgn_dme,
+			sum(pbm_vhn_dme::numeric) pbm_vhn_dme,
+			sum(pbm_etc_dme::numeric) pbm_etc_dme
+		from tb_year_dme_pbm
+		where sigungu_code is not null 
+		<if test="law_code != null">
+		and sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="beg_date != null">
+		and beg_year <![CDATA[>=]]> #{beg_date}
+		</if>
+		<if test="end_date != null">
+		and beg_year <![CDATA[<=]]> #{end_date}
+		</if>
+		group by sigungu_code, sigungu, beg_year
+		order by beg_year
+	</select>
+
+</mapper>	

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="typhoonWorldInfo">
+
+<select id="worldTyphoonHistoryList" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	select 
+		stn_id
+		, typ_name
+		, typ_ws
+		, tm_fc
+		, typ_lon
+		, typ_lat
+	from(	
+		select 
+			obs_id stn_id
+			, typhoon_nm typ_name
+			, kt typ_ws
+			, obs_time tm_fc
+			, lon typ_lon
+			, lat typ_lat
+		from outlink.tbo_dmi_typhoonhistory 
+		where obs_time <![CDATA[>=]]> to_timestamp(#{beg_date}, 'yyyymmdd') and obs_time <![CDATA[<=]]> to_timestamp(#{end_date}, 'yyyymmdd')
+		<if test="typ_name != null">
+		and typhoon_nm like concat(#{typ_name), '%')
+		</if>
+		<if test="national_weather_nm != null">
+		and obs_id = #{national_weather_nm}	
+		</if>
+		and kt<![CDATA[>]]> -99
+	) rs 
+	order by stn_id,tm_fc
+</select>
+
+<select id="worldTyphoonForecastGroupByName" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	select
+	typhoon_nm typ_nm
+	from outlink.tbo_dmi_typhoonforecast
+	where obs_time <![CDATA[>=]]> to_timestamp(#{beg_date}, 'yyyymmdd') and obs_time <![CDATA[<=]]> to_timestamp(#{end_date}, 'yyyymmdd')
+	group by typhoon_nm
+</select>
+
+<select id="worldTyphoonForecastList" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	
+	with main as(
+			select 
+			 obs_id stn_id
+			,max(data_time) data_time
+			,typhoon_nm typ_name
+				
+			from outlink.tbo_dmi_typhoonforecast
+			where obs_time <![CDATA[>=]]> to_timestamp(#{beg_date}, 'yyyymmdd') and obs_time <![CDATA[<=]]> to_timestamp(#{end_date}, 'yyyymmdd')
+		<if test="typ_name != null">
+		and typhoon_nm like concat(substring(#{typ_name},1,2), '%')
+		</if>
+		<if test="national_weather_nm != null">
+		and obs_id = #{national_weather_nm}	
+		</if>
+		and kt<![CDATA[>]]> -99
+			group by obs_id,typhoon_nm
+		)
+		select 
+			obs_id stn_id
+			, typhoon_nm typ_name
+			, kt::character varying as typ_ws
+			, obs_time tm_fc
+			, lon typ_lon
+			, lat typ_lat
+		from outlink.tbo_dmi_typhoonforecast t1,main t2
+		where t1.obs_id=t2.stn_id and t1.data_time=t2.data_time and t1.typhoon_nm=t2.typ_name
+		and t1.kt<![CDATA[>]]>  -99
+		order by stn_id,tm_fc
+ 
+	
+	
+	
+
+</select>
+
+</mapper>

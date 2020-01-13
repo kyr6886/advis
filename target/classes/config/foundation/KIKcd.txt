@@ -1,0 +1,8 @@
+http://www.moi.go.kr/ 업무안내 / 주민등록및인감
+ - http://www.moi.go.kr/frt/bbs/type001/commonSelectBoardList.do?bbsId=BBSMSTR_000000000052
+ - jscode20161121(말소코드포함).zip
+ - KIKcd_B.xlsx / KIKcd_H.xlsx
+ - 법정동코드,생성일자,말소일자 텍스트타입으로 변경 필수(메모장에 넣었따가 다시 옴겨오면 됨)
+ - 세종특별자치시 추가 업데이트(시군구 가 없음)
+   - update tc_law set law_sigungu=law_sido where substr(law_code,0,4)='3611';
+   - update tc_adm set adm_sigungu=adm_sido where substr(adm_code,0,4)='3611'; 

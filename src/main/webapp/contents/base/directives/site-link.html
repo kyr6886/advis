@@ -1,0 +1,7 @@
+<div>
+	<select ng-model="dynamicSelect">
+		<option value="">관련사이트</option>
+		<option ng-repeat="item in website" value="http://{{item.site_url}}">{{item.site_title}}</option>
+	</select>
+	<a href="#" ng-click="fnOnClickGoSite()">이동</a>
+</div>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmeDate">
+<select id="listDate"  parameterType="hashMap" resultType="yearDmeDateDto">
+select 
+	damage_date_code
+	, substring(beg_date,1,8) beg_date
+	, substring(end_date,1,8) end_date
+	, dme_date.code code
+	, code_name
+from tb_year_dme_date dme_date
+inner join tb_year_dme_code dme_code on dme_date.code = dme_code.code
+where damage_date_code is not null 
+<if test="code != null">
+	and dme_code.code=#{code}
+</if>
+<if test="beg_date != null">
+	and substring(beg_date,1,8) <![CDATA[>=]]> #{beg_date}
+</if>
+<if test="end_date != null">
+	and substring(end_date,1,8) <![CDATA[<=]]> #{end_date}
+</if> 
+order by damage_date_code asc
+
+</select>	
+
+<select id="detailDate"  parameterType="hashMap" resultType="yearDmeDateDto">
+select 
+	damage_date_code
+	, beg_date
+	, end_date
+	, dme_date.code code
+	, code_name
+from tb_year_dme_date dme_date
+inner join tb_year_dme_code dme_code on dme_date.code = dme_code.code
+order by damage_date_code asc
+</select>	
+</mapper>

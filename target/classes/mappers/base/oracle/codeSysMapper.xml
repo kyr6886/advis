@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="codeSys">
+	<select id="list" parameterType="hashMap" resultType="codeSysDTO">
+		select
+		sys_code
+		,sys_title
+		,grp_code
+		from tc_code_sys
+		where
+		use_yn='Y'
+		<if test="grp_code != null">
+			and grp_code=#{grp_code}
+		</if>
+		<if test="grp_codes != null">
+			and a.UNIT_SEQ in
+			<foreach item="item" index="index" collection="grp_codes"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+
+		</if>
+		order by sys_code
+	</select>
+
+	<select id="listGrp" parameterType="hashMap" resultType="codeGrpDTO">
+		select
+		grp_code,grp_title from tc_code_grp
+	</select>
+	<update id="createSys" parameterType="codeSysDTO">
+		insert into tc_code_sys(
+		sys_code,
+		sys_title,
+		grp_code,
+		use_yn,
+		create_date,
+		create_user_id,
+		update_date,
+		update_user_id
+		)
+		values (
+		#{sys_code},
+		#{sys_title},
+		#{grp_code},
+		#{use_yn},
+		sysdate,
+		#{create_user_id,jdbcType=VARCHAR},
+		sysdate,
+		#{update_user_id,jdbcType=VARCHAR}
+		)
+	</update>
+
+	<update id="updateSys" parameterType="hashMap">
+		update tc_code_sys
+		set
+		sys_title=#{sys_title},
+		grp_code=#{grp_code},
+		use_yn=#{use_yn}
+		where
+		sys_code=#{sys_code}
+	</update>
+
+	<delete id="dropSys" parameterType="hashMap">
+		delete from tc_code_sys
+		where
+		sys_code=#{sys_code}
+	</delete>
+	<update id="createGrp" parameterType="hashMap">
+		insert
+		into tc_code_grp
+		  (
+		    grp_code,
+		    grp_title,
+		    use_yn,
+		    create_date,
+		    create_user_id,
+		    update_date,
+		    update_user_id
+		  )
+		  values
+		  (
+		    #{grp_code},
+		    #{grp_title},
+		    #{use_yn},
+		    sysdate,
+		    #{create_user_id},
+		    sysdate,
+		    #{update_user_id}
+		  )
+
+	</update>
+
+	<update id="updateGrp" parameterType="hashMap">
+		update tc_code_sys
+		set
+		sys_title=#{sys_title},
+		grp_code=#{grp_code},
+		use_yn=#{use_yn}
+		where
+		sys_code=#{sys_code}
+	</update>
+
+	<delete id="dropGrp" parameterType="hashMap">
+		delete from tc_code_grp
+		where
+		grp_code=#{grp_code}
+	</delete>
+	<select id="detailGrp" parameterType="hashMap" resultType="codeGrpDTO">
+		select
+		grp_code, grp_title,
+		use_yn, create_date, create_user_id, update_date,
+		update_user_id
+		from
+		tc_code_grp
+		where
+		grp_code=#{grp_code}
+	</select>
+	<select id="detailSys" parameterType="hashMap" resultType="codeSysDTO">
+		select
+		sys_code, sys_title, grp_code, use_yn, create_date,
+		create_user_id,update_date,
+		update_user_id
+		from 
+		tc_code_sys
+		where
+		sys_code=#{sys_code}
+	</select>
+</mapper>

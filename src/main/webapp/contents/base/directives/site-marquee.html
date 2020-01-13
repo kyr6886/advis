@@ -1,0 +1,9 @@
+<div>
+	<table>
+		<tr>
+			<td ng-repeat="item in siteMarquee">
+				<a href="#" ng-click="fnOnClickGoMarquee({{item.site_url}});"><img ng-show="item.fileInfo!=null" ng-src="{{item.fileInfo.imgBase64}}" style="width:90px;height:50px;"/></a>
+			</td>
+		</tr>
+	</table>
+</div>

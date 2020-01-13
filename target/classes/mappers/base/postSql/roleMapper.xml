@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="role">
+<select id="list" parameterType="hashMap" resultType="roleDTO">
+		<![CDATA[
+		select  
+		 role_id
+		,role_title
+		from 
+		tc_role
+		]]>
+	</select>
+	<update id="create" parameterType="hashMap">
+		<![CDATA[
+		insert into tc_role
+		(
+		 role_id
+		,role_title
+		)
+		values
+		(
+		 #{role_id}
+		,#{role_title}
+		)
+		]]>
+	</update>
+	<delete id="drop" parameterType="hashMap">
+		<![CDATA[
+		delete from tc_role
+		where role_id=#{role_id}
+		]]>
+	</delete>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ocrPrg">
+	<select id="list" parameterType="hashmap" resultType="uniOcrDto">
+		select u_id,u_seq,u_name,c_u_name,u_status from ocr.tb_uni
+		order by u_id,u_seq
+	</select>
+	<select id="detail" parameterType="hashmap" resultType="sbjRptOcrDto">
+		select sbj_seq,rpt_seq,sbj_nm,sbj_cont from ocr.sbj_rpt_ocr 
+		where rpt_seq in(
+			select rpt_seq from ocr.prt_ocr where rpt_nm like concat('%','NZq6ITZM5jtgUe52RvEJgwBuNO6n9J4C_1_12.20일 대설 대처상황 보고(23시)001.jpg','%')
+		)
+		
+	</select>
+	<select id="create" parameterType="hashmap" resultType="uniOcrDto">
+		insert into ocr.tb_uni values
+		(
+			 #{u_id}
+			,#{u_seq}
+			,#{u_name}
+			,#{c_u_name}
+			,#{u_status}
+		)
+	</select>
+	<select id="maxOcrUniInfo" parameterType="hashmap" resultType="uniOcrDto">
+		select max(u_id) u_id,max(u_seq) u_se from ocr.tb_uni
+		where u_id =#{u_id}
+	</select>
+	<select id="delete" parameterType="hashmap" resultType="sbjRptOcrDto">
+		
+	</select>
+</mapper>

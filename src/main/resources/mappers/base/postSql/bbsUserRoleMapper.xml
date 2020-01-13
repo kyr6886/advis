@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bbsUserRole">
+	<select id="detail" parameterType="hashMap" resultType="bbsUserRoleDTO">
+		select
+			user_id,
+			role_id,
+			bbs_id
+		from
+		tb_user_role
+		where
+		bbs_id=#{bbs_id}
+		and
+		user_id=#{user_id} 
+	</select>
+	<insert id="create" parameterType="bbsUserRoleDTO">
+	INSERT INTO tb_bbs_user_role(
+            user_id, role_id)
+    VALUES (#{user_id},#{role_id});
+	
+	</insert>
+</mapper>

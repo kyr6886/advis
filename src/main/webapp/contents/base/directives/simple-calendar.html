@@ -1,0 +1,51 @@
+<div>
+				<div class="main-calendar-header">
+					<strong class="data">{{nowYear}}.{{nowMonth}}</strong>
+					<button class="prev" ng-click="prevMonth()"><img src="/ndmi/contents-dsi/img/common/btn_calenderprev.png" alt=""></button>
+					<button class="next" ng-click="nextMonth()"><img src="/ndmi/contents-dsi/img/common/btn_calendernext.png" alt=""></button>
+				</div>
+				<div class="main-calendar-body">
+					<table summary="예약 가능 달력">
+						<caption>달력</caption>
+						<colgroup>
+							<col width="14.2%">
+							<col width="14.2%">
+							<col width="14.2%">
+							<col width="14.2%">
+							<col width="14.2%">
+							<col width="14.2%">
+							<col width="14.2%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th scope="row" class="sun">SUN</th>
+								<th scope="row">MON</th>
+								<th scope="row">TUE</th>
+								<th scope="row">WED</th>
+								<th scope="row">THU</th>
+								<th scope="row">FRI</th>
+								<th scope="row" class="sat">SAT</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="n in week">
+								<td ng-repeat="item in weekOfDay">
+									<span ng-repeat="iDay in days" ng-if="iDay.week==n && iDay.day==item">
+									<button class="schedule today"  ng-if="iDay.hasSchedule">{{iDay.date}}</button>
+									
+									<span ng-if="!iDay.hasSchedule && !iDay.isToday">{{iDay.date}}</span>
+									</span>
+								</td>
+							</tr>
+							<tr ng-if="maxRow==6">
+							<td ng-repeat="item in weekOfDay">
+									<span ng-repeat="iDay in days" ng-if="iDay.week==maxRow && iDay.day==item">
+										<button class="schedule" ng-if="iDay.hasSchedule">{{iDay.date}}</button>
+										<span ng-if="!iDay.hasSchedule">{{iDay.date}}</span>
+									</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>

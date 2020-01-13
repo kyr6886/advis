@@ -1,0 +1,127 @@
+
+<div class="page-title">
+	<div class="title_left">
+		<h3>관련사이트 관리</h3>
+	</div>
+	
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row" id="manageEventCtrl">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<div class="col-md-9 col-sm-9 col-xs-10 ">
+				<h5>
+					관련사이트 추가 <small> 관련사이트를 추가 합니다.</small>
+				</h5>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-2 ">
+				<ul class="nav pull-right panel_toolbox">
+				
+					<li><a class="close-link" ng-click="fnClickHideForm()"><i class="fa fa-close"></i></a></li>
+				</ul>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<div class="x_content">
+				<form method="post" enctype="multipart/form-data" action="" name="site" class="form-horizontal form-label-left input_mask">
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">URL : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" placeholder="URL 입력" name="detail.site_url" ng-model="detail.site_url"> 
+							<span style="color:#f08080"	class="fa fa-credit-card form-control-feedback left" aria-hidden="true"> </span>
+							<input type="hidden" name="detail.siteUrlBefore" value="{{detail.siteUrlBefore}}"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">웹사이트명 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" placeholder="웹사이트 제목 입력" name="detail.site_title" ng-model="detail.site_title"> 
+							<span style="color:#f08080"	class="fa fa-credit-card form-control-feedback left" aria-hidden="true"> </span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">첨부파일 : </label>
+						<div class="ng-scope ng-hide" ng-show="isEnableUpdate && detail.file_grp_id!=null">
+							<a href="" class="ng-binding">{{detail.fileInfo.file_org_name}}</a>
+							<button type="button" ng-click="fnOnClickDeleteFile(detail.site_url,detail.file_grp_id)" class="btn btn-danger btn-xs btn-danger">
+								<i class="fa fa-trash-o"></i> 삭제
+							</button>
+						</div>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="file" class="form-control has-feedback-left" name="uploadFiles"> 
+							<span style="color:#f08080"	class="fa fa-credit-card form-control-feedback left" aria-hidden="true"> </span>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<button type="button" class="btn btn-primary pull-right" ng-click="fnClickHideForm()">취소</button>
+							<button type="button" class="btn btn-success pull-right" ng-show="!isEnableUpdate" ng-click="fnOnCreateAction()">저장</button>
+							<button type="button" class="btn btn-success pull-right" ng-show="isEnableUpdate" ng-click="fnOnUpdateAction()">수정</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<div class="row" ng-init="fnSiteInit()">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+
+
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>관련사이트 목록  <small> 관련사이트를 관리 합니다.</small></h5>
+
+			</div>
+
+			<div class="x_content">
+				<div class="row">
+					<button type="button" ng-click="fnClickBtnShowCreateForm()"
+						class="btn btn-primary btn-xs btn-info pull-right m-right-10">
+						<i class="fa fa-pencil"></i> 관련사이트 추가
+					</button>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-striped jambo_table bulk_action">
+						<thead>
+							<tr class="headings">
+								
+								<th class="column-title">번호</th>
+								<th class="column-title">사이트명</th>
+								<th class="column-title">URL</th>
+								<th class="column-title">배너이미지</th>
+								<th class="column-title">삭제</th>
+								<th class="column-title">사용여부</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="item in siteList">
+								<td>{{$index+1}}</td>
+								<td><a href="" ng-click="fnOnClickUpdate(item)">{{item.site_title}}</a></td>
+								<td>{{item.site_url}}</td>
+								<td><img ng-show="item.fileInfo!=null" ng-src="{{item.fileInfo.imgBase64}}" style="width:125px;height:25px;"/></td>
+								<td>
+									<button type="button" class="btn btn-primary btn-xs " ng-click="fnOnDropction(item.site_url)">
+										<i class="fa fa-pencil"></i> 삭제
+									</button>
+								</td>
+								<td>
+									<div class="btn-group  btn-group-xs">
+			                        	<button class="btn btn-default" ng-class="{'btn-info':item.use_yn=='Y'}" type="button" ng-click="fnClickUseYn(item,'Y')">&nbsp; 사용&nbsp;</button>
+			                        	<button class="btn btn-default" ng-class="{'btn-danger':item.use_yn=='N'}" type="button" ng-click="fnClickUseYn(item,'N')">미사용</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<div class="clearfix"></div>

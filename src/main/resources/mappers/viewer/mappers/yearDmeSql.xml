@@ -1,0 +1,1405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDme">
+<select id="listSidoTot" parameterType="hashMap" resultType="yearDmeDto">
+	with main as(
+			select law_code,stn_id,tm,rn_day,rn_10m_max,rn_60m_max from (
+			select 
+			substring(law_code,1,5) law_code
+			, stn_id
+			, tm
+			, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+			, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_10m_max / 10 end) rn_10m_max
+			, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+			from tb_obs_tsen asos 
+			left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+			where law_area in ('Y')
+			and tm  <![CDATA[>=]]> #{beg_date} and tm <![CDATA[<=]]> #{end_date}
+			and law_code like concat(#{law_code},'%')
+			and rn_day is not null
+			) t1
+			<![CDATA[
+			where rn_day > 0
+			]]>
+	)
+	
+	select 
+	
+	code sigungu_code,
+	damage_code,
+	damage_info,
+	beg_date,
+	end_date,
+	sum(com_dme::numeric) com_dem,
+	sum(com_total) com_total,
+	sum(pub_total) pub_total,
+	sum(pri_total) pri_total,
+	round(sum(sumRain),1) rn_day,
+	round(sum(maxHourRain),1) rn_60m_max,
+	round(sum(maxMinuteRain),1) rn_10m_max
+	 from (	
+	select 
+	 t2.damage_code damage_code,
+	 t3.code,
+	 beg_date,
+	 end_date,
+	 damage_info,
+	(select sum(rn_day) from main where substring(law_code,1,2)=substring(code,1,2) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date) sumRain,
+	(select max(rn_60m_max) from main where substring(law_code,1,2)=substring(code,1,2) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date) maxHourRain,
+	(select max(rn_10m_max) from main where substring(law_code,1,2)=substring(code,1,2) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date) maxMinuteRain,
+	com_dme,
+	com_total,
+	pub_total,
+	pri_total 
+	from 
+	(
+	select 
+		
+		damage_code
+		,sigungu_code
+		,damage_info
+		,concat(beg_year,beg_month,beg_day) beg_date
+		,concat(end_year,end_month,end_day) end_date
+		,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+		from tb_year_dme t1  
+		where sigungu_code like concat(#{law_code},'%')
+		and concat(beg_year,beg_month,beg_day)<![CDATA[>=]]> #{beg_date} and concat(end_year,end_month,end_day) <![CDATA[<=]]> #{end_date}
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		group by damage_code,sigungu_code,concat(beg_year,beg_month,beg_day),concat(end_year,end_month,end_day),damage_info
+		
+	) t2
+	left join tb_year_area_code t3 on  t2.sigungu_code=t3.code
+	where t3.code_level='2'
+	) t4
+	where sumRain is not null
+	group by damage_code, code, beg_date, end_date,damage_info
+	order by beg_date, end_date
+	</select>	
+	
+	<select id="listGunguTot" parameterType="hashMap" resultType="yearDmeDto">
+	with main as(
+			select law_code,stn_id,tm,rn_day,rn_10m_max,rn_60m_max from (
+			select 
+			substring(law_code,1,5) law_code
+			, stn_id
+			, tm
+			, law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+			, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_10m_max / 10 end) rn_10m_max
+			, law_area_per::numeric * (case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+			from tb_obs_tsen asos 
+			left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+			where law_area in ('N', 'A')
+			and tm  <![CDATA[>=]]> #{beg_date} and tm <![CDATA[<=]]> #{end_date}
+			and law_code like concat(#{law_code},'%')
+			and rn_day is not null
+			) t1
+		
+	)
+	
+	select 
+	
+	code sigungu_code,
+	damage_code,
+	damage_info,
+	beg_date,
+	end_date,
+	sum(com_dme::numeric) com_dem,
+	sum(com_total) com_total,
+	sum(pub_total) pub_total,
+	sum(pri_total) pri_total,
+	round(sum(sumRain),1) rn_day,
+	round(sum(maxHourRain),1) rn_60m_max,
+	round(sum(maxMinuteRain),1) rn_10m_max
+	 from (	
+	select 
+	 t2.damage_code damage_code,
+	 t3.code,
+	 beg_date,
+	 end_date,
+	(select sum(rn_day) from main where substring(law_code,1,5)=substring(code,1,5) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date) sumRain,
+	(select max(rn_60m_max) from main where substring(law_code,1,5)=substring(code,1,5) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date) maxHourRain,
+	(select max(rn_10m_max) from main where substring(law_code,1,5)=substring(code,1,5) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date) maxMinuteRain,
+	com_dme,
+	com_total,
+	pub_total,
+	pri_total 
+	from 
+	(
+	select 
+		damage_code
+		,damage_info
+		,sigungu_code
+		,concat(beg_year,beg_month,beg_day) beg_date
+		,concat(end_year,end_month,end_day) end_date
+		,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+		from tb_year_dme t1  
+		where sigungu_code like concat(#{law_code},'%')
+		and concat(beg_year,beg_month,beg_day)<![CDATA[>=]]> #{beg_date} and concat(end_year,end_month,end_day) <![CDATA[<=]]> #{end_date}
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		group by damage_code,sigungu_code,concat(beg_year,beg_month,beg_day),concat(end_year,end_month,end_day),damage_info
+		
+	) t2
+	left join tb_year_area_code t3 on  t2.sigungu_code=t3.code
+	where t3.code_level='2'
+	) t4
+	where sumRain is not null
+	group by damage_code, code, beg_date, end_date,damage_info
+	order by beg_date, end_date
+    </select>
+
+
+	<select id="listDamageByYear" parameterType="hashMap" resultType="yearDmeDto">
+		select 
+		<if test="law_code != null">
+			 sigungu_code
+			, beg_year 
+		</if>
+		<if test="law_code == null">
+			concat(beg_year,beg_month,beg_day) beg_date
+			, concat(end_year,end_month,end_day) end_date
+		</if>		
+			, sum(com_1::numeric) com_1
+			, sum(com_2::numeric) com_2
+			, sum(com_3::numeric) com_3
+			, sum(cob_tot::numeric ) cob_tot
+			, sum(cos_tot::numeric ) cos_tot
+			, sum(cow_tot::numeric) cow_tot
+			, sum(cow_dme::numeric) cow_tot
+			, sum(pra_tot::numeric) pra_tot
+			, sum(prb_tot::numeric) prb_tot
+			, sum(prc_tot::numeric) prc_tot
+			, sum(prd_tot::numeric) prd_tot
+			, sum(pre_tot::numeric) pra_tot
+			, sum(prf_tot::numeric) prf_tot
+			, sum(prg_tot::numeric) prg_tot
+			, sum(etc_tot::numeric) etc_tot
+			, sum(pba_tot::numeric) pba_tot
+			, sum(pbb_tot::numeric) pbb_tot
+			, sum(pbr_tot::numeric) pbr_tot
+			, sum(pbc_tot::numeric) pbc_tot
+			, sum(pbf_tot::numeric) pbf_tot
+			, sum(pbg_tot::numeric) pbg_tot
+			, sum(pbh_tot::numeric) pbh_tot
+			, sum(pbi_tot::numeric) pbi_tot
+			, sum(pbj_tot::numeric) pbj_tot
+			, sum(pbk_tot::numeric) pbk_tot
+			, sum(pbl_tot::numeric) pbl_tot
+			, sum(pbm_tot::numeric) pbm_tot
+			, sum(pbn_tot::numeric) pbn_tot
+			, sum(pbo_tot::numeric) pbo_tot
+		,( sum(com_1::numeric) + sum(com_2::numeric)  ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+	from tb_year_dme
+	where concat(beg_year,beg_month,beg_day)<![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+	<if test="law_code != null">
+	and sigungu_code like concat(#{law_code}, '%')
+	group by sigungu_code, beg_year
+	order by beg_year
+	</if>
+	<if test="law_code == null">
+	group by concat(beg_year,beg_month,beg_day), concat(end_year,end_month,end_day)
+	</if>
+	</select>
+	
+	
+	<select id="damageItemSum" parameterType="hashMap" resultType="yearDmeDto">
+		select 
+		<if test="law_code != null">
+			sigungu_code
+		</if>
+		<if test="law_code == null">
+			
+			concat(beg_year,beg_month) beg_date
+			, concat(end_year,end_month) end_date
+			
+		</if>
+			, sum(cob_tot::numeric ) cob_tot
+			, sum(cos_tot::numeric ) cos_tot
+			, sum(cow_tot::numeric) cow_tot
+			, sum(cow_dme::numeric) cow_tot
+			, sum(pra_tot::numeric) pra_tot
+			, sum(prb_tot::numeric) prb_tot
+			, sum(prc_tot::numeric) prc_tot
+			, sum(prd_tot::numeric) prd_tot
+			, sum(pre_tot::numeric) pra_tot
+			, sum(prf_tot::numeric) prf_tot
+			, sum(prg_tot::numeric) prg_tot
+			, sum(etc_tot::numeric) etc_tot
+			, sum(pba_tot::numeric) pba_tot
+			, sum(pbb_tot::numeric) pbb_tot
+			, sum(pbr_tot::numeric) pbr_tot
+			, sum(pbc_tot::numeric) pbc_tot
+			, sum(pbf_tot::numeric) pbf_tot
+			, sum(pbg_tot::numeric) pbg_tot
+			, sum(pbh_tot::numeric) pbh_tot
+			, sum(pbi_tot::numeric) pbi_tot
+			, sum(pbj_tot::numeric) pbj_tot
+			, sum(pbk_tot::numeric) pbk_tot
+			, sum(pbl_tot::numeric) pbl_tot
+			, sum(pbm_tot::numeric) pbm_tot
+			, sum(pbn_tot::numeric) pbn_tot
+			, sum(pbo_tot::numeric) pbo_tot
+			, sum(com_1::numeric) com_1
+			, sum(com_2::numeric) com_2
+			, sum(com_3::numeric) com_3
+			, (sum(com_1::numeric) +  sum(com_2::numeric)) com_dme
+			
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+	from tb_year_dme
+	where concat(beg_year,beg_month,beg_day)<![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		<if test="damage_code">
+			and damage_code=#{damage_code}
+		</if>
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		<if test="damage_codes!=null">
+			and damage_code in
+			<foreach collection="damage_codes" item="item" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	<if test="law_code != null">
+	and sigungu_code like concat(#{law_code}, '%')
+	group by sigungu_code
+	</if>
+	
+	
+	<if test="law_code == null">
+	group by concat(beg_year,beg_month), concat(end_year,end_month)
+	</if>
+	</select>
+	
+	<select id="listSidoTotalTot" parameterType="hashMap" resultType="yearDmeDto">
+		select
+     		 sigungu_code
+      		, beg_year
+      		, sum( cob_tot + cos_tot + cow_tot + pra_tot + prb_tot + prc_tot + prd_tot + pre_tot + prf_tot + prg_tot) pri_total
+     	 	, sum( pba_tot + pbb_tot + pbr_tot + pbc_tot + pbg_tot + pbh_tot + pbi_tot + pbj_tot + pbk_tot + pbl_tot + pbm_tot + pbn_tot + pbo_tot) pub_total
+		from (
+		select 
+				sigungu_code
+				, beg_year 
+				, sum(cob_tot::numeric ) cob_tot
+				, sum(cos_tot::numeric ) cos_tot
+				, sum(cow_tot::numeric) cow_tot
+				, sum(cow_dme::numeric) coa_dme
+				, sum(pra_tot::numeric) pra_tot
+				, sum(prb_tot::numeric) prb_tot
+				, sum(prc_tot::numeric) prc_tot
+				, sum(prd_tot::numeric) prd_tot
+				, sum(pre_tot::numeric) pre_tot
+				, sum(prf_tot::numeric) prf_tot
+				, sum(prg_tot::numeric) prg_tot
+				, sum(etc_tot::numeric) etc_2_tot
+				, sum(etc_tot::numeric) etc_3_tot
+				, sum(pba_tot::numeric) pba_tot
+				, sum(pbb_tot::numeric) pbb_tot
+				, sum(pbr_tot::numeric) pbr_tot
+				, sum(pbc_tot::numeric) pbc_tot
+				, sum(pbf_tot::numeric) pbf_tot
+				, sum(pbg_tot::numeric) pbg_tot
+				, sum(pbh_tot::numeric) pbh_tot
+				, sum(pbi_tot::numeric) pbi_tot
+				, sum(pbj_tot::numeric) pbj_tot
+				, sum(pbk_tot::numeric) pbk_tot
+				, sum(pbl_tot::numeric) pbl_tot
+				, sum(pbm_tot::numeric) pbm_tot
+				, sum(pbn_tot::numeric) pbn_tot
+				, sum(pbo_tot::numeric) pbo_tot
+			from tb_year_dme
+			where beg_year <![CDATA[>=]]> #{beg_date} and beg_year <![CDATA[<=]]> #{end_date}
+			and sigungu_code like concat(#{law_code}, '%')
+			group by sigungu_code, beg_year
+		) rs 
+		group by  sigungu_code , beg_year
+		order by beg_year
+	</select>
+	
+	<select id="listComDmeGunguTop10" parameterType="hashMap" resultType="yearDmeDto">
+	
+select 
+		damage_code,
+		damage_name,
+		damage_info,
+        sigungu_code,
+		sido,
+		sigungu, 
+		beg_date,
+		end_date,
+		rn_day,
+        rn_60m_max,
+        total_com_dme,
+		com_dme,
+		total_damage
+	from
+	(
+	select 
+		damage_code,
+		damage_info,
+		dmeCode.code_name damage_name,
+		t3.code sigungu_code,
+		t3.sido sido,
+		t3.sigungu sigungu, 
+		beg_date,
+		end_date,
+		(select trunc(max(rn_day),0) from (select 	
+			law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('N', 'A')
+				and substring(law_code,1,5)=substring(t3.code,1,5) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date
+			) rs
+		) rn_day,
+		(select trunc(max(rn_60m_max),0) from (select 	
+			(case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('N', 'A')
+				and substring(law_code,1,5)=substring(t3.code,1,5) and tm <![CDATA[>=]]> beg_date and tm  <![CDATA[<=]]> end_date
+			) rs
+		) rn_60m_max,
+		t4.total_com_dme,
+		 com_dme,
+		(com_total+pub_total+pri_total) total_damage 
+	from 
+	(
+	select 
+		damage_code
+		, com_dme
+		, sido_code
+		, sigungu_code
+		, beg_date
+		, end_date
+		, com_total
+		, pub_total
+		, pri_total
+		,damage_info
+	from 
+		(
+		select 
+		damage_code
+		,damage_info
+		,( sum(com_1::numeric) + sum(com_2::numeric) )com_dme
+		,sido_code
+		,sigungu_code
+		,concat(beg_year,beg_month,beg_day) beg_date
+		,concat(end_year,end_month,end_day) end_date
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+		from tb_year_dme t1  
+		where concat(beg_year,beg_month,beg_day) <![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		<if test="damage_code != null">
+		and damage_code =#{damage_code}
+		</if>
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		<if test="law_code != null">
+		and sigungu_code =#{law_code}
+		</if>
+		group by damage_code,sido_code,sigungu_code,beg_year,beg_month,beg_day,end_year,end_month,end_day,damage_info
+		) rs
+		order by rs.com_dme desc
+		limit 10
+	) t2
+	left join tb_year_area_code t3 on  t2.sigungu_code=t3.code
+	left join tb_year_dme_code dmeCode on t2.damage_code=dmeCode.code
+	left join (select sigungu_code, sum(com_1::numeric + com_2::numeric) total_com_dme 
+	from tb_year_dme 
+	where concat(beg_year,beg_month,beg_day)  <![CDATA[>=]]> '19850101' and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+	<if test="damage_code != null">
+	and damage_code =#{damage_code}
+	</if>
+	<if test="law_code != null">
+	and sigungu_code =#{law_code}
+	</if>
+	<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+	</if>
+	group by sigungu_code) t4 on t2.sigungu_code = t4.sigungu_code 
+	where t3.code_level='2'
+	) rs 
+	order by rs.com_dme desc, rs.total_com_dme desc
+	
+	
+	</select>
+	
+	
+	<select id="listComDmeRainSidoJoinByGungu" parameterType="hashMap" resultType="yearDmeDto">
+		select 
+        sigungu_code,
+        damage_info,
+		beg_date,
+		end_date,
+		rn_day,
+        rn_60m_max
+	from
+	(
+	select 
+		t3.code sigungu_code,
+		beg_date,
+		end_date,
+		damage_info,
+		(select trunc(max(rn_day),0) from (select 	
+			law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('Y')
+				and substring(law_code,1,2)=substring(t3.code,1,2) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date
+			) rs
+		) rn_day,
+		(select trunc(max(rn_60m_max),0) from (select 	
+			(case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('Y')
+				and substring(law_code,1,2)=substring(t3.code,1,2) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date
+			) rs
+		) rn_60m_max
+	from 
+	(
+	select 
+		damage_code
+		,damage_info
+		, com_dme
+		, sido_code
+		, sigungu_code
+		, beg_date
+		, end_date
+		, com_total
+		, pub_total
+		, pri_total
+	from 
+		(
+		select 
+		damage_code
+		,damage_info
+		,sum(com_1::numeric + com_2::numeric) com_dme
+		,sido_code
+		,sigungu_code
+		,concat(beg_year,beg_month,beg_day) beg_date
+		,concat(end_year,end_month,end_day) end_date
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+		from tb_year_dme t1  
+		where concat(beg_year,beg_month,beg_day) <![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		<if test="damage_code != null">
+		and damage_code =#{damage_code}
+		</if>
+		<if test="law_code != null">
+		and sigungu_code =#{damage_code}
+		</if>
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		group by damage_code,sido_code,sigungu_code,beg_year,beg_month,beg_day,end_year,end_month,end_day,damage_info
+		) rs
+		order by rs.com_dme desc
+		limit 10
+	) t2
+	left join tb_year_area_code t3 on  t2.sigungu_code=t3.code
+	left join (select sigungu_code, sum(com_dme::numeric) total_com_dme from tb_year_dme
+	where concat(beg_year,beg_month,beg_day)  <![CDATA[>=]]> '1985' and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+	<if test="damage_code != null">
+	and damage_code =#{damage_code}
+	</if>
+	<if test="law_code != null">
+	and sigungu_code =#{law_code}
+	</if>
+	<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+	group by sigungu_code) t4 on t2.sigungu_code = t4.sigungu_code 
+	where t3.code_level='2'
+	) rs 
+	where rs.rn_day is not null
+	</select>
+	
+	<select id="listTotalDmeGunguTop10" parameterType="hashMap" resultType="yearDmeDto">
+	
+	select 
+		damage_code
+		,damage_info
+		,damage_name
+        ,sigungu_code
+		,sido
+		,sigungu 
+		,beg_date
+		,end_date
+	    , cob_tot
+		, cos_tot
+		, cof_tot
+		, cow_tot
+		, pba_tot
+		, pbb_tot
+		, pbc_tot
+		, pbd_tot
+		, pbf_tot
+		, pbg_tot
+		, pbh_tot
+		, pbi_tot
+		, pbj_tot
+		, pbk_tot
+		, pbl_tot
+		, pbm_tot
+		, pra_tot
+		, prb_tot
+		, prc_tot
+		, prd_tot
+		, pre_tot
+		, prf_tot
+		, prg_tot
+		, etc_tot
+		,rn_day
+        ,rn_60m_max
+		,com_dme
+		,total_damage
+		,all_total_damage
+	from
+	(
+	select 
+		damage_code
+		,dmeCode.code_name damage_name
+		,t3.code sigungu_code
+		,t3.sido sido
+		,t3.sigungu sigungu 
+		,damage_info
+		,beg_date
+		,end_date
+		,(select trunc(max(rn_day),0) from (select 	
+			law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('N', 'A')
+				and substring(law_code,1,5)=substring(t3.code,1,5) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date
+			) rs
+		) rn_day
+		,(select trunc(max(rn_60m_max),0) from (select 	
+			(case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('N', 'A')
+				and substring(law_code,1,5)=substring(t3.code,1,5) and tm <![CDATA[>=]]> beg_date and tm <![CDATA[<=]]> end_date
+			) rs
+		) rn_60m_max
+		, cob_tot
+		, cos_tot
+		, cof_tot
+		, cow_tot
+		, pba_tot
+		, pbb_tot
+		, pbc_tot
+		, pbd_tot
+		, pbf_tot
+		, pbg_tot
+		, pbh_tot
+		, pbi_tot
+		, pbj_tot
+		, pbk_tot
+		, pbl_tot
+		, pbm_tot
+		, pra_tot
+		, prb_tot
+		, prc_tot
+		, prd_tot
+		, pre_tot
+		, prf_tot
+		, prg_tot
+		, etc_tot
+		, com_dme
+		, t2.total_damage total_damage
+		, t4.total_damage all_total_damage
+	from 
+	(
+	    select
+		   damage_code
+		   ,damage_info
+		   , com_dme
+		   , sido_code
+		   , sigungu_code
+		   , beg_date
+		   , end_date
+		   , cob_tot
+		   , cos_tot
+		   , cof_tot
+		   , cow_tot
+		   , pba_tot
+		   , pbb_tot
+		   , pbc_tot
+		   , pbd_tot
+		   , pbf_tot
+		   , pbg_tot
+		   , pbh_tot
+		   , pbi_tot
+		   , pbj_tot
+		   , pbk_tot
+		   , pbl_tot
+		   , pbm_tot
+		   , pra_tot
+		   , prb_tot
+		   , prc_tot
+		   , prd_tot
+		   , pre_tot
+		   , prf_tot
+		   , prg_tot
+		   , etc_tot
+		   , com_total
+		   , pub_total
+		   , pri_total
+		   , total_damage
+	    from(
+		select
+		   damage_code
+		   ,damage_info
+		   , com_dme
+		   , sido_code
+		   , sigungu_code
+		   , beg_date
+		   , end_date
+		   , cob_tot
+		   , cos_tot
+		   , cof_tot
+		   , cow_tot
+		   , pba_tot
+		   , pbb_tot
+		   , pbc_tot
+		   , pbd_tot
+		   , pbf_tot
+		   , pbg_tot
+		   , pbh_tot
+		   , pbi_tot
+		   , pbj_tot
+		   , pbk_tot
+		   , pbl_tot
+		   , pbm_tot
+		   , pra_tot
+		   , prb_tot
+		   , prc_tot
+		   , prd_tot
+		   , pre_tot
+		   , prf_tot
+		   , prg_tot
+		   , etc_tot
+		   , com_total
+		   , pub_total
+		   , pri_total
+		   , (com_total + pub_total + pri_total) total_damage
+		from (
+		
+			select 
+				damage_code
+				,damage_info
+				,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+				,sido_code
+				,sigungu_code
+				,concat(beg_year,beg_month,beg_day) beg_date
+				,concat(end_year,end_month,end_day) end_date
+				,sum(cob_tot::numeric) cob_tot
+				,sum(cos_tot::numeric) cos_tot
+				,sum(cof_tot::numeric) cof_tot
+				,sum(cow_tot::numeric) cow_tot
+				,sum(pba_tot::numeric) pba_tot
+				,sum(pbb_tot::numeric) pbb_tot
+				,sum(pbc_tot::numeric) pbc_tot
+				,sum(pbd_tot::numeric) pbd_tot
+				,sum(pbf_tot::numeric) pbf_tot
+				,sum(pbg_tot::numeric) pbg_tot
+				,sum(pbh_tot::numeric) pbh_tot
+				,sum(pbi_tot::numeric) pbi_tot
+				,sum(pbj_tot::numeric) pbj_tot
+				,sum(pbk_tot::numeric) pbk_tot
+				,sum(pbl_tot::numeric) pbl_tot
+				,sum(pbm_tot::numeric) pbm_tot
+				,sum(pra_tot::numeric) pra_tot
+				,sum(prb_tot::numeric) prb_tot
+				,sum(prc_tot::numeric) prc_tot
+				,sum(prd_tot::numeric) prd_tot
+				,sum(pre_tot::numeric) pre_tot
+				,sum(prf_tot::numeric) prf_tot
+				,sum(prg_tot::numeric) prg_tot
+				,sum(etc_tot::numeric) etc_tot
+				,(sum(cob_tot::numeric)+sum(cos_tot::numeric)+sum(cof_tot::numeric)+sum(cow_tot::numeric)) com_total
+				,(sum(pba_tot::numeric)+sum(pbb_tot::numeric)+sum(pbr_tot::numeric)+sum(pbc_tot::numeric)+sum(pbd_tot::numeric)+sum(pbf_tot::numeric)+sum(pbg_tot::numeric)+sum(pbh_tot::numeric)+sum(pbi_tot::numeric)+sum(pbj_tot::numeric)+sum(pbk_tot::numeric)+sum(pbl_tot::numeric)+sum(pbm_tot::numeric)+sum(pbn_tot::numeric)+sum(pbo_tot::numeric)) pub_total
+				,(sum(pra_tot::numeric)+sum(prb_tot::numeric)+sum(prc_tot::numeric)+sum(prd_tot::numeric)+sum(pre_tot::numeric)+sum(prf_tot::numeric)+sum(prg_tot::numeric)+sum(etc_tot::numeric)) pri_total
+		from tb_year_dme t1  
+		where 
+		concat(beg_year,beg_month,beg_day) <![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		<if test="law_code != null">
+		and sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		group by damage_code,sido_code,sigungu_code,beg_year,beg_month,beg_day,end_year,end_month,end_day,damage_info
+		) ra
+	) na
+	where sigungu_code not like '99%'
+	order by na.total_damage desc
+	limit 10
+
+	) t2
+	left join tb_year_area_code t3 on  t2.sigungu_code=t3.code
+	left join tb_year_dme_code dmeCode on t2.damage_code=dmeCode.code
+	left join (
+		select sigungu_code , trunc((com_total + pub_total + pri_total),0) total_damage
+		from (
+			select sigungu_code
+				,(sum( cob_tot::numeric)+sum(cos_tot::numeric)+sum(cof_tot::numeric)+sum(cow_tot::numeric)) com_total
+				,(sum(pba_tot::numeric)+sum(pbb_tot::numeric)+sum(pbr_tot::numeric)+sum(pbc_tot::numeric)+sum(pbd_tot::numeric)+sum(pbf_tot::numeric)+sum(pbg_tot::numeric)+sum(pbh_tot::numeric)+sum(pbi_tot::numeric)+sum(pbj_tot::numeric)+sum(pbk_tot::numeric)+sum(pbl_tot::numeric)+sum(pbm_tot::numeric)+sum(pbn_tot::numeric)+sum(pbo_tot::numeric)) pub_total
+				,(sum(pra_tot::numeric)+sum(prb_tot::numeric)+sum(prc_tot::numeric)+sum(prd_tot::numeric)+sum(pre_tot::numeric)+sum(prf_tot::numeric)+sum(prg_tot::numeric)+sum(etc_tot::numeric)) pri_total
+		from tb_year_dme
+		where concat(beg_year,beg_month,beg_day)  <![CDATA[>=]]> '1985' and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		<if test="law_code != null">
+		and sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+	        group by sigungu_code 
+
+	    ) nf
+	    ) t4 on t2.sigungu_code=t4.sigungu_code
+	
+	where t3.code_level='2'
+	) rs 
+	order by rs.total_damage desc
+	
+	</select>
+	
+	<select id="listTotalDmeRainSidoJoinByGungu" parameterType="hashMap" resultType="yearDmeDto">
+
+	select 
+		damage_code,
+		damage_info,
+		damage_name,
+        sigungu_code,
+		sido,
+		sigungu, 
+		beg_date,
+		end_date,
+		rn_day,
+        rn_60m_max,
+		total_damage,
+		all_total_damage
+	from
+	(
+	select 
+		damage_code,
+		dmeCode.code_name damage_name
+		,damage_info,
+		t3.code sigungu_code,
+		t3.sido sido,
+		t3.sigungu sigungu, 
+		beg_date,
+		end_date,
+		(select trunc(max(rn_day),0) from (select 	
+			law_area_per::numeric * (case when rn_day is null then 0 else rn_day / 10 end) rn_day
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('Y')
+				and substring(law_code,1,2)=substring(t3.code,1,2) and tm <![CDATA[>=]]>  beg_date and tm  <![CDATA[<=]]> end_date
+			) rs
+		) rn_day
+		,(select trunc(max(rn_60m_max),0) from (select 	
+			(case when rn_60m_max is null then 0 else rn_60m_max / 10 end) rn_60m_max
+				from tb_obs_tsen asos 
+				left outer join tb_obs_asos tsen on asos.obs_id = tsen.stn_id::character varying
+				where law_area in('Y')
+				and substring(law_code,1,2)=substring(t3.code,1,2) and tm <![CDATA[>=]]>  beg_date and tm  <![CDATA[<=]]> end_date
+			) rs
+		) rn_60m_max,
+		com_dme,
+		t2.total_damage total_damage,
+		t4.total_damage all_total_damage
+	from 
+	(
+	    select
+		   damage_code
+		   ,damage_info
+		   , com_dme
+		   , sido_code
+		   , sigungu_code
+		   , beg_date
+		   , end_date
+		   , com_total
+		   , pub_total
+		   , pri_total
+		   , total_damage
+	    from(
+		select
+		   damage_code
+		   ,damage_info
+		   , com_dme
+		   , sido_code
+		   , sigungu_code
+		   , beg_date
+		   , end_date
+		   , com_total
+		   , pub_total
+		   , pri_total
+		   , (com_total + pub_total + pri_total) total_damage
+		from (
+		
+			select 
+				damage_code
+				,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+				,sido_code
+				,sigungu_code
+				, damage_info
+				,concat(beg_year,beg_month,beg_day) beg_date
+				,concat(end_year,end_month,end_day) end_date
+				,(sum(cob_tot::numeric)+sum(cos_tot::numeric)+sum(cof_tot::numeric)+sum(cow_tot::numeric)) com_total
+				,(sum(pba_tot::numeric)+sum(pbb_tot::numeric)+sum(pbr_tot::numeric)+sum(pbc_tot::numeric)+sum(pbd_tot::numeric)+sum(pbf_tot::numeric)+sum(pbg_tot::numeric)+sum(pbh_tot::numeric)+sum(pbi_tot::numeric)+sum(pbj_tot::numeric)+sum(pbk_tot::numeric)+sum(pbl_tot::numeric)+sum(pbm_tot::numeric)+sum(pbn_tot::numeric)+sum(pbo_tot::numeric)) pub_total
+				,(sum(pra_tot::numeric)+sum(prb_tot::numeric)+sum(prc_tot::numeric)+sum(prd_tot::numeric)+sum(pre_tot::numeric)+sum(prf_tot::numeric)+sum(prg_tot::numeric)+sum(etc_tot::numeric)) pri_total
+		from tb_year_dme t1  
+		where 
+		concat(beg_year,beg_month,beg_day)  <![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		group by damage_code,sido_code,sigungu_code,beg_year,beg_month,beg_day,end_year,end_month,end_day,damage_info
+		) ra
+	) na
+	where sigungu_code not like '99%'
+	order by na.total_damage desc
+	limit 10
+
+	) t2
+	left join tb_year_area_code t3 on  t2.sigungu_code=t3.code
+	left join tb_year_dme_code dmeCode on t2.damage_code=dmeCode.code
+	left join (
+		select sigungu_code , trunc((com_total + pub_total + pri_total),0) total_damage
+		from (
+			select sigungu_code
+				,(sum( cob_tot::numeric)+sum(cos_tot::numeric)+sum(cof_tot::numeric)+sum(cow_tot::numeric)) com_total
+				,(sum(pba_tot::numeric)+sum(pbb_tot::numeric)+sum(pbr_tot::numeric)+sum(pbc_tot::numeric)+sum(pbd_tot::numeric)+sum(pbf_tot::numeric)+sum(pbg_tot::numeric)+sum(pbh_tot::numeric)+sum(pbi_tot::numeric)+sum(pbj_tot::numeric)+sum(pbk_tot::numeric)+sum(pbl_tot::numeric)+sum(pbm_tot::numeric)+sum(pbn_tot::numeric)+sum(pbo_tot::numeric)) pub_total
+				,(sum(pra_tot::numeric)+sum(prb_tot::numeric)+sum(prc_tot::numeric)+sum(prd_tot::numeric)+sum(pre_tot::numeric)+sum(prf_tot::numeric)+sum(prg_tot::numeric)+sum(etc_tot::numeric)) pri_total
+		from tb_year_dme
+		
+	        group by sigungu_code 
+
+	    ) nf
+	    ) t4 on t2.sigungu_code=t4.sigungu_code
+	
+	where t3.code_level='2'
+	) rs 
+	where rs.rn_day is not null
+	order by rs.total_damage desc
+	
+	</select>
+	
+	<select id="listTotalDmeChartByYear" parameterType="hashMap" resultType="yearDmeDto">
+	 select 
+		beg_year
+	    , sum(com_dme) com_dme
+		, sum(cob_tot) cob_tot
+		, sum(cos_tot) cos_tot
+		, sum(cof_tot) cof_tot
+		, sum(cow_tot) cow_tot
+		, sum(pba_tot) pba_tot
+		, sum(pbb_tot) pbb_tot
+		, sum(pbc_tot) pbc_tot
+		, sum(pbd_tot) pbd_tot
+		, sum(pbf_tot) pbf_tot
+		, sum(pbg_tot) pbg_tot
+		, sum(pbh_tot) pbh_tot
+		, sum(pbi_tot) pbi_tot
+		, sum(pbj_tot) pbj_tot
+		, sum(pbk_tot) pbk_tot
+		, sum(pbl_tot) pbl_tot
+		, sum(pbm_tot) pbm_tot
+		, sum(pra_tot) pra_tot
+		, sum(prb_tot) prb_tot
+		, sum(prc_tot) prc_tot
+		, sum(prd_tot) prd_tot
+		, sum(pre_tot) pre_tot
+		, sum(prf_tot) prf_tot
+		, sum(prg_tot) prg_tot
+		, sum(etc_tot) etc_tot
+		, sum(com_total + pub_total + pri_total) total_damage
+	from(	
+
+		  select 
+				damage_code
+				,sido_code
+				,sigungu_code sigungu_code
+				,beg_year beg_year
+				,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+				,sum(cob_tot::numeric) cob_tot
+				,sum(cos_tot::numeric) cos_tot
+				,sum(cof_tot::numeric) cof_tot
+				,sum(cow_tot::numeric) cow_tot
+				,sum(pba_tot::numeric) pba_tot
+				,sum(pbb_tot::numeric) pbb_tot
+				,sum(pbc_tot::numeric) pbc_tot
+				,sum(pbd_tot::numeric) pbd_tot
+				,sum(pbf_tot::numeric) pbf_tot
+				,sum(pbg_tot::numeric) pbg_tot
+				,sum(pbh_tot::numeric) pbh_tot
+				,sum(pbi_tot::numeric) pbi_tot
+				,sum(pbj_tot::numeric) pbj_tot
+				,sum(pbk_tot::numeric) pbk_tot
+				,sum(pbl_tot::numeric) pbl_tot
+				,sum(pbm_tot::numeric) pbm_tot
+				,sum(pra_tot::numeric) pra_tot
+				,sum(prb_tot::numeric) prb_tot
+				,sum(prc_tot::numeric) prc_tot
+				,sum(prd_tot::numeric) prd_tot
+				,sum(pre_tot::numeric) pre_tot
+				,sum(prf_tot::numeric) prf_tot
+				,sum(prg_tot::numeric) prg_tot
+				,sum(etc_tot::numeric) etc_tot
+				,(sum(cob_tot::numeric)+sum(cos_tot::numeric)+sum(cof_tot::numeric)+sum(cow_tot::numeric)) com_total
+				,(sum(pba_tot::numeric)+sum(pbb_tot::numeric)+sum(pbr_tot::numeric)+sum(pbc_tot::numeric)+sum(pbd_tot::numeric)+sum(pbf_tot::numeric)+sum(pbg_tot::numeric)+sum(pbh_tot::numeric)+sum(pbi_tot::numeric)+sum(pbj_tot::numeric)+sum(pbk_tot::numeric)+sum(pbl_tot::numeric)+sum(pbm_tot::numeric)+sum(pbn_tot::numeric)+sum(pbo_tot::numeric)) pub_total
+				,(sum(pra_tot::numeric)+sum(prb_tot::numeric)+sum(prc_tot::numeric)+sum(prd_tot::numeric)+sum(pre_tot::numeric)+sum(prf_tot::numeric)+sum(prg_tot::numeric)+sum(etc_tot::numeric)) pri_total
+		from tb_year_dme t1  
+		where 
+		concat(beg_year,beg_month,beg_day) <![CDATA[>=]]> #{beg_date} and concat(end_year,end_month,end_day) <![CDATA[<=]]> #{end_date}
+		group by damage_code,sido_code,sigungu_code,beg_year
+		order by com_dme desc
+		) rs
+		group by rs.beg_year
+		order by rs.beg_year
+	</select>
+	
+	<select id="listComDmeAndTotalDmeByYear" parameterType="hashMap" resultType="yearDmeDto">
+	select damage_code
+			, damage_name
+			,damage_info
+			, beg_date
+			, end_date
+			, com_dme
+			, total_damage
+	from (
+			select damage_code
+					,damage_info
+					, code.code_name damage_name
+					, beg_date
+					, end_date
+					, sum(com_dme) com_dme
+					, sum(com_total + pub_total + pri_total) total_damage
+			from(
+				select 
+					damage_code
+					,damage_info
+					,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+					, sido_code
+					, sigungu_code
+					, concat(beg_year,beg_month,beg_day) beg_date
+					, concat(end_year,end_month,end_day) end_date
+					, sum(cob_tot::numeric) cob_tot
+					, sum(cos_tot::numeric) cos_tot
+					, sum(cof_tot::numeric) cof_tot
+					, sum(cow_tot::numeric) cow_tot
+					, sum(pba_tot::numeric) pba_tot
+					, sum(pbb_tot::numeric) pbb_tot
+					, sum(pbc_tot::numeric) pbc_tot
+					, sum(pbd_tot::numeric) pbd_tot
+					, sum(pbf_tot::numeric) pbf_tot
+					, sum(pbg_tot::numeric) pbg_tot
+					, sum(pbh_tot::numeric) pbh_tot
+					, sum(pbi_tot::numeric) pbi_tot
+					, sum(pbj_tot::numeric) pbj_tot
+					, sum(pbk_tot::numeric) pbk_tot
+					, sum(pbl_tot::numeric) pbl_tot
+					, sum(pbm_tot::numeric) pbm_tot
+					, sum(pra_tot::numeric) pra_tot
+					, sum(prb_tot::numeric) prb_tot
+					, sum(prc_tot::numeric) prc_tot
+					, sum(prd_tot::numeric) prd_tot
+					, sum(pre_tot::numeric) pre_tot
+					, sum(prf_tot::numeric) prf_tot
+					, sum(prg_tot::numeric) prg_tot
+					, sum(etc_tot::numeric) etc_tot
+					, (sum(cob_tot::numeric)+sum(cos_tot::numeric) + sum(cof_tot::numeric)+sum(cow_tot::numeric)) com_total
+					, (sum(pba_tot::numeric)+sum(pbb_tot::numeric) + sum(pbr_tot::numeric)+sum(pbc_tot::numeric)+sum(pbd_tot::numeric)+sum(pbf_tot::numeric)+sum(pbg_tot::numeric)+sum(pbh_tot::numeric)+sum(pbi_tot::numeric)+sum(pbj_tot::numeric)+sum(pbk_tot::numeric)+sum(pbl_tot::numeric)+sum(pbm_tot::numeric)+sum(pbn_tot::numeric)+sum(pbo_tot::numeric)) pub_total
+					, (sum(pra_tot::numeric)+sum(prb_tot::numeric) + sum(prc_tot::numeric)+sum(prd_tot::numeric)+sum(pre_tot::numeric)+sum(prf_tot::numeric)+sum(prg_tot::numeric)+sum(etc_tot::numeric)) pri_total
+		from tb_year_dme t1  
+		where 1=1
+		<if test="beg_date != null">
+			and concat(beg_year,beg_month,beg_day) <![CDATA[>=]]> #{beg_date} and concat(beg_year,beg_month,beg_day) <![CDATA[<=]]> #{end_date}
+		</if>
+		<if test="law_code != null">
+		and sigungu_code like concat(#{law_code}, '%')
+		</if>
+		<if test="dme_code != null and dme_code != 'COM_DME' and  dme_code != 'TOT_DME'">
+		and damage_code = #{dme_code}
+		</if>
+		<if test="damage_info != null">
+		and damage_info like concat('%',#{damage_info}, '%')
+		</if>
+		group by damage_code,sido_code,sigungu_code,beg_year,beg_month,beg_day,end_year,end_month,end_day,damage_info
+		) ra
+		left outer join tb_year_dme_code code on ra.damage_code = code.code
+		group by  damage_code, code.code_name, beg_date, end_date,damage_info
+	) rs 
+	<if test="dme_code == 'COM_DME'">
+		order by com_dme desc
+	</if>
+	<if test="dme_code == 'TOT_DME'">
+		order by total_damage desc
+	</if>
+	</select>
+
+	<select id="listDisEachYearCount" parameterType="hashMap" resultType="yearDmeDto">
+		select 
+		 t2.code_name damage_name
+		,damage_code
+		,count(*) count
+		,max(t2.dis_category) dis_category
+		from tb_year_dme t1,tb_year_dme_code t2
+		where t1.damage_code=t2.code
+		<if test="begYear!=null">
+		and beg_year between #{begYear} and #{endYear}
+		</if>
+		group by damage_code,beg_year,t2.code_name
+	
+	</select>
+	<select id="listDisMonthlyCount" parameterType="hashMap" resultType="yearDmeDto">
+		select  code_name damage_name,damage_code,count(*) count,sum(com_dme) com_dme,sum(pub_total) pub_total,sum(pri_total) pri_total,max(dis_category) dis_category from (
+		select t2.code_name,damage_code,beg_month,beg_day,max(dis_category) dis_category
+		,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+		 from tb_year_dme t1,tb_year_dme_code t2
+		where t1.damage_code=t2.code
+		<if test="begYear!=null">
+		and beg_year between #{begYear} and #{endYear}
+		</if>
+		<if test="targetMonth!=null">
+		and beg_month in
+			<foreach collection="targetMonth" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		group by damage_code,beg_month,code_name,beg_day
+		) t3
+		group by code_name,damage_code
+	</select>
+
+	<select id="maxDisasterByMonth" parameterType="hashMap" resultType="yearDmeDto">
+		select  code_name damage_name,damage_code,beg_month,count(*) count from (
+		select t2.code_name,damage_code,beg_month,beg_day from tb_year_dme t1,tb_year_dme_code t2
+		where t1.damage_code=t2.code
+		and beg_month=#{targetMonth}
+		group by damage_code,beg_month,code_name,beg_day
+		) t3
+		group by code_name,damage_code,beg_month
+		order by count desc
+		limit 1
+	</select>
+	<select id="listAreaDamageSum" parameterType="hashMap" resultType="yearDmeDto">
+		with main as (
+			select substring(code,1,2) code,sido from tb_year_area_code
+			where code_level='1'
+		)
+		select main.sido,sido_code 
+		, (sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+
+		from tb_year_dme t1,tb_year_dme_code t2,main
+		where main.code=t1.sido_code 
+		and t1.damage_code=t2.code
+		and t2.dis_category =#{damageCategoryCode}
+		<if test="begYear!=null">
+		and t1.beg_year between #{begYear} and #{endYear}
+		</if>
+		group by t1.sido_code,main.sido
+		order by t1.sido_code
+			
+	</select>
+	
+	<select id="listTyphoonDmeList" parameterType="hashMap" resultType="yearDmeDto">
+		select
+			beg_year, beg_month, beg_day,
+			end_year, end_month, end_day,
+			concat(beg_year, beg_month, beg_day) beg_date,
+			concat(end_year, end_month, end_day) end_date
+		from
+			tb_year_dme
+		where
+			damage_code in ('HZD002', 'HZD007')
+			and damage_info like concat('%',#{typhoonName},'%')
+			
+		<if test="beg_date != null and end_date != null">
+			and (concat(beg_year, beg_month, beg_day) between #{beg_date} and #{end_date}
+			or concat(end_year, end_month, end_day) between #{beg_date} and #{end_date})
+		</if>
+		
+		group by
+			beg_year,
+			beg_month,
+			beg_day,
+			end_year,
+			end_month,
+			end_day
+		order by
+			beg_year,
+			beg_month,
+			beg_day,
+			end_year,
+			end_month,
+			end_day
+	</select>
+</mapper>

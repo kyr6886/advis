@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="disManualMapper">
+
+	<select id="listDisManual" parameterType="tbDisManualDto" resultType="tbDisManualDto">
+		select m.ctg_id, m.ctg_title, m.grp_code, m.sys_code, s.sys_title, m.manual_title, m.manual_contents, m.seq, m.use_yn
+		from(
+		select a.ctg_id, c.title as ctg_title, a.grp_code, a.sys_code, a.manual_title, a.manual_contents, a.seq, a.use_yn
+		from tb_dis_manual a, tc_dis_category c
+		where a.ctg_id = c.ctg_id
+		and c.depth = 1
+		and a.use_yn = 'Y'
+		and c.use_yn = 'Y'
+		<if test="ctg_id != null">
+		and a.ctg_id = #{ctg_id}
+		</if>
+		) m,
+		(
+		select grp_code, sys_code, sys_title
+		from tc_code_sys
+		where use_yn = 'Y'
+		and grp_code = 'MNA_CODE'
+		) s
+		where m.grp_code = s.grp_code
+		and m.sys_code = s.sys_code
+	</select>
+	
+	<update id="deleteDisManual" parameterType="tbDisManualDto">
+		update tb_dis_manual
+		set use_yn = 'N'
+		where seq = #{seq}
+	</update>
+	
+	<update id="insertDisManual" parameterType="tbDisManualDto">
+		INSERT INTO tb_dis_manual(
+            ctg_id, grp_code, sys_code, manual_title, manual_contents, seq, use_yn)
+    	VALUES (
+    		#{ctg_id},
+    		#{grp_code},
+    		#{sys_code},
+    		#{manual_title},
+    		#{manual_contents},
+    		nextval('tb_dis_manual_seq'),
+            'Y')
+	</update>
+	
+	<select id="selectListGroupByDisManual" parameterType="tbDisManualDto" resultType="tbDisManualDto">
+		select a.ctg_id, a.sys_code, b.sys_title, a.manual_title ,a.manual_contents
+		from tb_dis_manual a, tc_code_sys b
+		where a.sys_code = b.sys_code
+		and b.grp_code = 'MNA_CODE'
+		and a.use_yn = 'Y'
+		<if test="ctg_id != null">
+		and a.ctg_id = #{ctg_id}
+		</if>
+		
+		
+	</select>
+
+</mapper>

@@ -1,0 +1,189 @@
+
+<div class="page-title" ng-init="fnMngBBS()">
+	<div class="title_left">
+		<h3>게시판 관리</h3>
+	</div>
+	<div class="title_right">
+		<!-- <div
+			class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Search for...">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button">Go!</button>
+				</span>
+			</div>
+		</div> -->
+	</div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row ng-hide" ng-show="isShowBoardCreate">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<div class="col-md-9 col-sm-9 col-xs-10 ">
+				<h5>
+					게시판 추가 <small> 게시판을 추가 합니다.</small>
+				</h5>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-2 ">
+				<ul class="nav pull-right panel_toolbox">
+				
+					<li><a class="close-link" ng-click="fnClickHideForm()"><i class="fa fa-close"></i></a></li>
+				</ul>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<div class="x_content">
+				<form class="form-horizontal form-label-left input_mask">
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >아이디 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='selectedBoard.bbs_id'
+								 placeholder="아이디" ng-disabled="isEnableUpdate"> <span style="color:#f08080"
+								class="fa fa-credit-card form-control-feedback left" aria-hidden="true"> </span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">제목 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='selectedBoard.bbs_title'
+								 placeholder="제목"> <span style="color:#f08080"
+								class="fa fa-credit-card form-control-feedback left" aria-hidden="true"> </span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">리스트파일명 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='selectedBoard.bbs_list_view'
+								 placeholder="listView"> <span style="color:#f08080"
+								class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">작성파일명 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='selectedBoard.bbs_write_view'
+								 placeholder="createView"> <span style="color:#f08080"
+								class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">수정파일명 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='selectedBoard.bbs_update_view'
+								 placeholder="updateView"> <span style="color:#f08080"
+								class="fa fa-credit-card form-control-feedback left"  aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">읽기파일명 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='selectedBoard.bbs_read_view'
+								 placeholder="readView"> <span style="color:#f08080"
+								class="fa fa-credit-card form-control-feedback left "  aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">카테고리 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model='categoryTitle'
+								 placeholder="카테고리"> <span
+								class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>	
+					<div class="form-group">
+						<div class="col-md-12 col-sm-6 col-xs-12 form-group">
+							<label class="control-label col-md-1 col-sm-1 col-xs-12">읽기 권한 : </label>
+							<div class="col-md-9 col-sm-9 col-xs-12">
+								<label class="checkbox-inline" ng-repeat="item in listRoles">
+									<input type="checkbox"  value="{{item.role_id}}"  ng-checked="readRoleItem.indexOf(item.role_id) > -1" ng-click="toggleReadSelection(item.role_id)">{{item.role_title}}</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-6 col-xs-12 form-group">
+							<label class="control-label col-md-1 col-sm-1 col-xs-12">쓰기 권한 : </label>
+							<div class="col-md-9 col-sm-9 col-xs-12">
+								<label class="checkbox-inline" ng-repeat="item in listRoles">
+									<input type="checkbox"  value="{{item.role_id}}"  ng-checked="writeRoleItem.indexOf(item.role_id) > -1" ng-click="toggleWriteSelection(item.role_id)">{{item.role_title}}</label>
+							</div>
+						</div>
+					</div>
+						
+					<label class="control-label col-md-1 col-sm-1 col-xs-12">헤더 HTML</label>
+					<div class="col-md-12 col-sm-6 col-xs-12 form-group has-feedback">
+						<editor-form></editor-form>
+					</div>
+					<div class="col-md-12 col-sm-6 col-xs-12 form-group has-feedback">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12">사용 여부 선택 : </label>
+						<select ng-model='selectedBoard.use_yn'>
+							<option value="Y">Y</option>
+							<option value="N">N</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<button type="submit" class="btn btn-primary pull-right" ng-click="fnClickHideForm()">취소</button>
+							<button type="submit" class="btn btn-success pull-right" ng-show="!isEnableUpdate" ng-click="fnOnCreateAction()">저장</button>
+							<button type="submit" class="btn btn-success pull-right" ng-show="isEnableUpdate" ng-click="fnUpdateAction()">수정</button>
+						
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<div class="row" ng-init="fnMngBBS">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+
+
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>게시판 목록  <small> 게시판을 관리 합니다.</small></h5>
+
+			</div>
+
+			<div class="x_content">
+				<div class="row">
+					<button type="button" ng-click="fnClickBtnShowCreateForm()"
+						class="btn btn-primary btn-xs btn-info pull-right m-right-10">
+						<i class="fa fa-pencil"></i> 게시판 추가
+					</button>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-striped jambo_table bulk_action">
+						<thead>
+							<tr class="headings">
+								
+								<th class="column-title">번호</th>
+								<th class="column-title">아이디</th>
+								<th class="column-title">제목</th>
+								<th class="column-title">사용여부</th>
+								<th class="column-title">수정</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="item in listBBS">
+								<td>{{$index+1}}</td>
+								<td>{{item.bbs_id}}</td>
+								<td>{{item.bbs_title}}</td>
+								<td>{{item.use_yn}}</td>
+								<td>
+									<button type="button" ng-click="fnClickUpdate(item)" class="btn btn-primary btn-xs ">
+										<i class="fa fa-pencil"></i> 수정
+									</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<div class="clearfix"></div>

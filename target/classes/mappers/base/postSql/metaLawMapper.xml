@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="metaLaw">
+
+	<update id="createTable" parameterType="hashMap">
+		<![CDATA[
+			create table tc_law
+			  (
+			    law_code        varchar(10),
+			    law_sido        varchar(50),
+			    law_sigungu     varchar(50),
+			    law_dong        varchar(50),
+			    law_ri          varchar(50),
+			    code_create_day varchar(10),
+			    code_delete_day varchar(10),
+			    constraint tc_law_pk primary key (law_code)
+			  )
+		]]>
+	</update>
+
+	<update id="createIndex" parameterType="hashMap">
+		<![CDATA[
+			create index tc_law_idx_salary on tc_law
+			  (law_code,law_sido
+			  )
+		]]>
+	</update>
+
+ 	<select id="detail" parameterType="hashMap"  resultType="metaLawDTO">
+ 		<![CDATA[
+			select law_code ,
+			  law_sido ,
+			  law_sigungu ,
+			  law_dong ,
+			  law_ri ,
+			  code_create_day ,
+			  code_delete_day
+			from tc_law
+			where law_code=#{law_code}
+		]]>
+	</select>
+	
+	<select id="listBySido"  resultType="metaLawDTO">
+		<![CDATA[
+				select substr(law_code,1,2) law_code,
+				  law_sido,
+				  law_sigungu,
+				  law_dong,
+				  law_ri,
+				  code_create_day,
+				  code_delete_day
+				from tc_law
+				where code_delete_day   is null
+				and law_sido            is not null
+				and length(law_sigungu) = 0
+		        and length(law_dong) = 0
+		        and length(law_ri) = 0
+				order by law_code
+		]]>
+	</select>
+	<select id="listByGungu" parameterType="hashMap"  resultType="metaLawDTO">
+		<![CDATA[
+			select substr(law_code,1,5) law_code,
+			  law_sido,
+			  law_sigungu,
+			  law_dong,
+			  law_ri,
+			  code_create_day,
+			  code_delete_day
+			from tc_law
+			where code_delete_day   is null
+			and length(law_sigungu) > 0
+			and length(law_dong) = 0
+		    and length(law_ri) = 0
+			and substr(law_code,1,2) =#{law_code}
+			order by law_code
+		]]>
+	 </select>
+	 <select id="listByDong" parameterType="hashMap"  resultType="metaLawDTO">
+	 	<![CDATA[
+			select substr(law_code,1,7) law_code,
+			  law_sido,
+			  law_sigungu,
+			  law_dong,
+			  law_ri,
+			  code_create_day,
+			  code_delete_day
+			from tc_law
+			where code_delete_day   is null
+			and length(law_dong ) > 0
+			and length(law_ri) = 0
+			and substr(law_code,1,5) =#{law_code}
+			order by law_code
+		]]>
+	 </select>
+	 <select id="listByRi" parameterType="hashMap"  resultType="metaLawDTO">
+	 	<![CDATA[
+			select law_code,
+			  law_sido,
+			  law_sigungu,
+			  law_dong,
+			  law_ri,
+			  code_create_day,
+			  code_delete_day
+			from tc_law
+			where code_delete_day   is null
+			and length(law_ri ) > 0
+			and substr(law_code,1,8) =#{law_code}
+			order by law_code
+		]]>
+	 </select>
+</mapper>

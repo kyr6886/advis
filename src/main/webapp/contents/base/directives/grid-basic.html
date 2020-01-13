@@ -1,0 +1,30 @@
+<div>
+	<div>
+		<table style="width:{{dataSet.width}}px" class="hovertable fixed">
+			<col width="20px" />
+				<col width="30px" />
+				<col width="40px" />
+			<thead>
+				<tr>
+					<td ng-repeat="item in dataSet.column" style="width: 100px;">{{item.column}}</td>
+				</tr>
+			</thead>
+		</table>
+	</div>
+
+	<div style="width:{{dataSet.width+20}}px; height:600px;overflow-y:auto;">
+		<div  style="width:{{dataSet.width}}px">
+			<table style="width: {{dataSet.width}}px" class="hovertable fixed">
+				<col width="20px" />
+				<col width="30px" />
+				<col width="40px" />
+				<tbody>
+					<tr ng-repeat="item in dataSet.data">
+						<td ng-repeat="cols in dataSet.column" style="width: 100px;">
+							{{item[cols.column]}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

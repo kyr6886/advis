@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="yearDmeMapper">
+	
+	<select id="listDisEachYearCount" parameterType="hashMap" resultType="yearDmeDto">
+		select 
+		 t2.code_name damage_name
+		,damage_code
+		,count(*) count
+		,max(t2.dis_category) dis_category
+		from tb_year_dme t1,tb_year_dme_code t2
+		where t1.damage_code=t2.code
+		<if test="begYear!=null">
+		and beg_year between #{begYear} and #{endYear}
+		</if>
+		group by damage_code,beg_year,t2.code_name
+	
+	</select>
+	<select id="listDisMonthlyCount" parameterType="hashMap" resultType="yearDmeDto">
+		select  code_name damage_name,damage_code,count(*) count,sum(com_dme) com_dme,sum(pub_total) pub_total,sum(pri_total) pri_total,max(dis_category) dis_category from (
+		select t2.code_name,damage_code,beg_month,beg_day,max(dis_category) dis_category
+		,( sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+		 from tb_year_dme t1,tb_year_dme_code t2
+		where t1.damage_code=t2.code
+		<if test="begYear!=null">
+		and beg_year between #{begYear} and #{endYear}
+		</if>
+		<if test="targetMonth!=null">
+		and beg_month in
+			<foreach collection="targetMonth" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		group by damage_code,beg_month,code_name,beg_day
+		) t3
+		group by code_name,damage_code
+	</select>
+
+	<select id="maxDisasterByMonth" parameterType="hashMap" resultType="yearDmeDto">
+		select  code_name damage_name,damage_code,beg_month,count(*) count from (
+		select t2.code_name,damage_code,beg_month,beg_day from tb_year_dme t1,tb_year_dme_code t2
+		where t1.damage_code=t2.code
+		and beg_month=#{targetMonth}
+		group by damage_code,beg_month,code_name,beg_day
+		) t3
+		group by code_name,damage_code,beg_month
+		order by count desc
+		limit 1
+	</select>
+	<select id="listAreaDamageSum" parameterType="hashMap" resultType="yearDmeDto">
+		with main as (
+			select substring(code,1,2) code,sido from tb_year_area_code
+			where code_level='1'
+		)
+		select main.sido,sido_code 
+		, (sum(com_1::numeric) + sum(com_2::numeric) ) com_dme
+		,(
+		sum( cob_tot::numeric)
+		+sum(cos_tot::numeric)
+		+sum(cof_tot::numeric)
+		+sum(cow_tot::numeric)
+		) com_total
+		,( 
+		sum(pba_tot::numeric)
+		+sum(pbb_tot::numeric)
+		+sum(pbr_tot::numeric)
+		+sum(pbc_tot::numeric)
+		+sum(pbd_tot::numeric)
+		+sum(pbf_tot::numeric)
+		+sum(pbg_tot::numeric)
+		+sum(pbh_tot::numeric)
+		+sum(pbi_tot::numeric)
+		+sum(pbj_tot::numeric)
+		+sum(pbk_tot::numeric)
+		+sum(pbl_tot::numeric)
+		+sum(pbm_tot::numeric)
+		+sum(pbn_tot::numeric)
+		+sum(pbo_tot::numeric)
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric)
+		+sum(prc_tot::numeric)
+		+sum(prd_tot::numeric)
+		+sum(pre_tot::numeric)
+		+sum(prf_tot::numeric)
+		+sum(prg_tot::numeric)
+		+sum(etc_tot::numeric)
+		) pri_total
+
+		from tb_year_dme t1,tb_year_dme_code t2,main
+		where main.code=t1.sido_code 
+		and t1.damage_code=t2.code
+		and t2.dis_category =#{damageCategoryCode}
+		<if test="begYear!=null">
+		and t1.beg_year between #{begYear} and #{endYear}
+		</if>
+		group by t1.sido_code,main.sido
+		order by t1.sido_code
+			
+	</select>
+	
+	
+	<select id="listYearDme" parameterType="hashMap" resultType="yearDmeStaticsDto">
+	select 
+	sido
+	,sigungu
+	,concat(beg_year,beg_month,beg_day) beg_date
+	,concat(end_year,end_month,end_day) end_date
+	,( (com_1::numeric) + (com_2::numeric) ) com_dme
+			,(
+			( cob_tot::numeric)
+			+(cos_tot::numeric)
+			+(cof_tot::numeric)
+			+(cow_tot::numeric)
+			) com_total
+			,( 
+			(pba_tot::numeric)
+			+(pbb_tot::numeric)
+			+(pbr_tot::numeric)
+			+(pbc_tot::numeric)
+			+(pbd_tot::numeric)
+			+(pbf_tot::numeric)
+			+(pbg_tot::numeric)
+			+(pbh_tot::numeric)
+			+(pbi_tot::numeric)
+			+(pbj_tot::numeric)
+			+(pbk_tot::numeric)
+			+(pbk_3::numeric)
+			+(pbk_6::numeric)
+			+(pbl_tot::numeric)
+			+(pbm_tot::numeric)
+			+(pbn_tot::numeric)
+			+(pbo_tot::numeric)
+			) pub_total
+			,(
+			(pra_tot::numeric)
+			+(prb_tot::numeric)
+			+(prc_tot::numeric)
+			+(prd_tot::numeric)
+			+(pre_tot::numeric)
+			+(prf_tot::numeric)
+			+(prg_tot::numeric)
+			+(etc_tot::numeric)
+			) pri_total
+	
+	from tb_year_dme
+	where 1=1
+	and concat(beg_year,beg_month,beg_day)<![CDATA[ >= ]]>#{beg_date} and concat(end_year,end_month,end_day)<![CDATA[ <= ]]>#{end_date}
+	<if test="damage_code!=null">
+		and damage_code = #{damage_code}
+	</if>
+	order by sigungu_code
+
+	
+	</select>
+	
+</mapper>

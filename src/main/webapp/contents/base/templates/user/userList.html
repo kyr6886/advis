@@ -1,0 +1,134 @@
+<div class="page-title" ng-init="fnGetList()">
+	<div class="title_left"><h3>사용자 관리</h3></div>
+	<div class="title_right"></div>
+</div>
+<div class="clearfix"></div>
+<div class="row ng-hide" ng-show="isShowUserCreate">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<div class="col-md-9 col-sm-9 col-xs-10 "><h5>사용자 추가  <small>시스템 사용자를 추가합니다.</small></h5></div>
+				<div class="col-md-3 col-sm-3 col-xs-2 ">
+					<ul class="nav pull-right panel_toolbox ">				
+						<li><a class="close-link" ng-click="fnClickHideForm()"><i class="fa fa-close"></i></a></li>
+					</ul>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<div class="x_content">
+				<br>
+				<form class="form-horizontal form-label-left input_mask">
+					<div class="col-md-9 col-sm-9 col-xs-7 form-group has-feedback">
+						<input type="text" class="form-control has-feedback-left" ng-model='detailUser.user_id' id="inputSuccess1" placeholder="아이디" ng-change="fnOnChangeID()" ng-readonly="isEnableUpdate">
+						<span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-3">
+						<button type="button" class="btn btn-default btn-sm" ng-click="fnOnClickCheckID()">아이디 중복확인</button>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+						<input type="password" class="form-control has-feedback-left" ng-model='pwd1' id="inputSuccess2" placeholder="비밀번호">
+						<span class="fa fa-key form-control-feedback left" aria-hidden="true"></span>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+						<input type="password" class="form-control has-feedback-left" ng-model='pwd2' id="inputSuccess3" placeholder="비밀번호 확인">
+						<span class="fa fa-key form-control-feedback left" aria-hidden="true"></span>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12 form-group has-feedback">
+						<input type="text" class="form-control has-feedback-left" ng-model='detailUser.user_name' id="inputSuccess4" placeholder="이름">
+						<span class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12 form-group has-feedback">
+						<input type="text" class="form-control has-feedback-left" id="inputSuccess5" placeholder="Email"  ng-model='detailUser.user_email'>
+						<span class="fa fa-envelope form-control-feedback left" aria-hidden="true"></span>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
+						<input type="text" class="form-control has-feedback-left" id="inputSuccess6"  ng-model='phone1' placeholder="Phone1"> 
+						<span class="fa fa-phone form-control-feedback left" aria-hidden="true"></span>
+					</div>
+					<div class="col-md-1 col-sm-1 col-xs-1 form-group has-feedback" style="text-align: center;">-</div>
+					<div class="col-md-3 col-sm-3 col-xs-11 form-group has-feedback">
+						<input type="text" class="form-control" id="inputSuccess7"  ng-model='phone2' placeholder="Phone2">						
+					</div>
+					<div class="col-md-1 col-sm-1 col-xs-1 form-group has-feedback" style="text-align: center;">-</div>
+					<div class="col-md-4 col-sm-4 col-xs-11 form-group has-feedback">
+						<input type="text" class="form-control" id="inputSuccess8"  ng-model='phone3' placeholder="Phone3">
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-3 col-sm-3 col-xs-12">사용자 유형</label>
+						<div class="col-md-9 col-sm-9 col-xs-12">
+							<select class="form-control"  ng-model='detailUser.user_type_code'>
+								<option value="">사용자 유형 선택</option>
+	                          	<option ng-repeat="code in listUserTypeCodes" value="{{code.sys_code}}">{{code.sys_title}}</option>
+                          	</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-3 col-sm-3 col-xs-12">사용자 권한  </label>
+						<div class="col-md-9 col-sm-9 col-xs-12">
+							<label class="checkbox-inline" ng-repeat="item in listRoles">
+							<input type="checkbox"  value="{{item.role_id}}"  ng-checked="checkedItem.indexOf(item.role_id) > -1" ng-click="toggleSelection(item.role_id)">{{item.role_title}}</label>
+						</div>
+					</div>					
+					<div class="ln_solid"></div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<button type="submit" class="btn btn-primary pull-right" ng-click="fnClickHideForm()">Cancel</button>
+							<button type="submit" class="btn btn-success pull-right" ng-show="!isEnableUpdate" ng-click="fnClickBtnCreate()">Create</button>
+							<button type="submit" class="btn btn-success pull-right" ng-show="isEnableUpdate" ng-click="fnClickBtnCreate()">Update</button>						
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title"><h5>사용자 목록 <small>시스템 사용자를 관리합니다.</small></h5></div>
+			<div class="x_content">
+				<div class="row">
+					<button type="button" ng-click="fnClickBtnShowCreateForm()" class="btn btn-primary btn-xs btn-info pull-right m-right-10">
+						<i class="fa fa-pencil"></i> 사용자 추가
+					</button>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-striped jambo_table bulk_action">
+						<thead>
+							<tr class="headings">								
+								<th class="column-title">구분</th>
+								<th class="column-title">아이디</th>
+								<th class="column-title">이름</th>
+								<th class="column-title">이메일</th>
+								<th class="column-title">전화번호</th>
+								<th class="column-title">상태</th>
+								<th class="column-title">삭제</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="item in list">
+								<td>
+									<select ng-model="item.user_type_code" ng-change="fnChangeUserStat(item)">
+										<option ng-repeat="code in listUserTypeCodes" value="{{code.sys_code}}">{{code.sys_title}}</option>
+									</select>
+								</td>
+								<td><a href="" ng-click="fnOnClickUpdateUser(item)">{{item.user_id}}</a></td>
+								<td>{{item.user_name}}</td>
+								<td>{{item.user_email}}</td>
+								<td>{{item.user_phone}}</td>
+								<td>
+									<select ng-model="item.user_status_code" ng-change="fnChangeUserStat(item)">
+										<option ng-repeat="code in listUserStatusCodes" value="{{code.sys_code}}">{{code.sys_title}}</option>
+									</select>
+								</td>
+								<td><button type="button" ng-click="fnClickDelete(item)" class="btn btn-danger btn-xs btn-danger"><i class="fa fa-trash-o"></i> 삭제</button></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>

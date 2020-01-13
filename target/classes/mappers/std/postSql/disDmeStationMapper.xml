@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="disDmeStationMapper">	
+	<select id="list" parameterType="hashmap" resultType="disDmeStation">
+		select
+			dis_dme_id,
+			dis_dme_nm,
+			dis_dme_area,
+			dis_dme_area_detail,
+			dis_dme_typ,
+			dis_dme_class,
+			dis_facility_nm,
+			dis_facility_ty,
+			dis_water_nm,
+			dis_app_date,
+			dis_release_date,
+			info_update_date,
+			app_reason,
+			release_reason,
+			progress_txt,
+			dis_dme_factor,
+			dis_app_area,
+			dis_app_org_nm,
+			dis_app_org_number,
+			dis_standard_date,
+			provider_code,
+			provider_nm
+		from tb_dis_dme_station
+		where dis_release_date is null
+		
+		<if test="paramArea != null">
+			and dis_dme_id::text like concat(#{paramArea},'%')
+		</if>
+		
+		<if test="paramArea != null">
+			and dis_dme_typ like concat('%', #{paramType},'%')
+		</if>
+		
+		order by dis_app_date
+	</select>
+	
+	<select id="listType" resultType="disDmeStation">
+		select
+			dis_dme_typ
+		from
+			tb_dis_dme_station
+		group by
+			dis_dme_typ
+	</select>
+</mapper>

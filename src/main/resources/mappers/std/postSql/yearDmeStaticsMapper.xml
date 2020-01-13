@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmeStatics">
+	
+	<select id="list" parameterType="hashMap" resultType="yearDmeStaticsDto">
+	with main as(
+
+		select beg_date,end_date from (
+		select 
+			 concat(beg_year,beg_month,beg_day) beg_date
+			,concat(end_year,end_month,end_day) end_date
+		from 
+			tb_year_dme
+		where 
+			damage_code in (
+				select code from tb_year_dme_code
+				where dis_category=#{dis_category}
+			)
+		
+		) t1
+		group by beg_date,end_date	
+	)
+ select 
+ 	  t2.beg_date
+ 	, t2.end_date
+ 	, t2.com_dme
+ 	, t2.com_total
+ 	, t2.pub_total
+ 	, t2.pri_total
+ 	, t2.total_damage
+ 	, t2.stn_id
+ 	, t2.rn_day
+ 	, t2.rn_day_max
+ 	, t2.rn_60m_max
+  from  tb_year_dme_statics t2,main t3 
+  where t2.beg_date=t3.beg_date and t2.end_date=t3.end_date
+  
+  <if test="st_pri_total!=null">
+  	and
+  	( pri_total::numeric<![CDATA[ >= ]]>(#{st_pri_total}::numeric)*100000
+  	and pri_total::numeric<![CDATA[ < ]]>(#{end_pri_total}::numeric)*100000
+  	)
+  </if>
+   <if test="st_rn_day!=null">
+  	and (
+  	rn_day_max::numeric<![CDATA[ >= ]]>#{st_rn_day}::numeric
+  	and rn_day_max::numeric<![CDATA[ < ]]>#{end_rn_day}::numeric
+  	)
+  </if>
+   <if test="st_com_dme!=null">
+  	and 
+  	( com_dme::numeric<![CDATA[ >= ]]>#{st_com_dme}::numeric
+  	and com_dme::numeric<![CDATA[ < ]]>#{end_com_dme}::numeric
+  	)
+  </if>
+  <if test="sido_code!=null">
+  	and t2.stn_id in (	
+		select obs_id from tb_obs_tsen
+		where law_code like concat(#{sido_code},'%')
+	)
+	</if>
+
+  order by t3.beg_date desc
+		
+	
+	</select>
+	
+	
+	<select id="listSidoDmeRain" parameterType="hashMap" resultType="yearDmeStaticsDto">
+	select tt.beg_date
+		,tt.end_date
+		,tt.stn_id
+		,tt.sido_code
+		,tt.sido
+		,tt.sigungu_code
+		,tt.sigungu
+		,tt.com_dme
+		,(tt.com_total + tt.pub_total + tt.pri_total) as total_damage
+	from(
+		with tot as 
+		(
+			select substring(law_code,1,2) as law_code
+			from tb_obs_tsen
+			where obs_id is not null
+			<choose>
+	           	<when test="listObsId.size != 0">
+					and obs_id in
+					<foreach collection="listObsId" item="item" index="index" separator="," open="(" close=")">
+	                    #{item}
+	                </foreach>
+	            </when>
+	        </choose>
+			group by substring(law_code,1,2)
+		)
+		select 
+			t2.beg_date
+			,t2.end_date
+			,t2.stn_id
+			,t1.sido_code
+			,t1.sido
+			,t1.sigungu_code
+			,t1.sigungu
+			,t1.com_dme
+			,(t1.cob_tot::numeric+t1.cos_tot::numeric+t1.cof_tot::numeric+t1.cow_tot::numeric) as com_total
+			,(t1.pba_tot::numeric+t1.pbb_tot::numeric+t1.pbr_tot::numeric+t1.pbc_tot::numeric+t1.pbd_tot::numeric+t1.pbf_tot::numeric+t1.pbg_tot::numeric+t1.pbh_tot::numeric+t1.pbi_tot::numeric+t1.pbj_tot::numeric+t1.pbk_tot::numeric+t1.pbl_tot::numeric+t1.pbm_tot::numeric+t1.pbn_tot::numeric+t1.pbo_tot::numeric) as pub_total
+			,(t1.pra_tot::numeric+t1.prb_tot::numeric+t1.prc_tot::numeric+t1.prd_tot::numeric+t1.pre_tot::numeric+t1.prf_tot::numeric+t1.prg_tot::numeric+t1.etc_tot::numeric) as pri_total
+		from tb_year_dme t1,tb_year_dme_statics t2
+		where concat(t1.beg_year, t1.beg_month, t1.beg_day)=t2.beg_date 
+		and concat(t1.end_year, t1.end_month, t1.end_day)=t2.end_date 
+		and t1.sido_code in (select law_code from tot)
+		and t2.rn_day >= #{paramRnDay}
+	) tt
+	where (tt.com_total + tt.pub_total + tt.pri_total) > 0
+	ORDER BY (tt.com_total + tt.pub_total + tt.pri_total) desc
+	</select>
+	
+	
+	
+</mapper>

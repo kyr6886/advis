@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+    <!-- postgresql -->
+    <ResourceLink name="jdbc/noaaAdmin" global="jdbc/noaaAdmin" type="javax.sql.DataSource" /> 
+    <!-- oracle -->
+<!--     <ResourceLink name="jdbc/winsplus" global="jdbc/winsplus" type="javax.sql.DataSource" /> -->
+</Context>

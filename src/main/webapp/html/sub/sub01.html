@@ -1,0 +1,145 @@
+
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>재난상황관리 표준화 기술</title>
+	<meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no">
+	<meta name="author" content="재난상황관리 표준화 기술">
+	<meta name="subject" content="재난상황관리 표준화 기술">
+	<meta name="description" lang="ko" content="">
+	<meta name="robots" content="all">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" type="text/css" href="../../css/basic.css">
+	<link rel="stylesheet" type="text/css" href="../../css/disaster.css">
+	
+	<script src="../../js/jquery-1.9.1.js"></script>
+	<script type="text/javascript">
+	function resizeContent() {
+		var windowHeight = $(window).height();
+		var topHeight = $('header').height();
+		var bottomHeight = $('footer').height() +40;
+		var containerHeight = $('').css({'min-height':(windowHeight-topHeight-bottomHeight)-113+'px'});
+	}
+	$(document).ready(function() {
+		resizeContent();
+	});
+	 
+	$(window).resize(function() {
+		resizeContent();
+	});
+
+	</script>
+
+</head>
+<body>
+	<p id="skipnav">
+		<a href="#container">본문 내용 바로가기</a>
+		<a href="#gnb">대메뉴 바로가기</a>
+	</p>
+	<div class="wrap">
+		<header class="clearfix">
+			<div class="header-wrap">
+				<h1><a href=""><img src="../../images/logo-1.png" alt="재난상황관리 표준화 기술"/></a></h1>
+				<div class="search-wrap">
+					<label for="topSearch" class="hidden">검색</label>
+					<input type="text" id="topSearch">
+					<a href="" class="btn btn-search">검색</a>
+				</div>
+				<div class="head-service">
+					<ul class="user-info">
+						<li>김병식(관리자) 시스템 접속중</li>
+						<li><a href=""><i class="icon-lock-open-circle"></i><span class="hidden">로그인</span></a></li>
+						<li><a href=""><i class="icon-account"></i><span class="hidden">정보수정</span></a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="nav-wrap">
+				<div class="issue"></div>
+				<div class="bg-gnb"></div>
+				<nav id="gnb">
+					<ul>
+						<li><a href="">호우</a></li>
+						<li><a href="">태풍</a></li>
+						<li><a href="">지진</a></li>
+						<li><a href="">화재</a></li>
+						<li><a href="">대설</a></li>
+						<li><a href="">강풍</a></li>
+						<li><a href="">풍량</a></li>
+						<li><a href="">감염병/전염병</a></li>
+					</ul>
+				</nav>
+			</div>
+		</header>
+	
+    	<div id="container">
+    		<div class="contents-title">
+	    		<h2>피해 현황 <span>1985 ~ 2017년 까지의 재산, 인명 피해 통계 내용입니다.</span></h2>
+	    		<ul class="breadcrumb">
+    				<li>재난안전데이터 정보제공시스템</li>
+    				<li class="current">피해현황</li>
+    			</ul>
+			</div>
+			
+			<section class="main-divide">
+				<div class="section-title">
+					<ul>
+						<li>자연재난</li>
+						<li>태풍</li>
+					</ul>
+				</div>
+				<div class="select-area"><div class="graph3" style="background: #eee; height: 15rem;"></div></div>
+				<div class="result-area">
+					<div class="table-basic">
+						<table>
+							<caption>피해현황 자연재난</caption>
+							<thead>
+								<tr>
+									<th scope="col">재해유형</th>
+									<th scope="col">시설피해(천원)</th>
+									<th scope="col">인명피해(명)</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>태풍</td>
+									<td>50,570</td>
+									<td>15</td>
+								</tr>
+								<tr>
+									<td>태풍</td>
+									<td>50,570</td>
+									<td>15</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+			
+			<div class="search-box">
+				<span>지역</span>
+				<input type="checkbox" id="seoul">
+				<label for="seoul">서울</label>
+				<input type="checkbox" id="gyeonggi">
+				<label for="gyeonggi">경기</label>
+				<input type="checkbox" id="gangwon">
+				<label for="gangwon">강원</label>
+				<input type="checkbox" id="busan">
+				<label for="busan">부산</label>
+			</div>
+			
+			<section class="graph1" style="height: 20rem;">세부 지역별 통계정보</section>
+			<section class="graph2" style="height: 20rem;">버블 차트</section>
+			
+			<footer>
+				<div>Advanced Disaster visualized Intelligent Interactive and Information System</div>
+				<address>주소. 우)44538 울산광역시 중구 종가로 365 국립재난안전연구원 / TEL : 052-928-8000
+					<span class="copy">Copyright &copy; 2018 by National Disaster Management Institute. All Rights Reserved.</span>
+				</address>
+			</footer>
+    	</div>
+	</div>
+</body>
+</html>

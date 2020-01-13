@@ -1,0 +1,120 @@
+<div class="page-title">
+	<div class="title_left" ng-init="fnInit()">
+		<h3>특보 데이터 관리</h3>
+	</div>
+	<div class="title_right"></div>
+</div>
+<div class="clearfix"></div>
+<div class="row" ng-show="isCreateViewOn">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>특보 데이터 <small> 등록</small></h5>
+			</div>
+			<div class="x_content">
+				<div class="row form-horizontal form-label-left input_mask">
+					<div class="text-right">
+						<button type="button" class="fa fa-save btn btn-sm btn-primary" ng-click="fnClickSave()"> 저장</button>
+						<button type="button" class="fa fa-times-circle btn btn-sm btn-success" ng-click="fnClickCloseCreateView()"> 닫기</button>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >통신소 번호 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model="cd_stn" placeholder="임의 통신소 번호 : 999">
+							<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >예보시간 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model="dt_tm_fc" placeholder="{{nowTime}}">
+							<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >예보관 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model="nm_man_fc">
+							<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >예보제목 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model="etc_ttl">
+							<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >예보지역 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model="sect_area_txt">
+							<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-1 col-sm-1 col-xs-12" >발생시간 : </label>
+						<div class="col-md-10 col-sm-10 col-xs-12 form-group has-feedback">
+							<input type="text" class="form-control has-feedback-left" ng-model="dt_tm_ef_txt">
+							<span style="color:#f08080" class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></span>
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<div class="x_panel">
+			<div class="x_title">
+				<h5>특보 데이터 <small> 목록</small></h5>
+			</div>
+			<div class="x_content">
+				<div class="row">
+					<div class="text-right">
+						<button type="button" class="fa fa-plus-circle btn btn-sm btn-success" ng-click="fnClickOpenCreateView()"> 생성</button>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-striped" style="height:200px;overflow-y:auto;overflow-x:hidden">
+							<thead>
+								<tr class="headings bg-primary">
+									<th class="column-title">예보시간</th>
+									<th class="column-title">예보관</th>
+									<th class="column-title">예보제목</th>
+									<th class="column-title">예보지역</th>
+									<th class="column-title">발생시간</th>
+									<th class="column-title">삭제</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="item in mainDataList">
+									<td>{{item.dt_tm_fc}}</td>
+									<td>{{item.nm_man_fc}}</td>
+									<td>{{item.etc_ttl}}</td>
+									
+									<td title="{{item.sect_area_txt}}">
+										{{item.sect_area_txt.length > 40 ? item.sect_area_txt.substring(0,40)+"..." : item.sect_area_txt}}
+									</td>
+									
+									<td title="{{item.dt_tm_ef_txt}}">
+										{{item.dt_tm_ef_txt.length > 40 ? item.dt_tm_ef_txt.substring(0,40)+"..." : item.dt_tm_ef_txt}}
+									</td>
+									
+									<td>
+										<button type="button" class="fa fa-trash btn btn-sm btn-danger" ng-show="item.dt_regt.length==14" ng-click="fnClickDelete(item.dt_regt)"> 삭제</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div align="center">
+							<pager binding="pager" callback-click='fnOnPagingClick'></pager>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

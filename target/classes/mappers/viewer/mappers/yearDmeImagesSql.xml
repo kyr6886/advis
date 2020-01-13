@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yearDmeImages">
+	<select id="list"  parameterType="hashMap" resultType="yearDmeImagesDto">
+	select 
+	seq,beg_date,end_date,file_path,file_name 
+	from tb_year_dme_images
+	where
+	beg_date<![CDATA[>=]]>#{beg_date} and beg_date<![CDATA[<=]]>#{end_date} 
+	</select>
+	
+	<insert id="registImages" parameterType="yearDmeImagesDto">
+		insert into tb_year_dme_images
+		(
+		  seq
+		, beg_date
+		, end_date
+		, file_path
+		, file_name
+		, regist_user
+		, regist_dt		
+		) values (
+		  nextval('tb_year_dme_images_seq')
+		, #{beg_date}
+		, #{end_date}
+		, #{file_path}
+		, #{file_name}
+		, #{regist_user}
+		, now()
+		)
+	</insert>
+	
+	<select id="selectCountReportImages" resultType="String">
+	select 
+		max(file_grp_id) file_grp_id
+	from tb_year_report_images	
+	</select>
+	
+	<select id="selectReportImagesList"  parameterType="hashMap" resultType="yearDmeImagesDto">
+	select 
+		seq
+		,file_path
+		,file_name
+		,regist_user
+		,regist_dt
+		,file_grp_id
+		,file_ext
+	from tb_year_report_images
+	where
+	file_grp_id = #{file_grp_id}
+	</select>
+	
+	<insert id="registReportImages" parameterType="yearDmeImagesDto">
+		insert into tb_year_report_images
+		(
+		  seq
+		, beg_date
+		, end_date
+		, file_path
+		, file_name
+		, regist_user
+		, regist_dt
+		, file_grp_id	
+		, file_ext	
+		) values (
+		  nextval('tb_year_report_seq')
+		, #{beg_date}
+		, #{end_date}
+		, #{file_path}
+		, #{file_name}
+		, #{regist_user}
+		, now()
+		, #{file_grp_id}
+		, #{file_ext}
+		)
+	</insert>
+	
+	<delete id="deleteImages" parameterType="yearDmeImagesDto">
+		delete from tb_year_dme_images
+		where seq = #{seq}
+	</delete>
+	
+</mapper>

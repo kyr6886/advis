@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+	<!--사용자 목록 -->
+	<select id="list" parameterType="hashMap" resultType="userDTO">
+		<![CDATA[
+		select
+		t1.user_id,
+		t1.user_name,
+		t1.user_phone,
+		t1.user_email,
+		t1.user_type_code,
+		t1.use_yn,
+		t1.create_date,
+		t1.create_user_id,
+		t1.user_status_code,
+		t1.user_key,
+		t1.user_fail_count,
+		t2.sys_title user_type_title,
+		t3.sys_title user_status_title
+		from
+		tb_user t1
+		,tc_code_sys t2
+		,tc_code_sys t3
+		where
+		t1.use_yn='Y'
+		and
+		t1.user_type_code=t2.sys_code
+		and
+		t1.user_status_code=t3.sys_code
+		]]>
+		
+			<if test="user_name!=null"> and t1.user_name like concat(#{search_txt},'%')</if>
+			<if test="user_email!=null"> and t1.user_name like concat(#{search_txt},'%')</if>
+			<if test="st_date!=null"> and to_char(t1.create_date,'yyyymmdd') between #{st_date} and #{en_date}</if>
+			
+			
+		 limit (#{LastIndex}-#{FirstIndex}+1)  offset #{FirstIndex} 
+	</select>
+	
+	<select id="totalCount" parameterType="hashMap" resultType="int">
+	<![CDATA[
+		select
+		count(*)
+		from
+		tb_user t1
+		,tc_code_sys t2
+		,tc_code_sys t3
+		where
+		t1.user_type_code=t2.sys_code
+		and
+		t1.user_status_code=t3.sys_code
+		]]>
+		
+			<if test="user_name!=null"> and t1.user_name like concat(#{search_txt},'%')</if>
+			<if test="user_email!=null"> and t1.user_name like concat(#{search_txt},'%')</if>
+			<if test="st_date!=null"> and to_char(t1.create_date,'yyyymmdd') between #{st_date} and #{en_date}</if>
+		
+	</select>
+	
+	<!--사용자 상세 -->
+	<select id="detail" parameterType="hashMap" resultType="userDTO">
+		
+		with userRoles as(
+			select user_id,string_agg(role_id,',') roles from tb_user_role
+			<if test="user_id!=null">
+			where 
+			user_id=#{user_id}
+			</if>
+			
+			group by user_id
+		)
+		select
+		t1.user_id,
+		t1.user_name,
+		t1.user_phone,
+		t1.user_email,
+		t1.user_type_code,
+		t1.use_yn,
+		t1.create_date,
+		t1.create_user_id,
+		t1.user_status_code,
+		t1.user_key,
+		t1.user_fail_count,
+		t2.sys_title user_type_title,
+		t3.sys_title user_status_title
+		,t4.roles user_roles
+		from
+		tb_user t1
+		left join tc_code_sys t2 on t1.user_type_code=t2.sys_code
+		left join tc_code_sys t3 on t1.user_status_code=t3.sys_code
+		left join userRoles t4 on t1.user_id=t4.user_id
+	
+		<where>
+		<if test="user_id!=null">
+			and
+			t1.user_id=#{user_id}
+		</if>
+		<if test="user_pwd!=null">
+			and
+			t1.user_pwd=#{user_pwd}
+		</if>
+		</where>
+	</select>
+	<!--사용자 갱신 -->
+	<update id="update" parameterType="userDTO">
+		
+		update tb_user
+		set
+		 update_date=now()
+		,user_email=#{user_email}
+		,user_name=#{user_name}
+		<if test="user_pwd!=null">
+		,user_pwd=#{user_pwd}
+		</if>
+		<if test="user_fail_count!=null">
+		,user_fail_count=0
+		</if>
+		,user_phone=#{user_phone}
+		,user_status_code=#{user_status_code}
+		,user_type_code=#{user_type_code}
+		where user_id=#{user_id}		
+	</update>
+	
+	<!--로그인 실패 addcount -->
+	<update id="updateFailCnt" parameterType="userDTO">		
+		update tb_user set user_fail_count=user_fail_count+1 where user_id=#{user_id}
+	</update>
+	<update id="updateReFailCnt" parameterType="userDTO">		
+		update tb_user set user_fail_count=0 where user_id=#{user_id}
+	</update>
+	
+	<update id="create" parameterType="userDTO">
+		<![CDATA[
+		insert into tb_user
+		(
+		user_id
+		,user_email
+		,user_name
+		,user_pwd
+		,user_phone
+		,user_status_code
+		,user_type_code
+		,create_date
+		,create_user_id
+		,update_date
+		,update_user_id
+		,user_key
+		,use_yn
+		)
+		values
+		(
+		 #{user_id}
+		,#{user_email}
+		,#{user_name}
+		,#{user_pwd}
+		,#{user_phone}
+		,#{user_status_code}
+		,#{user_type_code}
+		,now()
+		,#{create_user_id}
+		,now()
+		,#{update_user_id}
+		,#{user_key}
+		,#{use_yn}
+		)
+		]]>
+	</update>
+
+	<!-- 패스워드변경 -->
+	<update id="changePassword" parameterType="hashMap">
+		<![CDATA[
+		update tb_user
+		set user_pwd=#{user_pwd}
+		where
+		user_id=#{user_id}
+		]]>
+	</update>
+	
+	<update id="updateUserType" parameterType="hashMap">
+		update tb_user
+		set user_type_code=#{user_type_code},user_status_code=#{user_status_code}
+		where
+		user_id=#{user_id}
+	</update>
+	
+	<!-- 사용자 타입 갱신 -->
+	<update id="changeType" parameterType="hashMap">
+		<![CDATA[
+		update tb_user
+		set user_type_code=#{user_type_code}
+		where
+		user_id=#{user_id}
+		]]>
+	</update>
+	<!-- 사용자  삭제 갱신 -->
+	<update id="delete" parameterType="hashMap">
+		<![CDATA[
+		update tb_user
+		 set update_date=now()
+		 ,update_user_id=#{update_user_id}
+		,use_yn='N'
+		where
+		user_id=#{user_id}
+		]]>
+	</update>
+	
+	<select id="countRole" parameterType="hashMap" resultType="int">
+		<![CDATA[
+		select count(*) from tb_user_role
+		where role_id=#{role_id}
+		]]>
+	</select>
+	
+	<select id="countTotalUser" parameterType="hashMap" resultType="int">
+		select count(*) from tb_user where use_yn='Y'		
+	</select>
+	
+
+</mapper>

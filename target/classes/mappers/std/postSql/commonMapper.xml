@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="stdCommon">
+	<select id="disMonthlySum" parameterType="hashMap" resultType="statMonthly">
+	
+with main as(
+	select damage_code,damage_name,sido_code,substring(beg_date,5,2) beg_month,sum(count) count from (
+		select 
+		case when damage_code='HZD002' then 'HZD002'
+			 when damage_code='HZD007'  then 'HZD002'
+			 when damage_code='HZD031' then 'HZD002'
+			 when damage_code='HZD034'  then 'HZD002'
+			 when damage_code='HZD013' then 'HZD006'
+			 when damage_code='HZD021'  then 'HZD006'
+			 when damage_code='HZD022' then 'HZD006'
+			 when damage_code='HZD023'  then 'HZD006'
+			 when damage_code='HZD026'  then 'HZD006'
+			 when damage_code='HZD030'  then 'HZD006'
+			 when damage_code='HZD032'  then 'HZD006'
+			 when damage_code='HZD033'  then 'HZD006'
+			 when damage_code='HZD020'  then 'HZD006'
+			 when damage_code='HZD035'  then 'HZD006'
+			 when damage_code='HZD036'  then 'HZD006'
+			 when damage_code='HZD046'  then 'HZD008'
+			 when damage_code='HZD040'  then 'HZD008'
+			 when damage_code='HZD037'  then 'HZD008'
+			 when damage_code='HZD029'  then 'HZD008'
+			 when damage_code='HZD024'  then 'HZD008'
+			 when damage_code='HZD016'  then 'HZD008'
+			 when damage_code='HZD004'  then 'HZD008'
+			 when damage_code='HZD046'  then 'HZD008'
+			 else damage_code
+		end as damage_code
+		,t2.code_name damage_name
+		,sido_code,concat(beg_year,beg_month,beg_day) beg_date,1 count
+		from tb_year_dme t1,tb_year_dme_code t2
+		where 
+		t1.damage_code=t2.code
+		group by damage_code,t2.code_name,sido_code,concat(beg_year,beg_month,beg_day)
+	) t1
+	group by damage_code,damage_name,sido_code,substring(beg_date,5,2)
+	
+	union all
+	
+	select
+	damage_code,damage_name,sido_code,substring(beg_date,5,2) beg_month,sum(count) count from (
+	
+	select 
+		case when di_dtl_id='20004'  then 'SEP'
+		 when di_dtl_id='20003'  then 'SCB'
+		 when di_dtl_id='20001'  then 'SCO'
+		else di_dtl_id
+			end as damage_code
+		,
+		case when di_dtl_id='20004'  then '환경오염사고'
+			 when di_dtl_id='20003'  then '화생방사고'
+			 when di_dtl_id='20001'  then '붕괴'
+		else di_dtl_name
+			end as damage_name
+		,substring(addr_code,1,2) sido_code,substring(obz_dt,1,8) beg_date,1 count 
+	from tb_accident_soc_group
+	where di_dtl_id in ('20004','20003','20001','20002')
+	group by di_dtl_id,di_dtl_name,substring(addr_code,1,2),substring(obz_dt,1,8)
+	
+	) t1
+	group by damage_code,damage_name,sido_code,substring(beg_date,5,2)
+)
+select 
+t1.damage_code,damage_name,t1.sido_code,beg_month,count,t2.total,ceil((count/t2.total)*100) rate
+from main t1 
+,
+(
+select 
+damage_code,sido_code,sum(count) total
+
+from main where sido_code is not null and beg_month is not null
+
+group by damage_code,sido_code
+) t2
+
+where t1.sido_code is not null and t1.beg_month is not null
+and t1.damage_code=t2.damage_code and t1.sido_code=t2.sido_code
+
+and t1.sido_code in
+<foreach collection="sido_code" item="item" open="(" close=")" separator=",">
+	#{item}
+</foreach>
+
+and beg_month=#{beg_month}
+and t1.damage_code in ('HZD002','HZD006','HZD008','HZD017','SEP','SCB','SCO','20002')
+order by rate desc
+
+	
+	</select>
+	
+	<select id="sidoMonthlyDamage" parameterType="hashMap" resultType="statMonthly">
+		
+		select sido_code,damage_code,damage_month beg_month,damage_money::numeric,damage_name from tb_year_dme_sido_monthly
+		where sido_code=#{sido_code} and damage_code=#{damage_code} and damage_month=#{damage_month}
+		order by damage_money::numeric desc
+
+	</select>
+	
+	<select id="listDamageBuildType" parameterType="hashMap" resultType="statisticsModel">
+	
+		with main as(
+		select 
+		sum(pba_tot::numeric) a1,--도로
+		sum(pbb_tot::numeric) a2,--제방
+		sum(pbr_tot::numeric) a3,--하천
+		sum(pbc_tot::numeric) a4,--소하천
+		sum(pbd_tot::numeric) a5,--상하수도
+		sum(pbf_tot::numeric) a6,--항만시설
+		sum(pbg_tot::numeric) a7,--어항시설
+		sum(pbh_tot::numeric) a8,--학교
+		sum(pbi_tot::numeric) a9,--철도
+		sum(pbj_tot::numeric) a10,--수리시설
+		sum(pbk_tot::numeric) a11,--사방임도 피해액
+		sum(pbl_tot::numeric) a12,--통신시설
+		sum(pbm_tot::numeric) a13,--군사시설
+		sum(pbn_tot::numeric) a14,--소규모시설물
+		sum(pbo_tot::numeric) a15,--기타시설물
+		sum(pra_tot::numeric) a16,--축대 담장
+		sum(prb_tot::numeric) a17,--가축
+		sum(prc_tot::numeric) a18,--축사
+		sum(prd_tot::numeric) a19,--양식장
+		sum(pre_tot::numeric) a20,--어망,어구
+		sum(prf_tot::numeric) a21,--비닐하우스
+		(
+		sum(pba_tot::numeric) 
+		+sum(pbb_tot::numeric) 
+		+sum(pbr_tot::numeric) 
+		+sum(pbc_tot::numeric) 
+		+sum(pbd_tot::numeric) 
+		+sum(pbf_tot::numeric) 
+		+sum(pbg_tot::numeric) 
+		+sum(pbh_tot::numeric) 
+		+sum(pbi_tot::numeric) 
+		+sum(pbj_tot::numeric) 
+		+sum(pbk_tot::numeric) 
+		+sum(pbl_tot::numeric) 
+		+sum(pbm_tot::numeric) 
+		+sum(pbn_tot::numeric) 
+		+sum(pbo_tot::numeric) 
+		) pub_total
+		,(
+		sum(pra_tot::numeric)
+		+sum(prb_tot::numeric) 
+		+sum(prc_tot::numeric) 
+		+sum(prd_tot::numeric) 
+		+sum(pre_tot::numeric) 
+		+sum(prf_tot::numeric) 
+		) pri_total
+		,sum(com_1::numeric) com_1--사망
+		,sum(com_2::numeric) com_2--실종
+		,sum(com_3::numeric) com_3--부상
+		,sum(com_dme::numeric) com_dme--인명피해 합계
+		,sum(cob_tot::numeric) cob_tot--건물피해액
+		,sum(cos_tot::numeric) cos_tot--선박피해액
+		,sum(cof_tot::numeric) cof_tot--농경지 피해액
+		,sum(cow_tot::numeric) cow_tot--농작물 피해액
+		
+		from tb_year_dme
+		where 
+		(
+			(concat(beg_year,beg_month,beg_day)<![CDATA[>=]]>#{beg_date} and concat(end_year,end_month,end_day)<![CDATA[<=]]>#{end_date})
+			<if test="damage_name!=null">
+			or
+			(beg_year=substring(#{beg_date},1,4) and damage_info like concat('%',#{damage_name},'%'))
+			</if>
+		)
+		and damage_code in
+		<foreach collection="damage_codes" item="item" open="("
+				close=")" separator=",">
+				#{item}
+		</foreach>
+		
+		group by concat(beg_year,beg_month,beg_day),concat(end_year,end_month,end_day)
+		)
+		select damage_money damageTotal,damage_name damageName, parentYn ,pub_total damagePublic,pri_total damagePrivate, sum
+		from (
+		select a1 damage_money,'도로' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum from main
+		union 
+		select a2 damage_money,'제방' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a3 damage_money,'하천' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a4 damage_money,'소하천' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a5 damage_money,'상하수도' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a6 damage_money,'항만' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a7 damage_money,'어항' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a8 damage_money,'학교' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a9 damage_money,'철도' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a10 damage_money,'수리' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a11 damage_money,'사방임도' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a12 damage_money,'통신' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a13 damage_money,'군사' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a14 damage_money,'소규모' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a15 damage_money,'기타' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a16 damage_money,'축대' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a17 damage_money,'가축' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a18 damage_money,'축사' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a19 damage_money,'양식장' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a20 damage_money,'어망,어구' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select a21 damage_money,'비닐하우스' damage_name,'N' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select pub_total damage_money,'공공시설' damage_name,'Y' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select pri_total damage_money,'사유시설' damage_name,'Y' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select cob_tot damage_money,'건물' damage_name,'Y' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select cos_tot damage_money,'선박' damage_name,'Y' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select cof_tot damage_money,'농경지' damage_name,'Y' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		union 
+		select cow_tot damage_money,'농작물' damage_name,'Y' parentYn ,pub_total,pri_total,(pub_total+pri_total+cob_tot+cos_tot+cof_tot+cow_tot) sum  from main
+		)  t1
+		where damage_money<![CDATA[>]]>0
+		order by damage_money desc
+	</select>
+	
+</mapper>

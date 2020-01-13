@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	">
+    
+	
+	<!--postgre
+	<bean id="postgres" class="org.apache.commons.dbcp.BasicDataSource"	destroy-method="close">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url" value="jdbc:postgresql://192.168.1.161:5432/com.noaa.base" />
+		<property name="username" value="postgres" />
+		<property name="password" value="1234" />
+	</bean> 
+	--> 
+
+	<!--
+	<bean id="postgres" class="org.apache.commons.dbcp.BasicDataSource"	destroy-method="close">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url" value="jdbc:postgresql://192.168.0.66:5432/csds_2016" />
+		<property name="username" value="postgres" />
+		<property name="password" value="postgis" />
+	</bean>
+	-->
+	
+	<!--orale--> 
+	
+	
+	
+	<!-- 
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@61.105.196.69:1521:orcl" />
+		<property name="username" value="winsplus" />
+		<property name="password" value="winsplus" />
+	</bean> -->
+	
+<!-- 
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource-oracle" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	 -->
+	
+	
+	
+<!-- 		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="*" rollback-for="Exception"/>
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="requiredTx" expression="execution(* egovframework.example.sample..impl.*Impl.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="requiredTx" />
+	</aop:config> -->
+	    
+</beans>  

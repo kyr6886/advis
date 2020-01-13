@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="damageAnlRainMapper">
+
+	<select id="searchListTotalRainByStn" parameterType="damageAnlRainDto" resultType="damageAnlRainDto">
+		select b.stn_id
+			,b.rn_day
+			,c.obs_name
+			,c.position_x
+			,c.position_y
+			,c.obs_management
+		from(
+			select stn_id, max(a.rn_day) as rn_day
+			from(
+				select tm, sum(rn_day) as rn_day, stn_id
+				from tb_obs_asos
+				where 1=1
+				<if test="stDate!=null and endDate!=null">
+					and tm between #{stDate} and #{endDate}
+				</if>
+				and rn_day > 0
+				group by tm, stn_id
+			)a group by stn_id
+			
+		)b join tb_obs_st c on b.stn_id::text = c.obs_id
+		order by rn_day desc
+		limit 1
+	</select>
+	
+	<select id="searchListDailyMaxRain" parameterType="damageAnlRainDto" resultType="damageAnlRainDto">
+		select  
+			c.tm
+			,c.rn_day_max as rn_day
+			,c.stn_id
+			,d.obs_name
+			,d.position_x
+			,d.position_y
+			,d.obs_management
+		from(
+			select  a.tm
+				,a.rn_day_max
+				,b.stn_id
+			from(
+				select tm, max(rn_day) as rn_day_max
+				from tb_obs_asos
+				where 1=1
+				<if test="stDate!=null and endDate!=null">
+					and tm between #{stDate} and #{endDate}
+				</if>
+				and rn_day > 0
+				group by tm
+			)a inner join tb_obs_asos b on a.tm = b.tm and a.rn_day_max = b.rn_day
+		)c inner join tb_obs_st d on c.stn_id::text = d.obs_id where d.delete_date = ''
+	</select>
+	
+</mapper>

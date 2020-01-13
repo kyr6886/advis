@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bbsUser">
+	<insert id="create" parameterType="bbsUserDTO" >
+		<![CDATA[
+		insert into tb_bbs_user
+		(
+		user_id
+		,user_email
+		,user_name
+		,user_pwd
+		,user_phone
+		,user_status_code
+		,user_type_code
+		,create_date
+		,create_user_id
+		,update_date
+		,update_user_id
+		,user_key
+		)
+		values
+		(
+		 #{user_id}
+		,#{user_email}
+		,#{user_name}
+		,#{user_pwd}
+		,#{user_phone}
+		,#{user_status_code}
+		,#{user_type_code}
+		,now()
+		,#{create_user_id}
+		,now()
+		,#{update_user_id}
+		,#{user_key}
+		)
+		]]>
+	</insert>
+	<select id="detail" parameterType="hashMap" resultType="bbsUserDTO">
+		select 
+			user_id
+			,user_email
+			,user_name
+			,user_pwd
+			,user_phone
+			,user_status_code
+			,user_type_code
+			,create_date
+			,create_user_id
+			,update_date
+			,update_user_id
+			,user_key
+		from 
+		tb_bbs_user
+		where
+		user_id=#{user_id}
+	
+	</select>
+	
+</mapper>

@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="typhoonCastInfo">
+<select id="listTyphoonInTargetArea" parameterType="hashMap" resultType="typhoonCastInfoDto">
+with main as(
+select 
+	leftBottomX,
+	leftBottomY,
+	leftTopX,
+	leftTopY,
+	rightBottomX,
+	rightBottomY,
+	rightTopX,
+	rightTopY
+	from 
+	(
+	select 
+	(min(typ_lon)-3.5) leftBottomX,
+	(min(typ_lat)-5) leftBottomY,
+	(min(typ_lon)-3.5) leftTopX,
+	(max(typ_lat)+5) leftTopY,
+	(max(typ_lon)+5) rightBottomX,
+	(min(typ_lat)-5) rightBottomY,
+	(max(typ_lon)+5) rightTopX,
+	(max(typ_lat)+5) rightTopY
+	from tob_kma_typhoon_5ds 
+	where  trunc(typ_seq,0)= trunc(#{typ_seq},0) and substring(tm_fc,1,4) = #{beg_year}
+	<if test='beg_date!=null'>
+	and tm_fc =#{beg_date} 
+	</if>
+	union 
+	select 
+	(min(loc_lngi::numeric)-3.5) leftBottomX,
+	(min(loc_lati::numeric)-5) leftBottomY,
+	(min(loc_lngi::numeric)-3.5) leftTopX,
+	(max(loc_lati::numeric)+5) leftTopY,
+	(max(loc_lngi::numeric)+5) rightBottomX,
+	(min(loc_lati::numeric)-5) rightBottomY,
+	(max(loc_lngi::numeric)+5) rightTopX,
+	(max(loc_lati::numeric)+5) rightTopY
+	from tob_kma_typhoon 
+	where  trunc(no_seq,0)= trunc(#{typ_seq},0)  and substring(dt_tm_fc,1,4) =  #{beg_year}
+	<if test='beg_date!=null'>
+	and dt_tm_fc=#{beg_date} 
+	</if>
+	) t1
+	
+	where leftBottomX is not null
+	
+	
+)
+select beg_year,tm_fc,typ_seq,typ_name,countPosition,beg_date,end_date from(
+	select substring(tm_fc,1,4) beg_year,min(tm_fc) tm_fc, min(tm_fc) beg_date,max(tm_fc) end_date, typ_seq,typ_name,count(*) countPosition
+	from tob_kma_typhoon_5ds 
+	where
+	typ_lon::numeric <![CDATA[>=]]>(select leftBottomX from main) and typ_lon::numeric<![CDATA[<=]]>(select rightBottomX from main) 
+	and typ_lat::numeric<![CDATA[>=]]>(select rightBottomY from main) and typ_lat<![CDATA[<=]]>(select rightTopY from main)
+	and (trunc(typ_seq,0)!=trunc(#{typ_seq},0) and substring(tm_fc,1,4) != #{beg_year})
+	group by substring(tm_fc,1,4), typ_seq,typ_name
+
+	union 
+	
+	select substring(dt_tm_fc,1,4) beg_year,min(dt_tm_fc) tm_fc, min(dt_tm_fc) beg_date,max(dt_tm_fc) end_date, no_seq typ_seq ,nm_kor typ_name ,count(*) countPosition 
+	from tob_kma_typhoon 
+	where
+	loc_lngi::numeric <![CDATA[>=]]>(select leftBottomX from main) and loc_lngi::numeric<![CDATA[<=]]>(select rightBottomX from main) 
+	and loc_lati::numeric<![CDATA[>=]]>(select rightBottomY from main) and loc_lati::numeric<![CDATA[<=]]>(select rightTopY from main)
+	
+	and (trunc(no_seq,0)!=trunc(#{typ_seq},0) and substring(dt_tm_fc,1,4) != #{beg_year})
+	group by substring(dt_tm_fc,1,4), no_seq,nm_kor
+
+
+
+
+) t1
+where 
+
+beg_year is not null
+and countPosition>10
+order by countPosition desc
+
+</select>
+<select id="listForcast" parameterType="hashMap" resultType="typhoonCastInfoDto">
+
+select 
+typ_lon,
+typ_lat
+from (	
+select 
+ft1_lon typ_lon,
+ft1_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft2_lon typ_lon,
+ft2_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft3_lon typ_lon,
+ft3_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft4_lon typ_lon,
+ft4_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft5_lon typ_lon,
+ft5_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft6_lon typ_lon,
+ft6_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft7_lon typ_lon,
+ft7_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft8_lon typ_lon,
+ft8_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft9_lon typ_lon,
+ft9_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+union
+select 
+ft10_lon typ_lon,
+ft10_lat typ_lat
+from tob_kma_typhoon_5ds
+where  trunc(typ_seq,0)= trunc(#{typ_seq},0)  and substring(tm_fc,1,4) =#{beg_year} and trunc(tm_seq,0)=trunc(#{tm_seq},0)
+) t1
+<![CDATA[
+where typ_lon >0 and typ_lat>0
+	
+]]>	
+
+
+</select>
+<select id="listTyphoonInTargetAreaByForcast" parameterType="hashMap" resultType="typhoonCastInfoDto">
+
+
+select beg_year,tm_fc,typ_seq,typ_name,countPosition,beg_date,end_date,distance from(
+	
+	select substring(tm_fc,1,4) beg_year,min(tm_fc) tm_fc, min(tm_fc) beg_date,max(tm_fc) end_date, typ_seq,typ_name,max(distance) distance,count(*) countPosition
+	from(
+	
+		select beg_year,tm_fc,typ_seq,typ_name,distance from (
+			select substring(tm_fc,1,4) beg_year,tm_fc,typ_seq,typ_name
+			,sqrt(abs((#{leftBottomX}+#{rightBottomX})/2-typ_lon::numeric)) distance
+			from tob_kma_typhoon_5ds 
+			where
+			typ_lon::numeric <![CDATA[>=]]>#{leftBottomX} and typ_lon::numeric<![CDATA[<=]]>#{rightBottomX}
+			and typ_lat::numeric<![CDATA[>=]]>#{rightBottomY} and typ_lat::numeric<![CDATA[<=]]>#{rightTopY}
+			and (trunc(typ_seq,0)!=trunc(#{typ_seq},0) and substring(tm_fc,1,4) != #{beg_year})
+	
+			
+		
+			union 
+			
+			select substring(dt_tm_fc,1,4) beg_year,dt_tm_fc tm_fc, no_seq typ_seq ,nm_kor typ_name
+			,sqrt(abs((#{leftBottomX}+#{rightBottomX})/2-loc_lngi::numeric)) distance  
+			from tob_kma_typhoon 
+			where
+			loc_lngi::numeric <![CDATA[>=]]>#{leftBottomX} and loc_lngi::numeric<![CDATA[<=]]>#{rightBottomX} 
+			and loc_lati::numeric<![CDATA[>=]]>#{rightBottomY} and loc_lati::numeric<![CDATA[<=]]>#{rightTopY}
+			and (trunc(no_seq,0)!=trunc(#{typ_seq},0) and substring(dt_tm_fc,1,4) != #{beg_year}
+	
+		
+			<![CDATA[
+			and substring(dt_tm_fc,1,4)>='1978'
+			]]>
+			
+			)
+		
+		) t1
+	
+		
+		
+	 ) t2 
+	
+	 group by substring(tm_fc,1,4), typ_seq,typ_name
+
+) t3
+where 
+beg_year is not null
+<![CDATA[
+and countPosition>1
+]]>
+order by beg_year desc,countPosition desc
+
+</select>
+<select id="listTyphoonSearchByXY" parameterType="hashMap" resultType="typhoonCastInfoDto">
+
+			select substring(tm_fc,1,4) beg_year,tm_fc,typ_seq,typ_name,typ_lon,typ_lat
+			,abs((#{leftBottomX}+#{rightBottomX})/2-typ_lon::numeric) distance
+			from tob_kma_typhoon_5ds 
+			where
+			typ_lon::numeric <![CDATA[>=]]>#{leftBottomX} and typ_lon::numeric<![CDATA[<=]]>#{rightBottomX}
+			and typ_lat::numeric<![CDATA[>=]]>#{rightBottomY} and typ_lat::numeric<![CDATA[<=]]>#{rightTopY}
+			and (trunc(typ_seq,0)!=trunc(#{typ_seq},0) and substring(tm_fc,1,4) != #{beg_year})
+		
+			union 
+			select substring(dt_tm_fc,1,4) beg_year,dt_tm_fc tm_fc, no_seq typ_seq ,nm_kor typ_name,loc_lngi::numeric typ_lon,loc_lati::numeric typ_lat
+			,abs((#{leftBottomX}+#{rightBottomX})/2-loc_lngi::numeric) distance  
+			from tob_kma_typhoon 
+			where
+			loc_lngi::numeric <![CDATA[>=]]>#{leftBottomX} and loc_lngi::numeric<![CDATA[<=]]>#{rightBottomX} 
+			and loc_lati::numeric<![CDATA[>=]]>#{rightBottomY} and loc_lati::numeric<![CDATA[<=]]>#{rightTopY}
+			and (trunc(no_seq,0)!=trunc(#{typ_seq},0) and substring(dt_tm_fc,1,4) != #{beg_year})
+			
+			<![CDATA[
+			and substring(dt_tm_fc,1,4)>='1978'
+			]]>
+</select>
+<select id="listTyphoonInfoByCurrentTime" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	select
+	      trunc(stn_id,0) stn_id
+		, tm_fc tm_fc
+		, trunc(typ_seq, 0) typ_seq 
+		, trunc(tm_seq, 0) tm_seq
+		, typ_name typ_name
+		, typ_en typ_en
+		, typ_tm typ_tm
+		, trunc(typ_lat, 1) typ_lat
+		, trunc(typ_lon, 1) typ_lon
+		, typ_dir typ_dir
+		, trunc(typ_sp, 0) typ_sp
+		, trunc(typ_ps, 0) typ_ps
+		, trunc(typ_ws, 0) typ_ws
+		, typ_tp typ_tp
+		, trunc(typ_25, 0) typ_25
+		, typ_25ed typ_25ed
+		, trunc(typ_25er, 0) typ_25er
+		, trunc(typ_15, 0) typ_15
+		, typ_15ed typ_15ed
+		, trunc(typ_15er, 0) typ_15er
+		, ft1_tm ft1_tm
+		, trunc(ft1_lat, 1) ft1_lat
+		, trunc(ft1_lon, 1) ft1_lon
+		, trunc(ft1_ps, 0) ft1_ps
+		, trunc(ft1_ws, 0) ft1_ws
+		, trunc(ft1_rad, 0) ft1_rad
+		, trunc(ft1_15, 0) ft1_15
+		, ft1_15ed ft1_15ed
+		, trunc(ft1_15er, 0) ft1_15er
+		, ft1_dir ft1_dir
+		, trunc(ft1_sp, 0) ft1_sp
+		, ft2_tm ft2_tm
+		, trunc(ft2_lat, 1) ft2_lat
+		, trunc(ft2_lon, 1) ft2_lon
+		, trunc(ft2_ps, 0) ft2_ps
+		, trunc(ft2_ws, 0) ft2_ws
+		, trunc(ft2_rad, 0) ft2_rad
+		, trunc(ft2_15, 0) ft2_15
+		, ft2_15ed ft2_15ed
+		, trunc(ft2_15er, 0) ft2_15er
+		, ft2_dir ft2_dir
+		, trunc(ft2_sp, 0) ft2_sp
+		, ft3_tm ft3_tm
+		, trunc(ft3_lat, 1) ft3_lat
+		, trunc(ft3_lon, 1) ft3_lon
+		, trunc(ft3_ps, 0) ft3_ps
+		, trunc(ft3_ws, 0) ft3_ws
+		, trunc(ft3_rad, 0) ft3_rad
+		, trunc(ft3_15, 0) ft3_15
+		, ft3_15ed ft3_15ed
+		, trunc(ft3_15er, 0) ft3_15er
+		, ft3_dir ft3_dir
+		, trunc(ft3_sp, 0) ft3_sp
+		, ft4_tm ft4_tm
+		, trunc(ft4_lat, 1) ft4_lat
+		, trunc(ft4_lon, 1) ft4_lon
+		, trunc(ft4_ps, 0) ft4_ps
+		, trunc(ft4_ws, 0) ft4_ws
+		, trunc(ft4_rad, 0) ft4_rad
+		, trunc(ft4_15, 0) ft4_15
+		, ft4_15ed ft4_15ed
+		, trunc(ft4_15er, 0) ft4_15er
+		, ft4_dir ft4_dir
+		, trunc(ft4_sp, 0) ft4_sp
+		, ft5_tm ft5_tm
+		, trunc(ft5_lat, 1) ft5_lat
+		, trunc(ft5_lon, 1) ft5_lon
+		, trunc(ft5_ps, 0) ft5_ps
+		, trunc(ft5_ws, 0) ft5_ws
+		, trunc(ft5_rad, 0) ft5_rad
+		, trunc(ft5_15, 0) ft5_15
+		, ft5_15ed ft5_15ed
+		, trunc(ft5_15er, 0) ft5_15er
+		, ft5_dir ft5_dir
+		, trunc(ft5_sp, 0) ft5_sp
+		, ft6_tm
+		, trunc(ft6_lat,1) ft6_lat
+		, trunc(ft6_lon,1) ft6_lon
+		, trunc(ft6_ps, 0) ft6_ps
+		, trunc(ft6_ws, 0) ft6_ws
+		, trunc(ft6_rad,0) ft6_rad
+		, trunc(ft6_15, 0) ft6_15
+		, ft6_15ed
+		, trunc(ft6_15er, 0) ft6_15er
+		, ft6_dir
+		, trunc(ft6_sp, 0) ft6_sp
+		, ft7_tm
+		, trunc(ft7_lat, 1) ft7_lat
+		, trunc(ft7_lon, 1) ft7_lon
+		, trunc(ft7_ps, 0) ft7_ps
+		, trunc(ft7_ws, 0) ft7_ws
+		, trunc(ft7_rad, 0) ft7_rad
+		, trunc(ft7_15, 0) ft7_15
+		, ft7_15ed
+		, trunc(ft7_15er,0) ft7_15er
+		, ft7_dir
+		, ft7_sp
+		, ft8_tm
+		, trunc(ft8_lat, 1) ft8_lat
+		, trunc(ft8_lon, 1) ft8_lon
+		, trunc(ft8_ps, 0) ft8_ps
+		, trunc(ft8_ws, 0) ft8_ws
+		, trunc(ft8_rad, 0) ft8_rad
+		, trunc(ft8_15, 0) ft8_15
+		, ft8_15ed
+		, trunc(ft8_15er,0) ft8_15er
+		, ft8_dir
+		, ft8_sp
+		, ft9_tm
+		, trunc(ft9_lat, 1) ft9_lat
+		, trunc(ft9_lon, 1) ft9_lon
+		, trunc(ft9_ps, 0) ft9_ps
+		, trunc(ft9_ws, 0) ft9_ws
+		, trunc(ft9_rad, 0) ft9_rad
+		, trunc(ft9_15, 0) ft9_15
+		, ft9_15ed
+		, trunc(ft9_15er, 0) ft9_15er
+		, ft9_dir
+		, ft9_sp
+		, ft10_tm
+		, trunc(ft10_lat, 1) ft10_lat
+		, trunc(ft10_lon, 1) ft10_lon
+		, trunc(ft10_ps, 0) ft10_ps
+		, trunc(ft10_ws, 0) ft10_ws
+		, trunc(ft10_rad, 0) ft10_rad
+		, trunc(ft10_15, 0) ft10_15
+		, ft10_15ed
+		, trunc(ft10_15er, 0) ft10_15er
+		, ft10_dir
+		, ft10_sp
+		
+		from tob_kma_typhoon_5ds
+		where stn_id is not null
+		<if test="beg_year != null">
+		 and substring(tm_fc,1,4) = #{beg_year}
+		</if>
+		<if test="beg_month != null">
+		 and substring(tm_fc,5,2) = #{beg_month}
+		</if>
+		<if test="typ_seq != null">
+		and 
+		(
+		trunc(typ_seq,0)::character varying = #{typ_seq}
+		or
+		typ_seq::character varying = #{typ_seq}
+		)
+		</if>
+		<if test="beg_date != null">
+		and substring(tm_fc,1,8) <![CDATA[>=]]> #{beg_date} and substring(tm_fc,1,8) <![CDATA[<=]]> #{end_date}
+		</if>
+		
+		order by tm_fc asc
+
+	</select>
+	
+	<select id="listTyphoonInfoByPastTime" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	
+	select 
+	  cd_stn stn_id
+      , dt_tm_fc tm_fc
+      , trunc(no_seq,0) typ_seq
+      , no_tm_seq tm_seq
+      , nm_kor typ_name
+      , nm_eng typ_en
+      , nm_man_fc man_fc
+      , dt_typ_tm typ_tm
+      , loc_lati typ_lat
+      , loc_lngi typ_lon
+      , cus_dir typ_dir
+      , wv_sp typ_sp
+      , at_ps typ_ps
+      , wv_ws typ_ws
+      , cat_lvl typ_tp
+      , loc_25rad typ_25
+      , cus_25ex_dir typ_25ed
+      , loc_25ex_rad typ_25er
+      , loc_15rad typ_15
+      , cus_15ex_dir typ_15ed
+      , loc_15ex_rad typ_15er
+      , dt_est1 ft1_tm
+      , loc_est_lati1 ft1_lat
+      , loc_est_lngi1 ft1_lon
+      , at_est_ps1 ft1_ps
+      , wv_est_ws1 ft1_ws
+      , loc_est_rad1 ft1_rad
+      , loc_est_15rad1 ft1_15
+      , cus_est_15ex_dir1 ft1_15ed
+      , loc_est_15ex_rad1 ft1_15er
+      , cus_est_dir1 ft1_dir
+      , wv_est_sp1 ft1_sp
+      , dt_est2 ft2_tm
+      , loc_est_lati2 ft2_lat
+      , loc_est_lngi2 ft2_lon
+      , at_est_ps2 ft2_ps
+      , wv_est_ws2 ft2_ws
+      , loc_est_rad2 ft2_rad
+      , loc_est_15rad2 ft2_15
+      , cus_est_15ex_dir2 ft2_15ed
+      , loc_est_15ex_rad2 ft2_15er
+      , cus_est_dir2 ft2_dir
+      , wv_est_sp2 ft2_sp
+      , dt_est3 ft3_tm
+      , loc_est_lati3 ft3_lat
+      , loc_est_lngi3 ft3_lon
+      , at_est_ps3 ft3_ps
+      , wv_est_ws3 ft3_ws
+      , loc_est_rad3 ft3_rad
+      , loc_est_15rad3 ft3_15
+      , cus_est_15ex_dir3 ft3_15ed
+      , loc_est_15ex_rad3 ft3_15er
+      , cus_est_dir3 ft3_dir
+      , wv_est_sp3 ft3_sp
+      , dt_est4 ft4_tm
+      , loc_est_lati4 ft4_lat
+      , loc_est_lngi4 ft4_lon
+      , at_est_ps4 ft4_ps
+      , wv_est_ws4 ft4_ws
+      , loc_est_rad4 ft4_rad
+      , loc_est_15rad4 ft4_15
+      , cus_est_15ex_dir4 ft4_15ed
+      , loc_est_15ex_rad4 ft4_15er
+      , cus_est_dir4 ft4_dir
+      , wv_est_sp4 ft4_sp
+      , dt_est5 ft5_tm
+      , loc_est_lati5 ft5_lat
+      , loc_est_lngi5 ft5_lon
+      , at_est_ps5 ft5_ps
+      , wv_est_ws5 ft5_ws
+      , loc_est_rad5 ft5_rad
+      , loc_est_15rad5 ft5_15
+      , cus_est_15ex_dir5 ft5_15ed
+      , loc_est_15ex_rad5 ft5_15er
+      , cus_est_dir5 ft5_dir
+      , wv_est_sp5 ft5_sp
+	from tob_kma_typhoon
+	where cd_stn is not null
+
+		<if test="beg_year != null">
+		 and substring(dt_tm_fc,1,4) = #{beg_year}
+		</if>
+		<if test="beg_month != null">
+		 and substring(dt_tm_fc,5,2) = #{beg_month}
+		</if>
+		<if test="typ_seq != null">
+		and 
+		(
+		trunc(no_seq,0)::character varying = #{typ_seq}
+		or
+		no_seq::character varying = #{typ_seq}
+		)
+		
+		</if>
+		<if test="beg_date != null">
+		and substring(dt_tm_fc,1,8) <![CDATA[>=]]> #{beg_date} and substring(dt_tm_fc,1,8) <![CDATA[<=]]> #{end_date}
+		</if>
+		order by dt_tm_fc asc
+		
+	</select>
+	
+	<select id="listPastSimilarTyphoonByPeriod" parameterType="hashMap" resultType="typhoonCastInfoDto" >
+	select 
+	  cd_stn stn_id
+      , dt_tm_fc tm_fc
+      , no_seq typ_seq
+      , no_tm_seq tm_seq
+      , nm_kor typ_name
+      , nm_eng typ_en
+      , nm_man_fc man_fc
+      , dt_typ_tm typ_tm
+      , loc_lati typ_lat
+      , loc_lngi typ_lon
+      , cus_dir typ_dir
+      , wv_sp typ_sp
+      , at_ps typ_ps
+      , wv_ws typ_ws
+      , cat_lvl typ_tp
+      , loc_25rad typ_25
+      , cus_25ex_dir typ_25ed
+      , loc_25ex_rad typ_25er
+      , loc_15rad typ_15
+      , cus_15ex_dir typ_15ed
+      , loc_15ex_rad typ_15er
+      , dt_est1 ft1_tm
+      , loc_est_lati1 ft1_lat
+      , loc_est_lngi1 ft1_lon
+      , at_est_ps1 ft1_ps
+      , wv_est_ws1 ft1_ws
+      , loc_est_rad1 ft1_rad
+      , loc_est_15rad1 ft1_15
+      , cus_est_15ex_dir1 ft1_15ed
+      , loc_est_15ex_rad1 ft1_15er
+      , cus_est_dir1 ft1_dir
+      , wv_est_sp1 ft1_sp
+      , dt_est2 ft2_tm
+      , loc_est_lati2 ft2_lat
+      , loc_est_lngi2 ft2_lon
+      , at_est_ps2 ft2_ps
+      , wv_est_ws2 ft2_ws
+      , loc_est_rad2 ft2_rad
+      , loc_est_15rad2 ft2_15
+      , cus_est_15ex_dir2 ft2_15ed
+      , loc_est_15ex_rad2 ft2_15er
+      , cus_est_dir2 ft2_dir
+      , wv_est_sp2 ft2_sp
+      , dt_est3 ft3_tm
+      , loc_est_lati3 ft3_lat
+      , loc_est_lngi3 ft3_lon
+      , at_est_ps3 ft3_ps
+      , wv_est_ws3 ft3_ws
+      , loc_est_rad3 ft3_rad
+      , loc_est_15rad3 ft3_15
+      , cus_est_15ex_dir3 ft3_15ed
+      , loc_est_15ex_rad3 ft3_15er
+      , cus_est_dir3 ft3_dir
+      , wv_est_sp3 ft3_sp
+      , dt_est4 ft4_tm
+      , loc_est_lati4 ft4_lat
+      , loc_est_lngi4 ft4_lon
+      , at_est_ps4 ft4_ps
+      , wv_est_ws4 ft4_ws
+      , loc_est_rad4 ft4_rad
+      , loc_est_15rad4 ft4_15
+      , cus_est_15ex_dir4 ft4_15ed
+      , loc_est_15ex_rad4 ft4_15er
+      , cus_est_dir4 ft4_dir
+      , wv_est_sp4 ft4_sp
+      , dt_est5 ft5_tm
+      , loc_est_lati5 ft5_lat
+      , loc_est_lngi5 ft5_lon
+      , at_est_ps5 ft5_ps
+      , wv_est_ws5 ft5_ws
+      , loc_est_rad5 ft5_rad
+      , loc_est_15rad5 ft5_15
+      , cus_est_15ex_dir5 ft5_15ed
+      , loc_est_15ex_rad5 ft5_15er
+      , cus_est_dir5 ft5_dir
+      , wv_est_sp5 ft5_sp
+	from tob_kma_typhoon
+	where substring(dt_tm_fc,1,8) <![CDATA[>=]]> #{beg_date} and substring(dt_tm_fc,1,8) <![CDATA[<=]]> #{end_date}
+	
+	order by dt_tm_fc desc
+
+	</select>
+	
+	
+	<select id="listCurrentSimilarTyphoonByPeriod" parameterType="hashMap" resultType="typhoonCastInfoDto" >
+	select
+	      trunc(stn_id,0) stn_id
+		, tm_fc tm_fc
+		, trunc(typ_seq, 0) typ_seq 
+		, trunc(tm_seq, 0) tm_seq
+		, typ_name typ_name
+		, typ_en typ_en
+		, typ_tm typ_tm
+		, trunc(typ_lat, 1) typ_lat
+		, trunc(typ_lon, 1) typ_lon
+		, typ_dir typ_dir
+		, trunc(typ_sp, 0) typ_sp
+		, trunc(typ_ps, 0) typ_ps
+		, trunc(typ_ws, 0) typ_ws
+		, typ_tp typ_tp
+		, trunc(typ_25, 0) typ_25
+		, typ_25ed typ_25ed
+		, trunc(typ_25er, 0) typ_25er
+		, trunc(typ_15, 0) typ_15
+		, typ_15ed typ_15ed
+		, trunc(typ_15er, 0) typ_15er
+		, ft1_tm ft1_tm
+		, trunc(ft1_lat, 1) ft1_lat
+		, trunc(ft1_lon, 1) ft1_lon
+		, trunc(ft1_ps, 0) ft1_ps
+		, trunc(ft1_ws, 0) ft1_ws
+		, trunc(ft1_rad, 0) ft1_rad
+		, trunc(ft1_15, 0) ft1_15
+		, ft1_15ed ft1_15ed
+		, trunc(ft1_15er, 0) ft1_15er
+		, ft1_dir ft1_dir
+		, trunc(ft1_sp, 0) ft1_sp
+		, ft2_tm ft2_tm
+		, trunc(ft2_lat, 1) ft2_lat
+		, trunc(ft2_lon, 1) ft2_lon
+		, trunc(ft2_ps, 0) ft2_ps
+		, trunc(ft2_ws, 0) ft2_ws
+		, trunc(ft2_rad, 0) ft2_rad
+		, trunc(ft2_15, 0) ft2_15
+		, ft2_15ed ft2_15ed
+		, trunc(ft2_15er, 0) ft2_15er
+		, ft2_dir ft2_dir
+		, trunc(ft2_sp, 0) ft2_sp
+		, ft3_tm ft3_tm
+		, trunc(ft3_lat, 1) ft3_lat
+		, trunc(ft3_lon, 1) ft3_lon
+		, trunc(ft3_ps, 0) ft3_ps
+		, trunc(ft3_ws, 0) ft3_ws
+		, trunc(ft3_rad, 0) ft3_rad
+		, trunc(ft3_15, 0) ft3_15
+		, ft3_15ed ft3_15ed
+		, trunc(ft3_15er, 0) ft3_15er
+		, ft3_dir ft3_dir
+		, trunc(ft3_sp, 0) ft3_sp
+		, ft4_tm ft4_tm
+		, trunc(ft4_lat, 1) ft4_lat
+		, trunc(ft4_lon, 1) ft4_lon
+		, trunc(ft4_ps, 0) ft4_ps
+		, trunc(ft4_ws, 0) ft4_ws
+		, trunc(ft4_rad, 0) ft4_rad
+		, trunc(ft4_15, 0) ft4_15
+		, ft4_15ed ft4_15ed
+		, trunc(ft4_15er, 0) ft4_15er
+		, ft4_dir ft4_dir
+		, trunc(ft4_sp, 0) ft4_sp
+		, ft5_tm ft5_tm
+		, trunc(ft5_lat, 1) ft5_lat
+		, trunc(ft5_lon, 1) ft5_lon
+		, trunc(ft5_ps, 0) ft5_ps
+		, trunc(ft5_ws, 0) ft5_ws
+		, trunc(ft5_rad, 0) ft5_rad
+		, trunc(ft5_15, 0) ft5_15
+		, ft5_15ed ft5_15ed
+		, trunc(ft5_15er, 0) ft5_15er
+		, ft5_dir ft5_dir
+		, trunc(ft5_sp, 0) ft5_sp
+		, ft6_tm
+		, trunc(ft6_lat,1) ft6_lat
+		, trunc(ft6_lon,1) ft6_lon
+		, trunc(ft6_ps, 0) ft6_ps
+		, trunc(ft6_ws, 0) ft6_ws
+		, trunc(ft6_rad,0) ft6_rad
+		, trunc(ft6_15, 0) ft6_15
+		, ft6_15ed
+		, trunc(ft6_15er, 0) ft6_15er
+		, ft6_dir
+		, trunc(ft6_sp, 0) ft6_sp
+		, ft7_tm
+		, trunc(ft7_lat, 1) ft7_lat
+		, trunc(ft7_lon, 1) ft7_lon
+		, trunc(ft7_ps, 0) ft7_ps
+		, trunc(ft7_ws, 0) ft7_ws
+		, trunc(ft7_rad, 0) ft7_rad
+		, trunc(ft7_15, 0) ft7_15
+		, ft7_15ed
+		, trunc(ft7_15er,0) ft7_15er
+		, ft7_dir
+		, ft7_sp
+		, ft8_tm
+		, trunc(ft8_lat, 1) ft8_lat
+		, trunc(ft8_lon, 1) ft8_lon
+		, trunc(ft8_ps, 0) ft8_ps
+		, trunc(ft8_ws, 0) ft8_ws
+		, trunc(ft8_rad, 0) ft8_rad
+		, trunc(ft8_15, 0) ft8_15
+		, ft8_15ed
+		, trunc(ft8_15er,0) ft8_15er
+		, ft8_dir
+		, ft8_sp
+		, ft9_tm
+		, trunc(ft9_lat, 1) ft9_lat
+		, trunc(ft9_lon, 1) ft9_lon
+		, trunc(ft9_ps, 0) ft9_ps
+		, trunc(ft9_ws, 0) ft9_ws
+		, trunc(ft9_rad, 0) ft9_rad
+		, trunc(ft9_15, 0) ft9_15
+		, ft9_15ed
+		, trunc(ft9_15er, 0) ft9_15er
+		, ft9_dir
+		, ft9_sp
+		, ft10_tm
+		, trunc(ft10_lat, 1) ft10_lat
+		, trunc(ft10_lon, 1) ft10_lon
+		, trunc(ft10_ps, 0) ft10_ps
+		, trunc(ft10_ws, 0) ft10_ws
+		, trunc(ft10_rad, 0) ft10_rad
+		, trunc(ft10_15, 0) ft10_15
+		, ft10_15ed
+		, trunc(ft10_15er, 0) ft10_15er
+		, ft10_dir
+		, ft10_sp
+	from tob_kma_typhoon_5ds
+	where substring(tm_fc,1,8) <![CDATA[>=]]> #{beg_date} and substring(tm_fc,1,8) <![CDATA[<=]]> #{end_date}
+	order by tm_fc desc
+	</select>
+	
+	<select id="typhoonNameList" parameterType="hashMap" resultType="typhoonCastInfoDto" >
+	with main as(
+		
+		
+		
+	select typ_name,tm_fc,beg_date,typ_sp,typ_en,typ_seq from (
+		select typ_name
+		,max(tm_fc) tm_fc 
+		,substring(min(tm_fc),1,8) beg_date
+		,round(avg(typ_sp)) typ_sp
+		,typ_en
+		,typ_seq
+		from tob_kma_typhoon_5ds
+		where stn_id is not null 
+	    and substring(tm_fc,1,4)<![CDATA[>=]]>#{beg_year} and substring(tm_fc,1,4)<![CDATA[<=]]>#{end_year}
+	
+		group by typ_name,typ_en,typ_seq
+		union all
+		select nm_kor typ_name
+		,max(dt_tm_fc) tm_fc 
+		,substring(min(dt_tm_fc),1,8) beg_date
+		,round(avg(wv_sp)) typ_sp
+		,nm_eng typ_en
+		,no_seq typ_seq from tob_kma_typhoon
+		where cd_stn is not null 
+		and substring(dt_tm_fc,1,4)<![CDATA[>=]]>#{beg_year} and substring(dt_tm_fc,1,4)<![CDATA[<=]]>#{end_year}
+	
+		group by nm_kor,nm_eng,no_seq
+		) t1
+		order by tm_fc desc
+	
+	)
+	
+	select  typ_name,
+		typ_ps,
+		typ_ws,
+		typ_en,
+		typ_sp,
+		beg_date,
+		typ_seq,
+		end_date
+	 from (
+	select  
+		t1.typ_name,
+		t1.typ_ps,
+		t1.typ_ws,
+		t1.typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon_5ds t1,main t2
+		where t1.typ_name=t2.typ_name and t1.tm_fc=t2.tm_fc and t1.typ_seq=t2.typ_seq
+		union all
+	select  
+		t1.nm_kor typ_name,
+		t1.at_ps typ_ps,
+		t1.wv_ws typ_ws,
+		t1.nm_eng typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon t1,main t2
+		where t1.nm_kor=t2.typ_name and t1.dt_tm_fc=t2.tm_fc and t1.no_seq=t2.typ_seq
+	) t2
+	order by beg_date desc
+
+	
+	</select>
+	
+	<select id="last" parameterType="hashMap" resultType="typhoonCastInfoDto" >
+	select
+	      trunc(stn_id,0) stn_id
+		, tm_fc tm_fc
+		, trunc(typ_seq, 0) typ_seq 
+		, trunc(tm_seq, 0) tm_seq
+		, typ_name typ_name
+		, typ_en typ_en
+		, typ_tm typ_tm
+		, trunc(typ_lat, 1) typ_lat
+		, trunc(typ_lon, 1) typ_lon
+		, typ_dir typ_dir
+		, trunc(typ_sp, 0) typ_sp
+		, trunc(typ_ps, 0) typ_ps
+		, trunc(typ_ws, 0) typ_ws
+		, typ_tp typ_tp
+		, trunc(typ_25, 0) typ_25
+		, typ_25ed typ_25ed
+		, trunc(typ_25er, 0) typ_25er
+		, trunc(typ_15, 0) typ_15
+		, typ_15ed typ_15ed
+		, trunc(typ_15er, 0) typ_15er
+		, ft1_tm ft1_tm
+		, trunc(ft1_lat, 1) ft1_lat
+		, trunc(ft1_lon, 1) ft1_lon
+		, trunc(ft1_ps, 0) ft1_ps
+		, trunc(ft1_ws, 0) ft1_ws
+		, trunc(ft1_rad, 0) ft1_rad
+		, trunc(ft1_15, 0) ft1_15
+		, ft1_15ed ft1_15ed
+		, trunc(ft1_15er, 0) ft1_15er
+		, ft1_dir ft1_dir
+		, trunc(ft1_sp, 0) ft1_sp
+		, ft2_tm ft2_tm
+		, trunc(ft2_lat, 1) ft2_lat
+		, trunc(ft2_lon, 1) ft2_lon
+		, trunc(ft2_ps, 0) ft2_ps
+		, trunc(ft2_ws, 0) ft2_ws
+		, trunc(ft2_rad, 0) ft2_rad
+		, trunc(ft2_15, 0) ft2_15
+		, ft2_15ed ft2_15ed
+		, trunc(ft2_15er, 0) ft2_15er
+		, ft2_dir ft2_dir
+		, trunc(ft2_sp, 0) ft2_sp
+		, ft3_tm ft3_tm
+		, trunc(ft3_lat, 1) ft3_lat
+		, trunc(ft3_lon, 1) ft3_lon
+		, trunc(ft3_ps, 0) ft3_ps
+		, trunc(ft3_ws, 0) ft3_ws
+		, trunc(ft3_rad, 0) ft3_rad
+		, trunc(ft3_15, 0) ft3_15
+		, ft3_15ed ft3_15ed
+		, trunc(ft3_15er, 0) ft3_15er
+		, ft3_dir ft3_dir
+		, trunc(ft3_sp, 0) ft3_sp
+		, ft4_tm ft4_tm
+		, trunc(ft4_lat, 1) ft4_lat
+		, trunc(ft4_lon, 1) ft4_lon
+		, trunc(ft4_ps, 0) ft4_ps
+		, trunc(ft4_ws, 0) ft4_ws
+		, trunc(ft4_rad, 0) ft4_rad
+		, trunc(ft4_15, 0) ft4_15
+		, ft4_15ed ft4_15ed
+		, trunc(ft4_15er, 0) ft4_15er
+		, ft4_dir ft4_dir
+		, trunc(ft4_sp, 0) ft4_sp
+		, ft5_tm ft5_tm
+		, trunc(ft5_lat, 1) ft5_lat
+		, trunc(ft5_lon, 1) ft5_lon
+		, trunc(ft5_ps, 0) ft5_ps
+		, trunc(ft5_ws, 0) ft5_ws
+		, trunc(ft5_rad, 0) ft5_rad
+		, trunc(ft5_15, 0) ft5_15
+		, ft5_15ed ft5_15ed
+		, trunc(ft5_15er, 0) ft5_15er
+		, ft5_dir ft5_dir
+		, trunc(ft5_sp, 0) ft5_sp
+		, ft6_tm
+		, trunc(ft6_lat,1) ft6_lat
+		, trunc(ft6_lon,1) ft6_lon
+		, trunc(ft6_ps, 0) ft6_ps
+		, trunc(ft6_ws, 0) ft6_ws
+		, trunc(ft6_rad,0) ft6_rad
+		, trunc(ft6_15, 0) ft6_15
+		, ft6_15ed
+		, trunc(ft6_15er, 0) ft6_15er
+		, ft6_dir
+		, trunc(ft6_sp, 0) ft6_sp
+		, ft7_tm
+		, trunc(ft7_lat, 1) ft7_lat
+		, trunc(ft7_lon, 1) ft7_lon
+		, trunc(ft7_ps, 0) ft7_ps
+		, trunc(ft7_ws, 0) ft7_ws
+		, trunc(ft7_rad, 0) ft7_rad
+		, trunc(ft7_15, 0) ft7_15
+		, ft7_15ed
+		, trunc(ft7_15er,0) ft7_15er
+		, ft7_dir
+		, ft7_sp
+		, ft8_tm
+		, trunc(ft8_lat, 1) ft8_lat
+		, trunc(ft8_lon, 1) ft8_lon
+		, trunc(ft8_ps, 0) ft8_ps
+		, trunc(ft8_ws, 0) ft8_ws
+		, trunc(ft8_rad, 0) ft8_rad
+		, trunc(ft8_15, 0) ft8_15
+		, ft8_15ed
+		, trunc(ft8_15er,0) ft8_15er
+		, ft8_dir
+		, ft8_sp
+		, ft9_tm
+		, trunc(ft9_lat, 1) ft9_lat
+		, trunc(ft9_lon, 1) ft9_lon
+		, trunc(ft9_ps, 0) ft9_ps
+		, trunc(ft9_ws, 0) ft9_ws
+		, trunc(ft9_rad, 0) ft9_rad
+		, trunc(ft9_15, 0) ft9_15
+		, ft9_15ed
+		, trunc(ft9_15er, 0) ft9_15er
+		, ft9_dir
+		, ft9_sp
+		, ft10_tm
+		, trunc(ft10_lat, 1) ft10_lat
+		, trunc(ft10_lon, 1) ft10_lon
+		, trunc(ft10_ps, 0) ft10_ps
+		, trunc(ft10_ws, 0) ft10_ws
+		, trunc(ft10_rad, 0) ft10_rad
+		, trunc(ft10_15, 0) ft10_15
+		, ft10_15ed
+		, trunc(ft10_15er, 0) ft10_15er
+		, ft10_dir
+		, ft10_sp
+		from tob_kma_typhoon_5ds
+		where stn_id is not null
+		order by tm_fc desc
+		limit 1
+	</select>
+	
+	<select id="currentTyphoonInfos" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	with main as(
+		select typ_name
+		,max(tm_fc) tm_fc 
+		,substring(min(tm_fc),1,8) beg_date
+		,round(avg(typ_sp)) typ_sp
+		,typ_en
+		,typ_seq
+		from tob_kma_typhoon_5ds
+		where stn_id is not null 
+		and substring(tm_fc,1,8)<![CDATA[>=]]>#{beg_date} and substring(tm_fc,1,8)<![CDATA[<=]]>#{end_date}
+		
+		group by typ_name,typ_en,typ_seq
+		order by tm_fc desc
+	
+	)
+	select  
+		t1.typ_name,
+		t1.typ_ps,
+		t1.typ_ws,
+		t1.typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon_5ds t1,main t2
+		where t1.typ_name=t2.typ_name and t1.tm_fc=t2.tm_fc and t1.typ_seq=t2.typ_seq
+	</select>
+	
+	
+	<select id="currentTyphoonInfosByName" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	with main as(
+		
+		
+		
+	select typ_name,tm_fc,beg_date,typ_sp,typ_en,typ_seq from (
+		select typ_name
+		,max(tm_fc) tm_fc 
+		,substring(min(tm_fc),1,8) beg_date
+		,round(avg(typ_sp)) typ_sp
+		,typ_en
+		,typ_seq
+		from tob_kma_typhoon_5ds
+		where stn_id is not null 
+		and substring(tm_fc,1,4)=#{beg_year} 
+		and typ_name like concat(#{typ_name},'%')
+		group by typ_name,typ_en,typ_seq
+		union all
+		select nm_kor typ_name
+		,max(dt_tm_fc) tm_fc 
+		,substring(min(dt_tm_fc),1,8) beg_date
+		,round(avg(wv_sp)) typ_sp
+		,nm_eng typ_en
+		,no_seq typ_seq from tob_kma_typhoon
+		where cd_stn is not null 
+		and substring(dt_tm_fc,1,4)=#{beg_year} 
+		and nm_kor like concat(#{typ_name},'%')
+		group by nm_kor,nm_eng,no_seq
+		)
+		order by tm_fc desc
+	
+	)
+	select  
+		t1.typ_name,
+		t1.typ_ps,
+		t1.typ_ws,
+		t1.typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon_5ds t1,main t2
+		where t1.typ_name=t2.typ_name and t1.tm_fc=t2.tm_fc and t1.typ_seq=t2.typ_seq
+		union all
+	select  
+		t1.nm_kor typ_name,
+		t1.at_ps typ_ps,
+		t1.wv_ws typ_ws,
+		t1.nm_eng typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon t1,main t2
+		where t1.nm_kor=t2.typ_name and t1.dt_tm_fc=t2.tm_fc and t1.no_seq=t2.typ_seq
+
+		
+	</select>
+	<select id="listSearch" parameterType="hashMap" resultType="typhoonCastInfoDto">
+	with main as(
+		
+		
+		
+	select typ_name,tm_fc,beg_date,typ_sp,typ_en,typ_seq from (
+		select typ_name
+		,max(tm_fc) tm_fc 
+		,substring(min(tm_fc),1,8) beg_date
+		,round(avg(typ_sp)) typ_sp
+		,typ_en
+		,typ_seq
+		from tob_kma_typhoon_5ds
+		where stn_id is not null 
+	    and substring(tm_fc,1,4)<![CDATA[>=]]>#{beg_year} and substring(tm_fc,1,4)<![CDATA[<=]]>#{end_year}
+	
+		group by typ_name,typ_en,typ_seq
+		union all
+		select nm_kor typ_name
+		,max(dt_tm_fc) tm_fc 
+		,substring(min(dt_tm_fc),1,8) beg_date
+		,round(avg(wv_sp)) typ_sp
+		,nm_eng typ_en
+		,no_seq typ_seq from tob_kma_typhoon
+		where cd_stn is not null 
+		and substring(dt_tm_fc,1,4)<![CDATA[>=]]>#{beg_year} and substring(dt_tm_fc,1,4)<![CDATA[<=]]>#{end_year}
+	
+		group by nm_kor,nm_eng,no_seq
+		)
+		order by tm_fc desc
+	
+	)
+	
+	select  typ_name,
+		typ_ps,
+		typ_ws,
+		typ_en,
+		typ_sp,
+		beg_date,
+		typ_seq,
+		end_date
+	 from (
+	select  
+		t1.typ_name,
+		t1.typ_ps,
+		t1.typ_ws,
+		t1.typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon_5ds t1,main t2
+		where t1.typ_name=t2.typ_name and t1.tm_fc=t2.tm_fc and t1.typ_seq=t2.typ_seq
+		union all
+	select  
+		t1.nm_kor typ_name,
+		t1.at_ps typ_ps,
+		t1.wv_ws typ_ws,
+		t1.nm_eng typ_en,
+		t2.typ_sp,
+		t2.beg_date,
+		t2.typ_seq,
+		substring(t2.tm_fc,1,8) end_date
+		from tob_kma_typhoon t1,main t2
+		where t1.nm_kor=t2.typ_name and t1.dt_tm_fc=t2.tm_fc and t1.no_seq=t2.typ_seq
+	)
+	order by beg_date desc
+	
+	</select>
+	<select id="listAllTyphoonDamage" parameterType="hashMap" resultType="typhoonCastInfoDto">
+		select 
+		rownum ,
+  typ_name ,
+  typ_ps ,
+  typ_ws ,
+  typ_en ,
+  typ_sp ,
+  beg_date ,
+  typ_seq ,
+  tm_seq ,
+  end_date ,
+  com_dme ,
+  total_damage 
+  from tb_typhoon_damage
+	</select>
+	
+
+
+	
+	<select id="listSearchTyphoonByKorea"  parameterType="hashMap" resultType="typhoonCastInfoDto">
+	select 
+	  beg_date
+	, end_date 
+	, typ_name 
+	, typ_eng_name
+	, typ_seq
+	from tb_year_dme_typhoon
+	order by beg_date desc
+   </select>
+	<select id="detailInfo"  parameterType="hashMap" resultType="typhoonCastInfoDto">
+	with main as(
+	select  
+		t1.typ_name,
+		t1.typ_ps,
+		t1.typ_ws,
+		t1.typ_en,
+		t1.tm_fc,
+		t1.typ_seq,
+		substring(t1.tm_fc,1,8) end_date
+		from tob_kma_typhoon_5ds t1
+		where t1.typ_name=#{typ_name}
+		and substring(t1.tm_fc,1,4)=#{end_year} 
+		union all
+	select  
+		t1.nm_kor typ_name,
+		t1.at_ps typ_ps,
+		t1.wv_ws typ_ws,
+		t1.nm_eng typ_en,
+		t1.dt_tm_fc tm_fc,
+		t1.no_seq typ_seq,
+		substring(t1.dt_tm_fc,1,8) end_date
+		from tob_kma_typhoon t1
+		where t1.nm_kor=#{typ_name}
+		and substring(t1.dt_tm_fc,1,4)=#{end_year}
+		)
+		select 
+			typ_name,
+		typ_ps,
+		typ_ws,
+		typ_en,
+		tm_fc,
+		typ_seq,
+		 end_date
+		 from main 
+		 order by tm_fc desc
+		 limit 1
+   </select>
+   
+   <select id="listLat30Info"  parameterType="hashMap" resultType="typhoonCastInfoDto">
+   <![CDATA[
+		with main as(
+	
+	select 
+			t1.tm_fc
+			,t1.typ_name
+			,max(t1.typ_ps) typ_ps
+			,max(t1.typ_ws) typ_ws
+			,max(t1.typ_sp) typ_sp
+			,max(typ_lat) typ_lat
+			,max(typ_lon) typ_lon
+			,max(typ_15) typ_15
+		from tob_kma_typhoon_5ds t1 
+		inner join 
+		
+		(
+			select typ_name, max(tm_fc) tm_fc from tob_kma_typhoon_5ds 
+			where typ_lat<31 and typ_lat>10 
+			group by typ_name,substring(tm_fc,1,4)
+		) t2
+		on t1.tm_fc=t2.tm_fc  and t1.typ_name=t2.typ_name
+		group by t1.tm_fc,t1.typ_name
+		
+		
+		union all
+		select 
+			 t1.dt_tm_fc tm_fc
+			,t1.nm_kor typ_name
+			,max(t1.at_ps) typ_ps
+			,max(t1.wv_ws) typ_ws
+			,max(t1.wv_sp) typ_sp
+			,max(loc_lati::numeric)  typ_lat
+			,max(loc_lngi::numeric) typ_lon 
+			,max(loc_15rad::numeric) typ_15
+		from tob_kma_typhoon  t1 
+		inner join 
+		
+		(
+			select nm_kor , max(dt_tm_fc) dt_tm_fc from tob_kma_typhoon 
+			where loc_lati::numeric<31 and loc_lati::numeric>10  
+			group by nm_kor,substring(dt_tm_fc,1,4)
+		) t2
+		on t1.dt_tm_fc=t2.dt_tm_fc  and t1.nm_kor=t2.nm_kor
+		group by t1.dt_tm_fc,t1.nm_kor
+
+)
+select 
+typ_name,
+tm_fc,
+typ_ps,
+typ_ws,
+typ_sp,
+typ_lat,
+typ_lon,
+typ_15,
+case 
+	when typ_ws>=44 then '매우 강'
+	when typ_ws>=33 and typ_ws<44 then '강'
+	when typ_ws>=25 and typ_ws<33 then '중'
+	else '-' end
+ pw_kor
+ ,
+ case 
+ 	when typ_15 is null then '-'
+	when typ_15>=800 then '초대형'
+	when typ_15>=500 and typ_ws<800 then '대형'
+	when typ_15>=300 and typ_ws<500 then '중형'
+	else '소형' end
+ typ_size_kor
+from main
+
+   ]]>
+   </select>
+   <select id="listSearchTyphoonsByNameYear"  parameterType="hashMap" resultType="typhoonCastInfoDto">
+   with main as(
+	select  
+		t1.typ_name,
+		t1.typ_ps,
+		t1.typ_ws,
+		t1.typ_en,
+		t1.typ_sp,
+		t1.tm_fc,
+		t1.typ_seq,
+		t1.typ_lon,
+		t1.typ_lat,
+		substring(t1.tm_fc,1,8) end_date
+		from tob_kma_typhoon_5ds t1
+		where concat(t1.typ_name,'-',substring(t1.tm_fc,1,4)) in
+		<foreach collection="typNmae_year" item="item" open="("
+				close=")" separator=",">
+				#{item}
+		</foreach>
+	
+		union all
+	select  
+		t1.nm_kor typ_name,
+		t1.at_ps typ_ps,
+		t1.wv_ws typ_ws,
+		t1.nm_eng typ_en,
+		t1.wv_sp typ_sp,
+		t1.dt_tm_fc tm_fc,
+		t1.no_seq typ_seq,
+		t1.loc_lngi::numeric typ_lon,
+		t1.loc_lati::numeric typ_lat,
+		substring(t1.dt_tm_fc,1,8) end_date
+		from tob_kma_typhoon t1
+		where concat(t1.nm_kor,'-',substring(t1.dt_tm_fc,1,4)) in
+		<foreach collection="typNmae_year" item="item" open="("
+				close=")" separator=",">
+				#{item}
+		</foreach>
+		)
+		select 
+			typ_name,
+		typ_ps,
+		typ_ws,
+		typ_en,
+		typ_sp,
+		tm_fc,
+		typ_seq,
+		typ_lon,
+		typ_lat,
+		 end_date
+		 from main 
+		 order by tm_fc desc
+		
+   </select>
+</mapper>

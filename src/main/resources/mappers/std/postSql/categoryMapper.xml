@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="disCategory">
+	<update id="insert" parameterType="categoryDTO">
+		  insert into tc_dis_category
+		 (  ctg_id
+			,ctg_group  
+			,print_id 
+			,title 
+			,depth 
+			,sort 
+			,parent_ctg_id
+			,create_date
+			,update_date
+			,contents
+			,use_yn
+			,create_user_id
+			
+		)
+		values(
+			#{ctg_id}  
+			,#{ctg_group} 
+			,#{print_id}
+			,#{title}
+			,#{depth}
+			,#{sort}
+			,#{parent_ctg_id}
+			,NOW()
+			,NOW()
+			,#{contents}
+			,#{use_yn}
+			,#{create_user_id}
+
+			)
+	</update>
+	<select id="selectCtg" parameterType="categoryDTO" resultType="categoryDTO">
+		select ctg_id
+			,ctg_group  
+			,print_id 
+			,title 
+			,depth 
+			,sort 
+			,parent_ctg_id
+		 from tc_dis_category
+		 where 1=1
+		 <if test="ctg_group!=null">
+			 and ctg_group = #{ctg_group}
+		 </if>
+ 		 <if test="ctg_id != null">
+			 and ctg_id like #{ctg_id} || '%' 
+		 </if>
+		 <if test="depth!=0 and depth != null">
+			 and depth = #{depth}
+		 </if>
+		and use_yn = 'Y'
+		order by print_id asc,sort desc
+	</select>
+	
+	<select id="disCodeList" parameterType="categoryDTO" resultType="categoryDTO">
+		select ctg_id
+			,ctg_group  
+			,print_id 
+			,title 
+			,depth 
+			,sort 
+			,parent_ctg_id
+		 from tc_dis_category
+		 where 1=1
+		 <if test="parent_ctg_id!=null">
+			 and parent_ctg_id = #{parent_ctg_id}
+		 </if>
+		 <if test="depth!=0 and depth != null">
+			 and depth = #{depth}
+		 </if>
+		  <if test="print_id!=null">
+			 and print_id = #{print_id}
+		 </if>
+		 <if test="ctg_group!=null">
+			 and ctg_group = #{ctg_group}
+		 </if>	
+		  <if test="title!=null">
+			 and title = #{title}
+		 </if>		 
+		 and use_yn = 'Y'
+
+		order by print_id asc,sort desc
+	</select>
+	
+	<update id="sortUpdate" parameterType="categoryDTO">
+		<![CDATA[
+		update tc_dis_category
+		set sort=#{sort}
+		where
+		ctg_id=#{ctg_id}
+		]]>
+	</update>
+	
+	<update id="update" parameterType="categoryDTO">
+		<![CDATA[
+		update tc_dis_category
+		set title=#{title}
+		, update_user_id = #{update_user_id}
+		where
+		print_id=#{print_id}
+		]]>
+	</update>	
+	<update id="delete" parameterType="categoryDTO">
+		<![CDATA[
+		update tc_dis_category
+		set use_yn=#{use_yn}
+		where
+		ctg_id=#{ctg_id}
+		and depth=#{depth}
+		]]>
+	</update>	
+	<select id="createSelectCode" parameterType="categoryDTO" resultType="categoryDTO">
+		select ctg_id
+			,ctg_group  
+			,print_id 
+			,title 
+			,depth 
+			,sort 
+			,parent_ctg_id
+		 from tc_dis_category
+		 where 1=1
+		 <if test="ctg_group!=null">
+			 and ctg_group = #{ctg_group}
+		 </if>
+		order by sort desc
+	</select>
+	
+	<select id="searchCtgIdList" parameterType="categoryDTO" resultType="categoryDTO">
+		select ctg_id
+			,ctg_group  
+			,print_id 
+			,title 
+			,depth 
+			,sort 
+			,parent_ctg_id
+		 from tc_dis_category
+		 where 1=1
+		 and use_yn = 'Y'
+		 <if test="ctg_group !=null">
+		 	and ctg_group=#{ctg_group}
+		 </if>
+		 <if test="depth!=0 and depth != null">
+			 and depth = #{depth}
+		 </if>
+		 <if test="title != null">
+			 and title = #{title}
+		 </if>
+		  
+
+	</select>
+	
+	<select id="listTbOcrFile" parameterType="tbOcrFile" resultType="tbOcrFile">
+		select   
+		t1.ctg_id
+		, t1.evt_id
+		, t1.title
+		, t1.file_new_name
+		,t2.title ctg_title
+		from tb_ocr_file t1,tc_dis_category t2
+		where t1.ctg_id=t2.ctg_id
+		<if test="ctg_id!=null and evt_id != null">
+			 and t1.ctg_id = #{ctg_id} and t1.evt_id = #{evt_id}
+		</if>
+		
+		<if test="pageSize and pageNo != null">
+			limit ${pageSize} offset ${pageSize}*${pageNo}
+		</if>
+	</select>
+	
+	<select id="countTbOcrFile" parameterType="tbOcrFile" resultType="int">
+		select count(*)
+		from tb_ocr_file
+		
+		<if test="ctg_id != null and evt_id != null">
+			where ctg_id = #{ctg_id} and evt_id = #{evt_id}
+		</if>
+	</select>
+	<select id="detailTbOcrFile" parameterType="hashMap" resultType="tbOcrFile">
+		select ctg_id, evt_id, title,file_org_name,file_new_name
+		from tb_ocr_file
+		<if test="ctg_id != null and evt_id != null">
+			where ctg_id = #{ctg_id} and evt_id = #{evt_id}
+		</if>
+	</select>
+	<update id="insertTbOcrFile" parameterType="tbOcrFile">
+		insert into tb_ocr_file(
+			ctg_id, evt_id, title, file_org_name, file_new_name
+		)
+		values(
+			#{ctg_id}, #{evt_id}, #{title}, #{file_org_name}, #{file_new_name}
+		)
+	</update>
+	
+	<update id="deleteTbOcrFile" parameterType="tbOcrFile">
+		delete from tb_ocr_file
+		where ctg_id = #{ctg_id} and evt_id = #{evt_id} 
+	</update>
+</mapper>

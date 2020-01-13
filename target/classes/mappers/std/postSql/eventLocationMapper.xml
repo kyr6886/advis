@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="eventLocation">
+	
+	
+	<select id="list" parameterType="hashMap" resultType="eventLocationDto">
+		select 
+		dme_type, evt_date, evt_time, evt_lon, evt_lat, evt_power, evt_z, contents, evt_group,addr
+		from tb_event_location
+		where 
+		(
+			dme_type in (select code from tb_year_dme_code where dis_category=#{dme_type})
+			or
+			dme_type=#{dme_type}
+		
+		)
+		and
+		evt_date between #{st_date} and #{end_date}
+		order by evt_date
+	</select>
+	<select id="listGroup" parameterType="hashMap" resultType="eventLocationDto">
+		select 
+		dme_type, evt_date, evt_time, evt_lon, evt_lat, evt_power, evt_z, contents, evt_group
+		from tb_event_location
+		where dme_type in (select code from tb_year_dme_code where dis_category=#{dme_type})
+		and
+		evt_group like concat('%',#{st_date},'%')
+	</select>
+	
+</mapper>

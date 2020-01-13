@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="menu">
+	<sql id="tableColumns">
+		${alias}.menu_id
+		,${alias}.menu_title
+		,${alias}.menu_group
+		,${alias}.menu_level
+		,${alias}.menu_sort
+		,${alias}.menu_uri
+		,${alias}.menu_type_code
+		,${alias}.menu_css
+		,${alias}.menu_img
+	</sql>
+	<sql id="commonColumns">
+		${alias}.use_yn
+		,${alias}.create_user_id
+		,${alias}.create_date
+	</sql>
+
+	<select id="list" parameterType="hashMap" resultType="menuDTO">
+		with menuRoles as(
+		select menu_id
+		,LISTAGG(role_id, ',') WITHIN GROUP (ORDER BY role_id) roles
+		,LISTAGG(write_yn, ',') WITHIN GROUP	(ORDER BY role_id) write_yn
+		from tb_menu_role
+		group by menu_id
+		)
+
+		select
+		<include refid="tableColumns">
+			<property name="alias" value="t1" />
+		</include>
+		,
+		<include refid="commonColumns">
+			<property name="alias" value="t1" />
+		</include>
+		,t2.roles menu_role
+		,t2.write_yn
+		from tm_menu t1
+		left join menuRoles t2 on
+		t1.menu_id=t2.menu_id
+		where t1.use_yn='Y'
+		order by
+		menu_group,t1.menu_level,t1.menu_sort 
+	</select>
+
+	<select id="detail" parameterType="hashMap" resultType="menuDTO">
+		select
+		menu_id
+		,menu_title
+		,menu_group
+		,menu_level
+		,menu_sort
+		,menu_uri
+		,menu_type_code
+		,menu_css
+		,menu_uri
+		,use_yn
+		,update_date
+		,update_user_id
+		,create_user_id
+		,create_date
+		from tm_menu
+		where
+		menu_id=#{menu_id}
+
+	</select>
+	<update id="create" parameterType="menuDTO">
+		insert into tm_menu
+		(
+		menu_id
+		,menu_title
+		,menu_group
+		,menu_uri
+		,menu_level
+		,menu_sort
+		,menu_type_code
+		,use_yn
+		,update_date
+		,update_user_id
+		,create_user_id
+		,create_date
+		)
+		values
+		(
+		#{menu_id}
+		,#{menu_title}
+		,#{menu_group}
+		,#{menu_uri}
+		,#{menu_level}
+		,#{menu_sort}
+		,#{menu_type_code}
+		,#{use_yn}
+		,sysdate
+		,#{update_user_id}
+		,#{create_user_id}
+		,sysdate
+		)
+	</update>
+	<update id="update" parameterType="menuDTO">
+		update tm_menu
+		set
+		menu_title=#{menu_title}
+		,menu_group=#{menu_group}
+		,menu_level=#{menu_level}
+		,menu_sort=#{menu_sort}
+		,menu_uri=#{menu_uri}
+		,menu_type_code=#{menu_type}
+		,menu_css=#{menu_css, jdbcType=VARCHAR}
+		,menu_img=#{menu_img, jdbcType=VARCHAR}
+		,menu_uri=#{menu_uri}
+		,use_yn=#{use_yn}
+		,update_date=#{update_date}
+		,update_user_id=#{update_user_id,jdbcType=VARCHAR}
+		,create_user_id=#{create_user_id,jdbcType=VARCHAR}
+		,create_date=#{create_date}
+		where
+		menu_id=#{menu_id}
+	</update>
+	<delete id="drop" parameterType="hashMap">
+		delete from tm_menu where
+		menu_id=#{menu_id}
+	</delete>
+
+	<update id="createLog" parameterType="menuLogDTO">
+		insert into th_menu_log
+		(
+		menu_id
+		,sessid
+		,create_date
+		,conn_day
+		,dur_time
+		,hit_count
+		,device
+		,ip_addr
+		,mobile_yn
+		)
+		values
+		(
+		#{menu_id}
+		,#{sessid}
+		,sysdate
+		,#{conn_day}
+		,#{dur_time}
+		,#{hit_count}
+		,#{device}
+		,#{ip_addr}
+		,#{isMobleYN}
+		)
+	</update>
+	<select id="detailLog" parameterType="hashMap" resultType="menuLogDTO">
+		select
+		menu_id
+		,sessid
+		,create_date
+		,conn_day
+		,dur_time
+		,hit_count
+		,device
+		,ip_addr
+		,mobile_yn
+		from
+		th_menu_log
+		where
+		menu_id=#{menu_id}
+		and
+		sessid=#{sessid}
+		and
+		conn_day=#{conn_day}
+	</select>
+	<select id="totalCountLog" parameterType="hashMap" resultType="int">
+		with menu_log as (
+				select 
+					 a.menu_id
+					,b.menu_title
+					,max(a.conn_day) as conn_day
+					,count(*) as hit_count
+				from th_menu_log a , tm_menu b
+				where a.menu_id  = b.menu_id
+				and a.conn_day between #{start_day} and #{end_day}
+				group by a.menu_id,b.menu_title
+			)
+			select 
+				count(*)
+				from menu_log
+			order by conn_day desc
+	</select>
+	<select id="listLog" parameterType="hashMap" resultType="menuLogDTO">
+		with menu_log as (
+				select 
+					 a.menu_id
+					,b.menu_title
+					,max(a.conn_day) as conn_day
+					,count(*) as hit_count
+				from th_menu_log a , tm_menu b
+				where a.menu_id  = b.menu_id
+				and a.conn_day between #{start_day} and #{end_day}
+				group by a.menu_id,b.menu_title
+			)
+			select * from(
+			select 
+			     rownum as rn
+				,menu_id
+				,menu_title
+				,conn_day
+				,hit_count
+				from menu_log
+			) where rn between #{FirstIndex}+1 and #{LastIndex}+1
+			order by conn_day desc
+	</select>
+	<select id="listConnectCount" parameterType="hashMap" resultType="menuLogDTO">
+		select
+		conn_day,
+		count(*) visitCount
+		from
+		th_menu_log
+		where
+		conn_day between #{start_day} and #{end_day}
+		group by conn_day
+		order by conn_day
+	</select>
+	<update id="updateLog" parameterType="menuLogDTO">
+		update th_menu_log
+		set
+		dur_time=#{dur_time}
+		where
+		menu_id=#{menu_id}
+		and
+		sessid=#{sessid}
+		and
+		conn_day=#{conn_day}
+	</update>
+	
+	<select id="devicePrecent" parameterType="hashMap" resultType="menuDTO">
+		select 
+		  sum(decode(mobile_yn,'Y',1,0)) mobile_cnt,
+		  sum(decode(mobile_yn,'N',1,0)) desk_cnt,
+		  round(sum(decode(mobile_yn,'Y',1,0)) / (sum(decode(mobile_yn,'Y',1,0))+sum(decode(mobile_yn,'N',1,0))) * 100,2) mobile_percent,
+		  round(sum(decode(mobile_yn,'N',1,0)) / (sum(decode(mobile_yn,'Y',1,0))+sum(decode(mobile_yn,'N',1,0))) * 100,2) desk_percent
+		from th_menu_log
+		<where>
+			<if test="stDate!=null">
+				and conn_day between #{stDate} and #{enDate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="averageUseTime" parameterType="hashMap" resultType="int">
+		select round(avg(dur_time/1000/60),0) as avg_use_time from th_menu_log where conn_day between #{start_day} and #{end_day}
+	</select>
+	<select id="countCurrentUser" parameterType="hashMap" resultType="int">
+			select count(*) as cur_user_cnt from th_menu_log where create_date between to_date(#{start_day},'yyyymmddhh24mi') and sysdate
+	</select>
+</mapper>

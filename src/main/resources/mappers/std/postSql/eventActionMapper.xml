@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="eventAction">
+	<update id="create" parameterType="eventActionDto">
+		 INSERT INTO public.tb_dis_event_action(
+            ctg_id, evt_group, year, month, day, hour, sort, dis_org, dis_level_code, 
+            dis_act_lv1, dis_act_lv2, dis_act_lv3, dis_act_lv4, dis_act_lv5, 
+            dis_act_lv6, dis_act_date)
+	    VALUES (
+	    	#{ctg_id}
+	    	,#{evt_group}
+	    	,#{year}
+	    	,#{month}
+	    	,#{day}
+	    	,#{hour}
+	    	,#{sort}
+	    	,#{dis_org}
+	    	,#{dis_level_code}
+	        ,#{dis_act_lv1}
+	        ,#{dis_act_lv2}
+	        ,#{dis_act_lv3}
+	        ,#{dis_act_lv4}
+	        ,#{dis_act_lv5}
+	        ,#{dis_act_lv6}
+	        ,#{dis_act_date}
+        )
+	</update>
+	<delete id="delete" parameterType="eventActionDto" >
+		delete from public.tb_dis_event_action
+		where year = #{year}
+		and month = #{month}
+		and day = #{day}
+		and hour = #{hour}
+	</delete>
+	<select id="select" parameterType="hashMap" resultType="eventActionDto">
+		select 
+			ctg_id, evt_group, year, month, day, hour, sort, dis_org, dis_level_code, 
+            dis_act_lv1, dis_act_lv2, dis_act_lv3, dis_act_lv4, dis_act_lv5, 
+            dis_act_lv6, dis_act_date
+        from tb_dis_event_action
+        where ctg_id = #{ctg_id}
+        <if test="evt_group!=null">
+       		and evt_group = #{evt_group} 
+       	</if>
+       	<if test="year!=null">
+       		and year = #{year} 
+       	</if>
+       	<if test="month!=null">
+       		and month = #{month} 
+       	</if>
+       	<if test="day!=null">
+       		and day = #{day} 
+       	</if>
+       	<if test="hour!=null">
+       		and hour = #{hour} 
+       	</if>
+       	order by sort
+	</select>
+</mapper>
